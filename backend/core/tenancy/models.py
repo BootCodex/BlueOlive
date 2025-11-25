@@ -1,5 +1,9 @@
 # tenancy/models.py
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from .shop_manager import create_shop_schema
+from .utils import register_tenant_connection
 
 class Tenant(models.Model):
     name = models.CharField(max_length=200, unique=True)
@@ -40,3 +44,10 @@ class Shop(models.Model):
 
     def __str__(self):
         return f"{self.tenant.name} - {self.name}"
+
+
+@receiver(post_save, sender=Shop)
+def create_shop_schema_on_save(sender, instance, created, **kwargs):
+    if created:
+        register_tenant_connection(instance.tenant)
+        create_shop_schema(instance.tenant, instance.schema_name)

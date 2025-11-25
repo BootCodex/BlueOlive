@@ -30,17 +30,33 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
-INSTALLED_APPS = [
+SHARED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # 3rd-party
     'rest_framework',
+
+    # Local apps
     'tenancy',
-    'shop_core',
 ]
+
+TENANT_APPS = [
+    'shop_users',
+]
+
+SHOP_APPS = [
+    'debtors',
+    'creditors',
+    'stock_control',
+]
+
+# Django requires INSTALLED_APPS to know which apps are available
+INSTALLED_APPS = SHARED_APPS + TENANT_APPS + ['apps.debtors', 'apps.creditors', 'apps.stock_control']
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -50,6 +66,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    'tenancy.middleware.TenantMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'

@@ -14,6 +14,11 @@ class TenantMiddleware(MiddlewareMixin):
     5) Set search_path for the tenant DB connection to the requested schema
     """
     def process_request(self, request):
+        # Allow public endpoints without tenant check
+        public_paths = ['/admin', '/favicon.ico']
+        if any(request.path.startswith(path) for path in public_paths):
+            return  # Skip tenant middleware for public paths
+
         host = request.get_host().split(":")[0]
         # Example: tenant is subdomain
         # extract subdomain e.g. tenant1.example.com -> tenant1
