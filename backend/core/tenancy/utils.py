@@ -60,10 +60,7 @@ def provision_tenant(tenant, superuser_conn_info):
     """
     1) Create database in Postgres
     2) Register the DB alias in Django settings
-    3) Run migrations for 'shop_core' app into tenant DB
     """
     create_tenant_database_postgres(tenant, superuser_conn_info)
     register_tenant_connection(tenant)
-    # Run migrations for tenant apps into the new DB
-    call_command("migrate", database=tenant.db_alias, app_label="shop_core", verbosity=1)
     # Optionally create shared schema inside tenant DB (see shop creation)
