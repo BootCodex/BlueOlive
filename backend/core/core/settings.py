@@ -43,20 +43,28 @@ SHARED_APPS = [
 
     # Local apps
     'tenancy',
-]
-
-TENANT_APPS = [
     'shop_users',
 ]
 
+TENANT_APPS = [
+]
+
 SHOP_APPS = [
-    'debtors',
-    'creditors',
-    'stock_control',
+    'apps.debtors',
+    'apps.cash_book',
+    'apps.creditors',
+    'apps.stock_control',
 ]
 
 # Django requires INSTALLED_APPS to know which apps are available
-INSTALLED_APPS = SHARED_APPS + TENANT_APPS + ['apps.debtors', 'apps.creditors', 'apps.stock_control']
+INSTALLED_APPS = SHARED_APPS + TENANT_APPS + SHOP_APPS
+
+AUTH_USER_MODEL = 'shop_users.ShopUser'
+
+AUTHENTICATION_BACKENDS = [
+    'shop_users.auth_backends.ShopUserBackend',
+    'django.contrib.auth.backends.ModelBackend',  # fallback
+]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

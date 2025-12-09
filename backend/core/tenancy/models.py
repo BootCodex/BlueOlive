@@ -35,15 +35,25 @@ class Shop(models.Model):
     tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, related_name="shops")
     name = models.CharField(max_length=200)
     schema_name = models.CharField(max_length=100, unique=True)
+    is_head_office = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     tenant_control = True
 
     class Meta:
         verbose_name = "Shop"
+        constraints = [
+            models.UniqueConstraint(fields=['tenant', 'is_head_office'], condition=models.Q(is_head_office=True), name='unique_head_office_per_tenant')
+        ]
 
     def __str__(self):
         return f"{self.tenant.name} - {self.name}"
+
+    def save(self, *args, **kwargs):
+        if self.is_head_office:
+            # Ensure no other head office for this tenant
+            Shop.objects.filter(tenant=self.tenant, is_head_office=True).exclude(pk=self.pk).update(is_head_office=False)
+        super().save(*args, **kwargs)
 
 
 @receiver(post_save, sender=Shop)

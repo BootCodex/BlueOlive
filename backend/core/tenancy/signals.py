@@ -20,23 +20,23 @@ def create_tenant_database(sender, instance, created, **kwargs):
     # Step 1: Create the database
     try:
         _create_database(db_alias, tenant)
-        print(f"✓ Database created: {db_alias}")
+        print(f"Database created: {tenant.db_name}")
     except Exception as e:
-        print(f"✗ Error creating database: {e}")
+        print(f"Error creating database: {e}")
         # Optionally: delete the tenant or mark it as failed
         tenant.delete()
         raise
 
     # Step 2: Add database to Django's DATABASES
-    _add_database_to_settings(db_alias)
-    print(f"✓ Database added to settings: {db_alias}")
+    _add_database_to_settings(db_alias, tenant)
+    print(f"Database added to settings: {db_alias}")
 
     # Step 3: Run migrations on the new database
     try:
         _run_migrations(db_alias)
-        print(f"✓ Migrations completed on: {db_alias}")
+        print(f"Migrations completed on: {db_alias}")
     except Exception as e:
-        print(f"✗ Error running migrations: {e}")
+        print(f"Error running migrations: {e}")
         # Optionally: clean up the database
         raise
 
@@ -44,7 +44,7 @@ def create_tenant_database(sender, instance, created, **kwargs):
 def _create_database(db_alias, tenant):
     """Create a PostgreSQL database for the tenant."""
     default_db = settings.DATABASES["default"]
-    
+
     # Connect to the default database to create the new one
     conn = psycopg2.connect(
         dbname=default_db["NAME"],
@@ -55,29 +55,36 @@ def _create_database(db_alias, tenant):
     )
     conn.autocommit = True
     cursor = conn.cursor()
-    
+
     try:
-        # Create the database
-        cursor.execute(f'CREATE DATABASE "{db_alias}"')
+        # Create the database (ignore if it already exists)
+        cursor.execute(f'CREATE DATABASE "{tenant.db_name}"')
+    except psycopg2.errors.DuplicateDatabase:
+        print(f"Database {tenant.db_name} already exists, skipping creation")
     finally:
         cursor.close()
         conn.close()
 
 
-def _add_database_to_settings(db_alias):
+def _add_database_to_settings(db_alias, tenant):
     """Add the new database to Django's DATABASES setting at runtime."""
     default_db = settings.DATABASES["default"]
-    
+
     settings.DATABASES[db_alias] = {
         "ENGINE": default_db["ENGINE"],
-        "NAME": db_alias,
-        "USER": default_db["USER"],
-        "PASSWORD": default_db["PASSWORD"],
-        "HOST": default_db["HOST"],
-        "PORT": default_db["PORT"],
+        "NAME": tenant.db_name,
+        "USER": tenant.db_user,
+        "PASSWORD": tenant.db_password,
+        "HOST": tenant.db_host,
+        "PORT": tenant.db_port,
         "CONN_MAX_AGE": 0,
+        "OPTIONS": {},
+        "TIME_ZONE": settings.TIME_ZONE,
+        "AUTOCOMMIT": True,
+        "ATOMIC_REQUESTS": False,
+        "CONN_HEALTH_CHECKS": False,
     }
-    
+
     # Register the new database connection
     connections.databases[db_alias] = settings.DATABASES[db_alias]
 

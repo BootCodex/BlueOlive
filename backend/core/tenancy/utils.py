@@ -60,7 +60,30 @@ def provision_tenant(tenant, superuser_conn_info):
     """
     1) Create database in Postgres
     2) Register the DB alias in Django settings
+    3) Migrate shop_users to public schema
     """
+    from django.conf import settings
+    from django.core.management import call_command
+    from .tenant_context import set_current_tenant, clear_current_tenant
+
     create_tenant_database_postgres(tenant, superuser_conn_info)
     register_tenant_connection(tenant)
-    # Optionally create shared schema inside tenant DB (see shop creation)
+
+    # Migrate shop_users to public schema
+    alias = tenant.db_alias
+    original_options = settings.DATABASES[alias].get('OPTIONS', {})
+    settings.DATABASES[alias]['OPTIONS'] = {
+        **original_options,
+        'options': '-c search_path=public'
+    }
+    connections.databases[alias] = settings.DATABASES[alias]
+
+    try:
+        set_current_tenant(tenant)
+        try:
+            call_command("migrate", "shop_users", database=alias, verbosity=1)
+        finally:
+            clear_current_tenant()
+    finally:
+        settings.DATABASES[alias]['OPTIONS'] = original_options
+        connections.databases[alias] = settings.DATABASES[alias]
