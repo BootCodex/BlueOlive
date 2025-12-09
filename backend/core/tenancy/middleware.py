@@ -3,7 +3,7 @@ from django.utils.deprecation import MiddlewareMixin
 from django.http import HttpResponseForbidden
 from django.db import connections
 from tenancy.tenant_context import set_current_tenant, set_current_shop, clear_current
-from tenancy.models import Tenant
+from tenancy.models import Tenant, Shop
 
 class TenantMiddleware(MiddlewareMixin):
     """
@@ -46,8 +46,12 @@ class TenantMiddleware(MiddlewareMixin):
         # Determine shop schema: from header or path
         shop_schema = request.headers.get("X-Shop-Schema")  # e.g. 'shop_123'
         if not shop_schema:
-            # Could fallback to default shop
-            shop_schema = "public"  # or tenant default
+            # Fallback to head office shop schema
+            try:
+                head_office = tenant.shops.get(is_head_office=True)
+                shop_schema = head_office.schema_name
+            except Shop.DoesNotExist:
+                shop_schema = "public"  # fallback if no head office
         set_current_shop(shop_schema)
 
         # Set search_path for this tenant DB connection immediately

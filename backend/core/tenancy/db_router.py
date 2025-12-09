@@ -16,16 +16,26 @@ class TenantDatabaseRouter:
         return "default"
 
     def allow_migrate(self, db, app_label, model_name=None, **hints):
-        # Tenant and shop apps only migrate on their specific tenant database
-        if app_label in settings.TENANT_APPS or app_label in settings.SHOP_APPS:
-            tenant = hints.get("tenant") or get_current_tenant()
-            # Only allow if we have a specific tenant and it matches the db
-            if tenant:
-                return db == tenant.db_alias
+        tenant = get_current_tenant()
+
+        # SHOP_APPS: Allow migration when tenant context is set and db matches
+        shop_app_labels = [app.split('.')[-1] for app in settings.SHOP_APPS]
+        if app_label in shop_app_labels:
+            if tenant and db == tenant.db_alias:
+                return True
             return False
 
-        # Shared apps migrate only on default database
-        if app_label in settings.SHARED_APPS:
+        # TENANT_APPS: Allow migration when tenant context is set and db matches
+        tenant_app_labels = [app.split('.')[-1] for app in settings.TENANT_APPS]
+        if app_label in tenant_app_labels:
+            if tenant and db == tenant.db_alias:
+                return True
+            return False
+
+        # SHARED_APPS: Only migrate on default database
+        shared_app_labels = [app.split('.')[-1] for app in settings.SHARED_APPS]
+        if app_label in shared_app_labels:
             return db == "default"
 
+        # All other apps: migrate on default database only
         return db == "default"
