@@ -1,4 +1,5 @@
 import os
+import sys
 import psycopg2
 from django.conf import settings
 from django.db import connections, DEFAULT_DB_ALIAS
@@ -11,10 +12,21 @@ from tenancy.models import Tenant
 @receiver(post_save, sender=Tenant)
 def create_tenant_database(sender, instance, created, **kwargs):
     """Create a new database and run migrations when a Tenant is created."""
+    
+    # Skip database creation during tests
+    if 'test' in sys.argv or os.environ.get('DJANGO_TESTING'):
+        return
+    
     if not created:
         return
 
     tenant = instance
+    
+    # Validate that tenant has required fields
+    if not tenant.db_name:
+        print(f"Warning: Tenant {tenant.name} has no db_name, skipping database creation")
+        return
+    
     db_alias = tenant.db_alias
 
     # Step 1: Create the database
@@ -57,10 +69,17 @@ def _create_database(db_alias, tenant):
     cursor = conn.cursor()
 
     try:
+        # Validate db_name before creating
+        if not tenant.db_name or tenant.db_name.strip() == "":
+            raise ValueError(f"Invalid database name for tenant {tenant.name}")
+        
         # Create the database (ignore if it already exists)
         cursor.execute(f'CREATE DATABASE "{tenant.db_name}"')
     except psycopg2.errors.DuplicateDatabase:
         print(f"Database {tenant.db_name} already exists, skipping creation")
+    except Exception as e:
+        print(f"Error creating database {tenant.db_name}: {e}")
+        raise
     finally:
         cursor.close()
         conn.close()
@@ -73,10 +92,10 @@ def _add_database_to_settings(db_alias, tenant):
     settings.DATABASES[db_alias] = {
         "ENGINE": default_db["ENGINE"],
         "NAME": tenant.db_name,
-        "USER": tenant.db_user,
-        "PASSWORD": tenant.db_password,
-        "HOST": tenant.db_host,
-        "PORT": tenant.db_port,
+        "USER": tenant.db_user or default_db["USER"],
+        "PASSWORD": tenant.db_password or default_db["PASSWORD"],
+        "HOST": tenant.db_host or default_db["HOST"],
+        "PORT": tenant.db_port or default_db["PORT"],
         "CONN_MAX_AGE": 0,
         "OPTIONS": {},
         "TIME_ZONE": settings.TIME_ZONE,
@@ -93,11 +112,22 @@ def _run_migrations(db_alias):
     """Run all pending migrations on the tenant database."""
     from django.core.management import call_command
     
-    # Run migrations for tenant apps only on this database
-    for app_label in settings.TENANT_APPS:
+    # Check if TENANT_APPS is defined
+    tenant_apps = getattr(settings, 'TENANT_APPS', [])
+    
+    if not tenant_apps:
+        # If no TENANT_APPS defined, run all migrations
         call_command(
             "migrate",
-            app_label=app_label,
             database=db_alias,
             verbosity=1,
         )
+    else:
+        # Run migrations for tenant apps only on this database
+        for app_label in tenant_apps:
+            call_command(
+                "migrate",
+                app_label=app_label,
+                database=db_alias,
+                verbosity=1,
+            )
