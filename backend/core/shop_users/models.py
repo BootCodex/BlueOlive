@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from tenancy.models import Tenant
+from tenancy.models import Tenant, Shop
 from .managers import TenantUserManager
 
 class ShopUser(AbstractUser):
@@ -13,16 +13,25 @@ class ShopUser(AbstractUser):
     # Override username to remove unique constraint from AbstractUser
     username = models.CharField(
         max_length=150,
+        unique=True,
         help_text='Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.',
     )
     
     tenant = models.ForeignKey(
-        Tenant, 
-        on_delete=models.CASCADE, 
-        related_name='users', 
-        null=True, 
+        Tenant,
+        on_delete=models.CASCADE,
+        related_name='users',
+        null=True,
         blank=True,
         help_text="Leave blank for superusers only"
+    )
+    shop = models.ForeignKey(
+        Shop,
+        on_delete=models.CASCADE,
+        related_name='users',
+        null=True,
+        blank=True,
+        help_text="Shop the user is assigned to (optional for admins)"
     )
     phone = models.CharField(max_length=20, blank=True)
     role = models.CharField(
@@ -44,7 +53,8 @@ class ShopUser(AbstractUser):
 
     def __str__(self):
         tenant_name = self.tenant.name if self.tenant else "Global"
-        return f"{self.username} ({tenant_name})"
+        shop_name = self.shop.name if self.shop else ""
+        return f"{self.username} ({tenant_name}{f' - {shop_name}' if shop_name else ''})"
     
     def has_role(self, role):
         """Check if user has a specific role"""
@@ -62,7 +72,11 @@ class ShopUser(AbstractUser):
         # Ensure superusers don't have a tenant
         if self.is_superuser and self.tenant:
             self.tenant = None
+            self.shop = None
         # Ensure regular users have a tenant
         elif not self.is_superuser and not self.tenant:
             raise ValueError("Regular users must belong to a tenant")
+        # Ensure shop belongs to tenant
+        if self.shop and self.shop.tenant != self.tenant:
+            raise ValueError("Shop must belong to the user's tenant")
         super().save(*args, **kwargs)
