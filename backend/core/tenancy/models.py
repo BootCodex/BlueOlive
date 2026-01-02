@@ -2,16 +2,42 @@
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.core import signing
 from .shop_manager import create_shop_schema
 from .utils import register_tenant_connection
 
+
+class EncryptedCharField(models.CharField):
+    """
+    A CharField that encrypts/decrypts values automatically.
+    """
+    def from_db_value(self, value, expression, connection):
+        if value is None:
+            return value
+        try:
+            return signing.loads(value)
+        except signing.BadSignature:
+            return value  # Return as-is if decryption fails
+
+    def to_python(self, value):
+        if value is None:
+            return value
+        return str(value)
+
+    def get_prep_value(self, value):
+        if value is None:
+            return value
+        return signing.dumps(str(value))
+
 class Tenant(models.Model):
-    name = models.CharField(max_length=200, unique=True)
+    name = models.CharField(max_length=200, unique=True)  # Company name
     slug = models.SlugField(unique=True)
+    phone = models.CharField(max_length=20, default='')
+    email = models.EmailField(max_length=150, default='')
     db_name = models.CharField(max_length=200)
-    db_user = models.CharField(max_length=200)
-    db_password = models.CharField(max_length=200)
-    db_host = models.CharField(max_length=200)
+    db_user = models.CharField(max_length=200, default='postgres')
+    db_password = EncryptedCharField(max_length=200)  # Encrypted field
+    db_host = models.CharField(max_length=200, default='localhost')
     db_port = models.IntegerField(default=5432)
     created_at = models.DateTimeField(auto_now_add=True)
     tenant_control = models.BooleanField(default=True)
@@ -59,5 +85,9 @@ class Shop(models.Model):
 @receiver(post_save, sender=Shop)
 def create_shop_schema_on_save(sender, instance, created, **kwargs):
     if created:
-        register_tenant_connection(instance.tenant)
-        create_shop_schema(instance.tenant, instance.schema_name)
+        try:
+            register_tenant_connection(instance.tenant)
+            create_shop_schema(instance.tenant, instance.schema_name)
+        except Exception as e:
+            print(f"Warning: Failed to create schema for shop {instance.name}: {e}")
+            # Don't raise, allow shop creation to succeed
