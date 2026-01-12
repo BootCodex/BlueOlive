@@ -1,4 +1,4 @@
-from django.test import TestCase, override_settings
+from django.test import TestCase, override_settings, Client
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from tenancy.models import Tenant
@@ -37,8 +37,9 @@ class ShopUserModelTest(TestCase):
         default_db = settings.DATABASES['default']
         
         self.tenant1 = Tenant.objects.create(
-            name="Tenant 1", 
+            name="Tenant 1",
             slug="tenant1",
+            subdomain="tenant1",
             db_name="test_tenant1_db",
             db_user=default_db.get('USER', 'postgres'),
             db_password=default_db.get('PASSWORD', ''),
@@ -46,8 +47,9 @@ class ShopUserModelTest(TestCase):
             db_port=default_db.get('PORT', 5432),
         )
         self.tenant2 = Tenant.objects.create(
-            name="Tenant 2", 
+            name="Tenant 2",
             slug="tenant2",
+            subdomain="tenant2",
             db_name="test_tenant2_db",
             db_user=default_db.get('USER', 'postgres'),
             db_password=default_db.get('PASSWORD', ''),
@@ -180,8 +182,9 @@ class TenantUserManagerTest(TestCase):
         default_db = settings.DATABASES['default']
         
         self.tenant1 = Tenant.objects.create(
-            name="Tenant 1", 
+            name="Tenant 1",
             slug="tenant1",
+            subdomain="tenant1",
             db_name="test_tenant1_db",
             db_user=default_db.get('USER', 'postgres'),
             db_password=default_db.get('PASSWORD', ''),
@@ -189,8 +192,9 @@ class TenantUserManagerTest(TestCase):
             db_port=default_db.get('PORT', 5432),
         )
         self.tenant2 = Tenant.objects.create(
-            name="Tenant 2", 
+            name="Tenant 2",
             slug="tenant2",
+            subdomain="tenant2",
             db_name="test_tenant2_db",
             db_user=default_db.get('USER', 'postgres'),
             db_password=default_db.get('PASSWORD', ''),
@@ -253,8 +257,9 @@ class ShopUserAuthenticationTest(TestCase):
         default_db = settings.DATABASES['default']
         
         self.tenant = Tenant.objects.create(
-            name="Test Tenant", 
+            name="Test Tenant",
             slug="test",
+            subdomain="testsub",
             db_name="test_tenant_db",
             db_user=default_db.get('USER', 'postgres'),
             db_password=default_db.get('PASSWORD', ''),
@@ -296,6 +301,7 @@ class ShopUserAuthenticationTest(TestCase):
         other_tenant = Tenant.objects.create(
             name="Other Tenant",
             slug="other",
+            subdomain="other",
             db_name="test_other_db",
             db_user=default_db.get('USER', 'postgres'),
             db_password=default_db.get('PASSWORD', ''),
@@ -362,5 +368,141 @@ class ShopUserAuthenticationTest(TestCase):
             username="nonexistent",
             password="anypassword"
         )
-        
+
         self.assertIsNone(authenticated_user)
+
+
+class SubdomainIsolationIntegrationTest(TestCase):
+    """Integration tests for tenant isolation via subdomains"""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        disable_tenant_signals()
+
+    @classmethod
+    def tearDownClass(cls):
+        enable_tenant_signals()
+        super().tearDownClass()
+
+    def setUp(self):
+        default_db = settings.DATABASES['default']
+
+        # Create two tenants with different subdomains
+        self.tenant1 = Tenant.objects.create(
+            name="Tenant One",
+            slug="tenantone",
+            subdomain="tenant1",
+            db_name="test_tenant1_db",
+            db_user=default_db.get('USER', 'postgres'),
+            db_password=default_db.get('PASSWORD', ''),
+            db_host=default_db.get('HOST', 'localhost'),
+            db_port=default_db.get('PORT', 5432),
+        )
+        self.tenant2 = Tenant.objects.create(
+            name="Tenant Two",
+            slug="tenanttwo",
+            subdomain="tenant2",
+            db_name="test_tenant2_db",
+            db_user=default_db.get('USER', 'postgres'),
+            db_password=default_db.get('PASSWORD', ''),
+            db_host=default_db.get('HOST', 'localhost'),
+            db_port=default_db.get('PORT', 5432),
+        )
+        # Register connections
+        from tenancy.utils import register_tenant_connection
+        register_tenant_connection(self.tenant1)
+        register_tenant_connection(self.tenant2)
+
+        # Create users for each tenant
+        self.user1 = User.objects.create_user(
+            username="testuser",
+            password="testpass123",
+            tenant=self.tenant1,
+            role=User.Role.ADMIN
+        )
+        self.user2 = User.objects.create_user(
+            username="testuser",  # Same username, different tenant
+            password="testpass123",
+            tenant=self.tenant2,
+            role=User.Role.ADMIN
+        )
+
+        # Additional users as per task
+        self.user1_extra = User.objects.create_user(
+            username="extrauser1",
+            password="extrapass1",
+            tenant=self.tenant1,
+            role=User.Role.STAFF
+        )
+        self.user2_extra = User.objects.create_user(
+            username="extrauser2",
+            password="extrapass2",
+            tenant=self.tenant2,
+            role=User.Role.STAFF
+        )
+
+    def test_successful_login_own_subdomain(self):
+        """Test that user can login to their own subdomain"""
+        client = Client(SERVER_NAME='tenant1.localhost')
+        response = client.post('/api/login/', {
+            'username': 'testuser',
+            'password': 'testpass123'
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Login successful', response.json().get('message', ''))
+
+    def test_login_blocked_wrong_subdomain(self):
+        """Test that user is blocked from logging in to wrong subdomain"""
+        client = Client(SERVER_NAME='tenant2.localhost')
+        response = client.post('/api/login/', {
+            'username': 'testuser',  # user1's username
+            'password': 'testpass123'
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Invalid credentials', response.json().get('error', ''))
+
+    def test_additional_user_own_subdomain(self):
+        """Test additional user can login to own subdomain"""
+        client = Client(SERVER_NAME='tenant1.localhost')
+        response = client.post('/api/login/', {
+            'username': 'extrauser1',
+            'password': 'extrapass1'
+        })
+        self.assertEqual(response.status_code, 200)
+
+    def test_additional_user_blocked_other_subdomain(self):
+        """Test additional user blocked from other subdomain"""
+        client = Client(SERVER_NAME='tenant2.localhost')
+        response = client.post('/api/login/', {
+            'username': 'extrauser1',
+            'password': 'extrapass1'
+        })
+        self.assertEqual(response.status_code, 400)
+
+    def test_data_isolation_users_view(self):
+        """Test that users can only see users from their tenant"""
+        # Login as user1
+        client = Client(SERVER_NAME='tenant1.localhost')
+        client.post('/api/login/', {
+            'username': 'testuser',
+            'password': 'testpass123'
+        })
+        # Access users API
+        response = client.get('/api/users/')
+        self.assertEqual(response.status_code, 200)
+        users = response.json()
+        # Should only see users from tenant1
+        usernames = [u['username'] for u in users]
+        self.assertIn('testuser', usernames)
+        self.assertIn('extrauser1', usernames)
+        self.assertNotIn('extrauser2', usernames)
+
+    def test_invalid_subdomain_blocks_access(self):
+        """Test that invalid subdomain returns forbidden"""
+        client = Client(SERVER_NAME='invalid.localhost')
+        response = client.post('/api/login/', {
+            'username': 'testuser',
+            'password': 'testpass123'
+        })
+        self.assertEqual(response.status_code, 403)

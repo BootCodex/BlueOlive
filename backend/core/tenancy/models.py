@@ -3,6 +3,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core import signing
+from django.core.exceptions import ValidationError
 from .shop_manager import create_shop_schema
 from .utils import register_tenant_connection
 
@@ -32,6 +33,7 @@ class EncryptedCharField(models.CharField):
 class Tenant(models.Model):
     name = models.CharField(max_length=200, unique=True)  # Company name
     slug = models.SlugField(unique=True)
+    subdomain = models.CharField(max_length=100, unique=True, default='default', help_text="Subdomain for tenant access, e.g., 'tenant1'")
     phone = models.CharField(max_length=20, default='')
     email = models.EmailField(max_length=150, default='')
     db_name = models.CharField(max_length=200)
@@ -48,6 +50,10 @@ class Tenant(models.Model):
     @property
     def db_alias(self):
         return f"tenant_{self.id}"
+
+    def clean(self):
+        if not self.subdomain:
+            raise ValidationError("Subdomain is required for tenant isolation.")
 
     def __str__(self):
         return self.name

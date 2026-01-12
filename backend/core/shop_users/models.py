@@ -13,7 +13,7 @@ class ShopUser(AbstractUser):
     # Override username to remove unique constraint from AbstractUser
     username = models.CharField(
         max_length=150,
-        unique=True,
+        unique=False,
         help_text='Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.',
     )
     

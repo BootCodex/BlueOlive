@@ -20,8 +20,8 @@ class TenantMiddleware:
 
     def __call__(self, request):
         # Allow public endpoints without tenant check
-        public_paths = ['/admin', '/favicon.ico', '/', '/api/tenants/', '/api/current_tenant/']
-        if any(request.path.startswith(path) for path in public_paths):
+        public_paths = ['/admin', '/favicon.ico', '/api/tenants/', '/api/current_tenant/']
+        if (request.path == '/' or any(request.path.startswith(path) for path in public_paths)) and not request.path.startswith('/api/login/'):
             logger.debug(f"Skipping tenant middleware for public path: {request.path}")
             response = self.get_response(request)
             clear_current()
@@ -48,18 +48,11 @@ class TenantMiddleware:
 
         tenant = None
         try:
-            tenant = Tenant.objects.get(slug=tenant_key)
-            logger.info(f"Resolved tenant: {tenant.name} for key: {tenant_key}")
+            tenant = Tenant.objects.get(subdomain=tenant_key)
+            logger.info(f"Resolved tenant: {tenant.name} for subdomain: {tenant_key}")
         except Tenant.DoesNotExist:
-            # Try to find by shop name
-            try:
-                from .models import Shop
-                shop = Shop.objects.get(name=tenant_key)
-                tenant = shop.tenant
-                logger.info(f"Resolved tenant via shop: {tenant.name} for shop: {tenant_key}")
-            except Shop.DoesNotExist:
-                logger.warning(f"Invalid tenant or shop: {tenant_key}")
-                return HttpResponseForbidden("Invalid tenant or shop")
+            logger.warning(f"Invalid subdomain: {tenant_key}")
+            return HttpResponseForbidden("Invalid subdomain")
 
         # register tenant in thread-local
         set_current_tenant(tenant)

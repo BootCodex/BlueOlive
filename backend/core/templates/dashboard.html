@@ -24,7 +24,7 @@
             <li><strong>Tenant: <span id="tenant"></span> | User: <span id="user"></span></strong></li>
             <li><a href="#shops">Shop Management</a></li>
             <li><a href="#users">User Management</a></li>
-            <li><a href="#debtors">Debtors</a></li>
+            <li><a href="/debtors/">Debtors</a></li>
             <li><a href="#cashbook">Cash Book</a></li>
             <li><a href="#creditors">Creditors</a></li>
             <li><a href="#stock">Stock Control</a></li>
@@ -39,6 +39,7 @@
             <tr>
                 <th>ID</th>
                 <th>Name</th>
+                <th>Description</th>
                 <th>Schema</th>
                 <th>Head Office</th>
                 <th>Actions</th>
@@ -50,7 +51,13 @@
     <div id="shopForm" class="form hidden">
         <h3 id="shopFormTitle">Add Shop</h3>
         <input type="hidden" id="shopId">
+        <label for="shopTenant">Tenant:</label>
+        <select id="shopTenant" style="display: none;">
+            <!-- Tenants will be loaded dynamically -->
+        </select>
         <input type="text" id="shopName" placeholder="Shop Name" required>
+        <textarea id="shopDescription" placeholder="Description" rows="3"></textarea>
+        <input type="text" id="schemaName" placeholder="Schema Name" readonly>
         <label><input type="checkbox" id="isHeadOffice"> Head Office</label>
         <button id="saveShop">Save</button>
         <button id="cancelShop">Cancel</button>
@@ -66,6 +73,7 @@
                 <th>Email</th>
                 <th>First Name</th>
                 <th>Last Name</th>
+                <th>Phone</th>
                 <th>Role</th>
                 <th>Shop</th>
                 <th>Actions</th>
@@ -81,7 +89,12 @@
         <input type="email" id="email" placeholder="Email">
         <input type="text" id="firstName" placeholder="First Name">
         <input type="text" id="lastName" placeholder="Last Name">
+        <input type="tel" id="phone" placeholder="Phone Number">
         <input type="password" id="password" placeholder="Password">
+        <input type="password" id="passwordConfirm" placeholder="Confirm Password">
+        <select id="tenant" style="display: none;">
+            <!-- Tenants will be loaded dynamically -->
+        </select>
         <select id="role" required>
             <option value="CUSTOMER">Customer</option>
             <option value="STAFF">Staff</option>
@@ -99,6 +112,15 @@
     <script>
         const apiBase = window.location.origin;
 
+        function slugify(text) {
+            return text.toString().toLowerCase()
+                .replace(/\s+/g, '-')           // Replace spaces with -
+                .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+                .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+                .replace(/^-+/, '')             // Trim - from start of text
+                .replace(/-+$/, '');            // Trim - from end of text
+        }
+
         async function loadTenant() {
             try {
                 const response = await fetch(`${apiBase}/api/current_tenant/`, { credentials: 'include' });
@@ -106,6 +128,7 @@
                     const data = await response.json();
                     document.getElementById('tenant').textContent = data.name || 'None';
                     window.tenantSlug = data.slug;
+                    window.tenantId = data.id;
                     localStorage.setItem('tenantSlug', data.slug || '');
                 } else {
                     const fallback = window.location.hostname.split('.')[0];
@@ -130,23 +153,65 @@
                     window.userRole = data.role;
                     window.isSuperuser = data.is_superuser;
                     setRoleBasedVisibility();
+                    loadTenants();
                 } else {
                     document.getElementById('user').textContent = 'Guest';
                     window.userRole = null;
                     window.isSuperuser = false;
                     setRoleBasedVisibility();
+                    loadTenants();
                 }
             } catch (error) {
                 document.getElementById('user').textContent = 'Guest';
                 window.userRole = null;
                 window.isSuperuser = false;
                 setRoleBasedVisibility();
+                loadTenants();
             }
         }
 
-        async function loadShops() {
+        async function loadTenants() {
+            if (window.isSuperuser) {
+                try {
+                    const response = await fetch(`${apiBase}/api/tenants/`, { credentials: 'include' });
+                    if (response.ok) {
+                        const tenants = await response.json();
+                        window.tenants = tenants;
+                        populateTenantSelect(tenants);
+                    }
+                } catch (error) {
+                    console.error('Error loading tenants:', error);
+                }
+            }
+        }
+
+        function populateTenantSelect(tenants) {
+            const userTenantSelect = document.getElementById('tenant');
+            const shopTenantSelect = document.getElementById('shopTenant');
+            userTenantSelect.innerHTML = '';
+            shopTenantSelect.innerHTML = '';
+            tenants.forEach(tenant => {
+                const option1 = document.createElement('option');
+                option1.value = tenant.id;
+                option1.textContent = tenant.name;
+                userTenantSelect.appendChild(option1);
+                const option2 = option1.cloneNode(true);
+                shopTenantSelect.appendChild(option2);
+            });
+            // Set default to current tenant
+            if (window.tenantId) {
+                userTenantSelect.value = window.tenantId;
+                shopTenantSelect.value = window.tenantId;
+            }
+        }
+
+        async function loadShops(tenantSlug = null) {
             try {
-                const response = await fetch(`${apiBase}/api/tenant_shops/`, {
+                let url = `${apiBase}/api/tenant_shops/`;
+                if (tenantSlug) {
+                    url += `?tenant=${tenantSlug}`;
+                }
+                const response = await fetch(url, {
                     credentials: 'include',
                     headers: getHeaders()
                 });
@@ -188,6 +253,12 @@
             // Show/hide sections
             document.getElementById('shops').style.display = canManageUsers ? 'block' : 'none';
             document.getElementById('users').style.display = canManageUsers ? 'block' : 'none';
+            // Show/hide tenant selects
+            document.getElementById('tenant').style.display = isSuper ? 'block' : 'none';
+            document.getElementById('shopTenant').style.display = (isSuper || role === 'ADMIN') ? 'block' : 'none';
+            if (!isSuper && role === 'ADMIN') {
+                document.getElementById('shopTenant').disabled = true;
+            }
             // For other sections, you can add similar logic when implementing them
         }
 
@@ -239,6 +310,7 @@
                 row.innerHTML = `
                     <td>${shop.id}</td>
                     <td>${shop.name}</td>
+                    <td>${shop.description || ''}</td>
                     <td>${shop.schema_name}</td>
                     <td>${shop.is_head_office ? 'Yes' : 'No'}</td>
                     <td>
@@ -282,6 +354,7 @@
                     <td>${user.email || ''}</td>
                     <td>${user.first_name || ''}</td>
                     <td>${user.last_name || ''}</td>
+                    <td>${user.phone || ''}</td>
                     <td>${user.role || ''}</td>
                     <td>${user.shop_name || ''}</td>
                     <td>
@@ -303,10 +376,22 @@
 
         document.getElementById('saveShop').addEventListener('click', async () => {
             const id = document.getElementById('shopId').value;
+            const name = document.getElementById('shopName').value;
+
+            // Validation
+            if (!name) {
+                alert('Shop name is required');
+                return;
+            }
+
             const data = {
-                name: document.getElementById('shopName').value,
+                name,
+                description: document.getElementById('shopDescription').value,
                 is_head_office: document.getElementById('isHeadOffice').checked,
             };
+            if (window.isSuperuser || window.userRole === 'ADMIN') {
+                data.tenant = document.getElementById('shopTenant').value;
+            }
             const csrfToken = getCsrfToken();
             const method = id ? 'PUT' : 'POST';
             const url = id ? `${apiBase}/api/shops/${id}/` : `${apiBase}/api/shops/`;
@@ -325,8 +410,9 @@
                     fetchShops();
                     hideShopForm();
                 } else {
-                    const errorText = await response.text();
-                    alert('Error saving shop: ' + errorText);
+                    const errorData = await response.json();
+                    const errorMsg = errorData.detail || Object.values(errorData).flat().join(', ') || 'Error saving shop';
+                    alert('Error saving shop: ' + errorMsg);
                 }
             } catch (error) {
                 console.error('Error saving shop:', error);
@@ -348,6 +434,8 @@
                 .then(shop => {
                     document.getElementById('shopId').value = shop.id;
                     document.getElementById('shopName').value = shop.name;
+                    document.getElementById('shopDescription').value = shop.description || '';
+                    document.getElementById('schemaName').value = shop.schema_name;
                     document.getElementById('isHeadOffice').checked = shop.is_head_office;
                     document.getElementById('shopFormTitle').textContent = 'Edit Shop';
                     showShopForm();
@@ -381,12 +469,15 @@
 
         function showShopForm() {
             document.getElementById('shopForm').classList.remove('hidden');
+            document.getElementById('schemaName').value = slugify(document.getElementById('shopName').value);
         }
 
         function hideShopForm() {
             document.getElementById('shopForm').classList.add('hidden');
             document.getElementById('shopId').value = '';
             document.getElementById('shopName').value = '';
+            document.getElementById('shopDescription').value = '';
+            document.getElementById('schemaName').value = '';
             document.getElementById('isHeadOffice').checked = false;
             document.getElementById('shopFormTitle').textContent = 'Add Shop';
         }
@@ -402,16 +493,46 @@
         document.getElementById('saveUser').addEventListener('click', async () => {
             const id = document.getElementById('userId').value;
             const password = document.getElementById('password').value;
+            const passwordConfirm = document.getElementById('passwordConfirm').value;
+            const username = document.getElementById('username').value;
+            const role = document.getElementById('role').value;
+
+            // Validation
+            if (!username) {
+                alert('Username is required');
+                return;
+            }
+            if (!role) {
+                alert('Role is required');
+                return;
+            }
+            if (!id && !password) {
+                alert('Password is required for new users');
+                return;
+            }
+            if (password !== passwordConfirm) {
+                alert('Passwords do not match');
+                return;
+            }
+            if (password && password.length < 8) {
+                alert('Password must be at least 8 characters long');
+                return;
+            }
+
             const data = {
-                username: document.getElementById('username').value,
+                username,
                 email: document.getElementById('email').value,
                 first_name: document.getElementById('firstName').value,
                 last_name: document.getElementById('lastName').value,
-                role: document.getElementById('role').value,
+                phone: document.getElementById('phone').value,
+                role,
                 shop: document.getElementById('shop').value || null,
             };
             if (password) {
                 data.password = password;
+            }
+            if (window.isSuperuser) {
+                data.tenant = document.getElementById('tenant').value;
             }
             const csrfToken = getCsrfToken();
             const method = id ? 'PUT' : 'POST';
@@ -431,7 +552,9 @@
                     fetchUsers();
                     hideForm();
                 } else {
-                    alert('Error saving user');
+                    const errorData = await response.json();
+                    const errorMsg = errorData.detail || Object.values(errorData).flat().join(', ') || 'Error saving user';
+                    alert('Error saving user: ' + errorMsg);
                 }
             } catch (error) {
                 console.error('Error saving user:', error);
@@ -457,9 +580,11 @@
                     document.getElementById('email').value = user.email || '';
                     document.getElementById('firstName').value = user.first_name || '';
                     document.getElementById('lastName').value = user.last_name || '';
+                    document.getElementById('phone').value = user.phone || '';
                     document.getElementById('role').value = user.role || 'CUSTOMER';
                     document.getElementById('shop').value = user.shop || '';
                     document.getElementById('password').value = ''; // Don't prefill password
+                    document.getElementById('passwordConfirm').value = '';
                     document.getElementById('formTitle').textContent = 'Edit User';
                     showForm();
                 })
@@ -501,11 +626,17 @@
             document.getElementById('email').value = '';
             document.getElementById('firstName').value = '';
             document.getElementById('lastName').value = '';
+            document.getElementById('phone').value = '';
             document.getElementById('role').value = 'CUSTOMER';
             document.getElementById('shop').value = '';
             document.getElementById('password').value = '';
+            document.getElementById('passwordConfirm').value = '';
             document.getElementById('formTitle').textContent = 'Add User';
         }
+
+        document.getElementById('shopName').addEventListener('input', () => {
+            document.getElementById('schemaName').value = slugify(document.getElementById('shopName').value);
+        });
 
         document.getElementById('logout').addEventListener('click', async () => {
             const csrfToken = getCsrfToken();
@@ -530,6 +661,18 @@
             fetchShops();
             fetchUsers();
         })();
+
+        // Reload shops when tenant changes for superusers
+        document.getElementById('tenant').addEventListener('change', () => {
+            const selectedTenantId = document.getElementById('tenant').value;
+            if (selectedTenantId && window.tenants) {
+                const tenant = window.tenants.find(t => t.id == selectedTenantId);
+                const tenantSlug = tenant ? tenant.slug : null;
+                loadShops(tenantSlug);
+            } else {
+                loadShops();
+            }
+        });
     </script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-from django.contrib.auth import login, logout
+from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.views import LoginView as DjangoLoginView, LogoutView as DjangoLogoutView
 from django.http import JsonResponse
 from rest_framework import viewsets, permissions
@@ -30,12 +30,19 @@ class IsTenantUserOrSuperuser(permissions.BasePermission):
         return obj.tenant == request.user.tenant and request.user.role == 'ADMIN'
 
 class LoginView(DjangoLoginView):
-    def form_valid(self, form):
-        login(self.request, form.get_user())
-        return JsonResponse({'message': 'Login successful'})
-
-    def form_invalid(self, form):
-        return JsonResponse({'error': 'Invalid credentials'}, status=400)
+    def post(self, request, *args, **kwargs):
+        username = request.POST.get('username') or request.data.get('username')
+        password = request.POST.get('password') or request.data.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            current_tenant = get_current_tenant()
+            if user.is_superuser or user.tenant == current_tenant:
+                login(request, user)
+                return JsonResponse({'message': 'Login successful'})
+            else:
+                return JsonResponse({'error': 'Invalid credentials'}, status=400)
+        else:
+            return JsonResponse({'error': 'Invalid credentials'}, status=400)
 
 class LogoutView(DjangoLogoutView):
     def dispatch(self, request, *args, **kwargs):

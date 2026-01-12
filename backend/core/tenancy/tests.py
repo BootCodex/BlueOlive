@@ -2,23 +2,25 @@ from django.test import TestCase, TransactionTestCase
 from django.db import connections
 from tenancy.models import Tenant, Shop
 from django.conf import settings
+from tenancy.utils import register_tenant_connection
 
-class ShopSchemaCreationTest(TransactionTestCase):
+class ShopSchemaCreationTest(TestCase):
     """Test that schemas are created and migrated when shops are added."""
-
-    databases = {'default', 'tenant_1'}  # Allow connections to tenant database
 
     def setUp(self):
         # Create a test tenant
         self.tenant = Tenant.objects.create(
             name="Test Tenant",
             slug="test-tenant",
+            subdomain="testtenant",
             db_name="test_tenant_db",
             db_user="postgres",
             db_password="0660089932@G",
             db_host="localhost",
             db_port=5432
         )
+        # Register the tenant connection
+        register_tenant_connection(self.tenant)
 
     def test_schema_creation_on_shop_save(self):
         """Test that creating a shop triggers schema creation and migration."""
