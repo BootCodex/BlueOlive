@@ -90,7 +90,8 @@
 
                 if (response.ok) {
                     document.getElementById('message').textContent = 'Login successful! Redirecting...';
-                    window.location.href = '/dashboard/';
+                    const nextUrl = urlParams.get('next') || '/dashboard/';
+                    window.location.href = nextUrl;
                 } else {
                     let errorMsg = 'Login failed';
                     try {

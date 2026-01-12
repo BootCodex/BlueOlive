@@ -69,8 +69,9 @@ AUTH_USER_MODEL = 'shop_users.ShopUser'
 
 AUTHENTICATION_BACKENDS = [
     'shop_users.auth_backends.ShopUserBackend',
-    'django.contrib.auth.backends.ModelBackend',  # fallback
 ]
+
+LOGIN_URL = '/login/'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -78,11 +79,10 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'tenancy.middleware.TenantMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
-    'tenancy.middleware.TenantMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'

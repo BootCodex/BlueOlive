@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import Tenant, Shop
 from shop_users.models import ShopUser
 from django.utils.text import slugify
+import uuid
 from django.contrib.auth.hashers import make_password
 from tenancy.tenant_context import get_current_tenant
 from .utils import create_tenant_database_postgres, register_tenant_connection
@@ -11,9 +12,10 @@ class TenantSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tenant
-        fields = ['name', 'phone', 'email', 'password', 'slug', 'db_name', 'db_user', 'db_password', 'db_host', 'db_port']
+        fields = ['name', 'phone', 'email', 'password', 'slug', 'subdomain', 'db_name', 'db_user', 'db_password', 'db_host', 'db_port']
         extra_kwargs = {
             'slug': {'required': False},
+            'subdomain': {'read_only': True},
             'db_name': {'required': False},
             'db_user': {'required': False, 'default': 'postgres'},
             'db_password': {'required': True},  # Must provide password
@@ -25,9 +27,13 @@ class TenantSerializer(serializers.ModelSerializer):
         password = validated_data.pop('password')
         name = validated_data['name']
         if 'slug' not in validated_data or not validated_data['slug']:
-            validated_data['slug'] = slugify(name)
+            slug_candidate = slugify(name)
+            if not slug_candidate:
+                slug_candidate = f"tenant-{uuid.uuid4().hex[:8]}"
+            validated_data['slug'] = slug_candidate
         if 'db_name' not in validated_data or not validated_data['db_name']:
             validated_data['db_name'] = slugify(name)
+        validated_data['subdomain'] = validated_data['slug']
         tenant = super().create(validated_data)
 
         # Create the tenant database
