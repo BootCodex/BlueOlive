@@ -29,8 +29,13 @@ jobs:
             ${{ runner.os }}-pip-lint-
 
       - name: Install dependencies
+        # Pinned: unpinned installs pick up whatever's newest on PyPI at
+        # each run, so a tool's own release (e.g. isort's 8->9 line-
+        # collapsing behavior change) can flip check results with no
+        # change to this repo at all. These match versions verified
+        # locally against the current codebase.
         run: |
-          pip install flake8 black isort bandit safety
+          pip install flake8==7.3.0 black==26.5.1 isort==9.0.1 bandit==1.9.4 safety==3.8.1
 
       - name: Run Black (check only)
         run: |
@@ -135,7 +140,14 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          # 20 is EOL-adjacent (see the Node 20 deprecation warning on this
+          # workflow) and its bundled npm validates this app's lockfile
+          # (Tailwind 4's tooling pulls in an optional peer on picomatch
+          # that resolves to two coexisting major versions - normal for
+          # npm, but apparently not accepted by npm ci under Node 20) more
+          # strictly than the npm bundled with 22, which installs this
+          # lockfile cleanly. Same issue as the admin job (ed348bd3).
+          node-version: '22'
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
