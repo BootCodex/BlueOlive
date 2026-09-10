@@ -5,12 +5,16 @@ Includes /health/, /ready/, and /metrics/ endpoints.
 
 import logging
 
+from apps.saas_admin.auth import PlatformOwnerJWTAuthentication
+from apps.saas_admin.permissions import IsPlatformSuperuser
 from django.db import connections
 from django.db.utils import OperationalError
 from django.http import JsonResponse
-from apps.saas_admin.auth import PlatformOwnerJWTAuthentication
-from apps.saas_admin.permissions import IsPlatformSuperuser
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.decorators import (
+    api_view,
+    authentication_classes,
+    permission_classes,
+)
 from rest_framework.permissions import AllowAny
 from rest_framework.status import HTTP_200_OK, HTTP_503_SERVICE_UNAVAILABLE
 

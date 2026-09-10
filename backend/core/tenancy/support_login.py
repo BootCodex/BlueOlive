@@ -29,7 +29,9 @@ SUPPORT_LOGIN_TTL_SECONDS = 60
 _CACHE_KEY_PREFIX = "support_login:"
 
 
-def generate_support_login_code(*, tenant_id, user_id, superuser_id, superuser_username, reason):
+def generate_support_login_code(
+    *, tenant_id, user_id, superuser_id, superuser_username, reason
+):
     """Mint a one-time code mapping to a specific tenant user. Returns the code."""
     code = secrets.token_urlsafe(32)
     cache.set(

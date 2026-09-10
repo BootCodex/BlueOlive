@@ -15,7 +15,11 @@ audit trail.
 
 from django.conf import settings
 from rest_framework import status
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.decorators import (
+    api_view,
+    authentication_classes,
+    permission_classes,
+)
 from rest_framework.response import Response
 from shop_users.models import ShopUser
 from tenancy.audit import TenantAuditLog

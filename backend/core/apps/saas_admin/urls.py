@@ -41,9 +41,15 @@ router = DefaultRouter()
 router.register(r"tenants", TenantViewSet, basename="tenant")
 router.register(r"shops", ShopViewSet, basename="shop")
 router.register(r"tenant-stats", TenantStatsViewSet, basename="tenant-stats")
-router.register(r"subscription-plans", PlatformSubscriptionPlanViewSet, basename="subscription-plan")
+router.register(
+    r"subscription-plans", PlatformSubscriptionPlanViewSet, basename="subscription-plan"
+)
 router.register(r"subscriptions", PlatformSubscriptionViewSet, basename="subscription")
-router.register(r"subscription-payments", PlatformSubscriptionPaymentViewSet, basename="subscription-payment")
+router.register(
+    r"subscription-payments",
+    PlatformSubscriptionPaymentViewSet,
+    basename="subscription-payment",
+)
 router.register(r"audit-logs", AuditLogViewSet, basename="audit-log")
 
 urlpatterns = [

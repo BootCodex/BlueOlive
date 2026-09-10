@@ -189,7 +189,14 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          # 20 is EOL-adjacent (see the Node 20 deprecation warning on this
+          # workflow) and its bundled npm validates this app's lockfile
+          # (Tailwind 4's tooling pulls in an optional peer on picomatch
+          # that resolves to two coexisting major versions - normal for
+          # npm, but apparently not accepted by npm ci under Node 20) more
+          # strictly than the npm bundled with 22, which installs this
+          # lockfile cleanly.
+          node-version: '22'
           cache: 'npm'
           cache-dependency-path: admin/package-lock.json
 

@@ -96,7 +96,9 @@ class AuditLogViewSet(viewsets.ReadOnlyModelViewSet):
         )
 
         serializer = self.get_serializer(
-            objects, many=True, context={**self.get_serializer_context(), "tenant_names": tenant_names}
+            objects,
+            many=True,
+            context={**self.get_serializer_context(), "tenant_names": tenant_names},
         )
 
         if page is not None:

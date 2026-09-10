@@ -21,7 +21,11 @@ Admin buttons), not an automatic retry.
 
 from django.utils import timezone
 from rest_framework import status
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.decorators import (
+    api_view,
+    authentication_classes,
+    permission_classes,
+)
 from rest_framework.response import Response
 from tenancy.models import Shop, Tenant
 from tenancy.tasks import setup_shop_schema_async, setup_tenant_database_async
@@ -68,10 +72,7 @@ def provisioning_health(request):
     Distinct from TenantStatsViewSet.overview - this is about provisioning
     *problems*, not overall counts.
     """
-    tenants = (
-        Tenant.objects.exclude(setup_status="ready")
-        .order_by("created_at")
-    )
+    tenants = Tenant.objects.exclude(setup_status="ready").order_by("created_at")
     shops = (
         Shop.objects.exclude(setup_status="ready")
         .select_related("tenant")

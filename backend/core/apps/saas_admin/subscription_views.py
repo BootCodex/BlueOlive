@@ -72,12 +72,9 @@ class PlatformSubscriptionViewSet(TenantSubscriptionViewSet):
             mrr += sub.plan.price * Decimal(30) / Decimal(sub.plan.billing_period_days)
 
         month_start = timezone.now().date().replace(day=1)
-        revenue_this_month = (
-            SubscriptionPayment.objects.filter(
-                status="SUCCEEDED", paid_at__gte=month_start
-            ).aggregate(total=Sum("amount"))["total"]
-            or Decimal("0")
-        )
+        revenue_this_month = SubscriptionPayment.objects.filter(
+            status="SUCCEEDED", paid_at__gte=month_start
+        ).aggregate(total=Sum("amount"))["total"] or Decimal("0")
 
         expiring_soon = qs.filter(
             status__in=["ACTIVE", "TRIAL"],
