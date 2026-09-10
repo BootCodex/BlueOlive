@@ -140,16 +140,24 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          # 20 is EOL-adjacent (see the Node 20 deprecation warning on this
-          # workflow) and its bundled npm validates this app's lockfile
-          # (Tailwind 4's tooling pulls in an optional peer on picomatch
-          # that resolves to two coexisting major versions - normal for
-          # npm, but apparently not accepted by npm ci under Node 20) more
-          # strictly than the npm bundled with 22, which installs this
-          # lockfile cleanly. Same issue as the admin job (ed348bd3).
           node-version: '22'
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
+
+      # npm 10.x (bundled with Node 22 on the ubuntu-latest runner) has a
+      # `npm ci` validation bug where an *optional* peer dependency (fdir's
+      # optional peer on picomatch, pulled in by Tailwind 4's tooling) that
+      # isn't satisfied by whichever picomatch version npm's resolver hoists
+      # to the root gets reported as an EUSAGE "lock file's picomatch@X does
+      # not satisfy picomatch@Y" error, even though the lockfile itself is
+      # correct (npm install regenerates it identically) and a real install
+      # would just skip the unmet optional peer. npm 11+ doesn't have this
+      # bug, so pin to it explicitly rather than relying on whatever version
+      # happens to be bundled with the runner's Node. See also the admin job
+      # below, which hits the same bug (ed348bd3 tried fixing it by bumping
+      # Node to 22 alone, which was not sufficient).
+      - name: Update npm
+        run: npm install -g npm@11
 
       - name: Install dependencies
         working-directory: frontend
@@ -201,16 +209,17 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          # 20 is EOL-adjacent (see the Node 20 deprecation warning on this
-          # workflow) and its bundled npm validates this app's lockfile
-          # (Tailwind 4's tooling pulls in an optional peer on picomatch
-          # that resolves to two coexisting major versions - normal for
-          # npm, but apparently not accepted by npm ci under Node 20) more
-          # strictly than the npm bundled with 22, which installs this
-          # lockfile cleanly.
           node-version: '22'
           cache: 'npm'
           cache-dependency-path: admin/package-lock.json
+
+      # See the matching step in the frontend job above: npm 10.x (bundled
+      # with Node 22 here) has an `npm ci` validation bug around unmet
+      # *optional* peer deps (fdir's optional peer on picomatch) that npm 11+
+      # doesn't have. Pin to it explicitly instead of trusting the runner's
+      # bundled npm.
+      - name: Update npm
+        run: npm install -g npm@11
 
       - name: Install dependencies
         working-directory: admin
