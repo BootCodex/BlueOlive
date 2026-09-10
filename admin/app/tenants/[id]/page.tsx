@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, KeyRound, Plus, Power, PowerOff, Puzzle, Store, Users, X } from 'lucide-react';
+import { ArrowLeft, KeyRound, LogIn, Plus, Power, PowerOff, Puzzle, Store, Users, X } from 'lucide-react';
 import PlatformOwnerRoute from '@/components/PlatformOwnerRoute';
 import {
   Tenant,
@@ -18,6 +18,7 @@ import {
   toggleTenantUserStatus,
   resetTenantUserPassword,
   updateTenantAddons,
+  startSupportLogin,
 } from '@/lib/platformApi';
 
 // Keep in sync with backend settings.OPTIONAL_ADDON_APPS / ADDON_DEPENDENCIES.
@@ -138,6 +139,22 @@ function TenantDetail() {
     }
   };
 
+  const handleSupportLogin = async (user: TenantUser) => {
+    const reason = window.prompt(
+      `Reason for signing in as ${user.username}? (logged in the audit trail)`
+    );
+    if (reason === null) return;
+    setBusyId(user.id);
+    try {
+      const { redirect_url } = await startSupportLogin(tenantId, user.id, reason);
+      window.open(redirect_url, '_blank', 'noopener,noreferrer');
+    } catch (err: any) {
+      setError(err?.response?.data?.error || 'Failed to start support login');
+    } finally {
+      setBusyId(null);
+    }
+  };
+
   if (loading) {
     return <div className="max-w-5xl mx-auto px-6 py-8 text-slate-500 text-sm">Loading...</div>;
   }
@@ -152,7 +169,7 @@ function TenantDetail() {
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-8">
-      <Link href="/owner" className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-100 mb-6 w-fit">
+      <Link href="/" className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-100 mb-6 w-fit">
         <ArrowLeft className="h-4 w-4" /> Back to tenants
       </Link>
 
@@ -324,6 +341,14 @@ function TenantDetail() {
                       </span>
                     </td>
                     <td className="px-4 py-2.5 text-right space-x-2">
+                      <button
+                        onClick={() => handleSupportLogin(user)}
+                        disabled={busyId === user.id || !user.is_active}
+                        title={!user.is_active ? 'User is inactive' : undefined}
+                        className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-md border border-blue-900 text-blue-400 hover:bg-blue-950/50 transition disabled:opacity-50"
+                      >
+                        <LogIn className="h-3 w-3" /> Support Login
+                      </button>
                       <button
                         onClick={() => handleResetPassword(user)}
                         disabled={busyId === user.id}

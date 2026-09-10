@@ -16,7 +16,7 @@ export default function ExpenseInvoiceForm() {
   const invoiceId = params.id as string;
   const isNew = invoiceId === 'new';
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState(() => ({
     supplier_id: 0,
     invoice_number: '',
     invoice_date: new Date().toISOString().split('T')[0],
@@ -26,7 +26,7 @@ export default function ExpenseInvoiceForm() {
     amount: 0,
     vat_rate: 14,
     vat_option: 'I',
-  });
+  }));
 
   const { data: suppliers } = useQuery({
     queryKey: ['creditors-accounts'],
@@ -38,7 +38,7 @@ export default function ExpenseInvoiceForm() {
     queryFn: () => settingsApi.expenseCategories.list({ page_size: 100 }),
   });
 
-  const { data: invoiceData, isLoading } = useQuery({
+  const { data: _invoiceData, isLoading } = useQuery({
     queryKey: ['expense-invoice', invoiceId],
     queryFn: () => creditorsApi.invoices.get(invoiceId),
     enabled: !isNew,

@@ -4,9 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/useAuth';
 import { usePOSAPI, LineItem, TenderData, CashSaleCreateData } from '@/lib/posApi';
 import { useRouter } from 'next/navigation';
-import { StockItemPicker, GrossProfitDisplay, GPBadge } from '@/components/pos';
-import { Card, CardContent } from '@/components/ui/card';
-
+import { StockItemPicker, GPBadge } from '@/components/pos';
 export default function CreateCashSale() {
   const { user } = useAuth();
   const router = useRouter();

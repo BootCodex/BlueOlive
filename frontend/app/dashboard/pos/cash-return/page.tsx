@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/lib/useAuth';
-import { usePOSAPI } from '@/lib/posApi';
+import { usePOSAPI, type TransactionResponse } from '@/lib/posApi';
 import Link from 'next/link';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -20,15 +20,24 @@ import {
   Search,
   Eye,
   Printer,
-  Download,
   AlertCircle,
 } from 'lucide-react';
+
+interface CashReturnRow {
+  id: string | number;
+  reference: string;
+  original_sale: string;
+  customer: string;
+  amount: number;
+  date: string;
+  status: 'completed' | 'pending';
+}
 
 export default function CashReturnPage() {
   const { user, isLoading: authLoading } = useAuth();
   const posAPI = usePOSAPI(user?.tenant?.slug);
   const posAPIRef = useRef(posAPI);
-  const [returns, setReturns] = useState<any[]>([]);
+  const [returns, setReturns] = useState<CashReturnRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -47,16 +56,16 @@ export default function CashReturnPage() {
         });
         if (cancelled) return;
 
-        const raw: any[] = Array.isArray(response) ? response : (response as any).results ?? [];
+        const raw: TransactionResponse[] = Array.isArray(response) ? response : (response.results ?? []);
         setReturns(
-          raw.map((ret: any) => ({
+          raw.map((ret: TransactionResponse) => ({
             id: ret.id,
-            reference: ret.return_number ?? String(ret.id),
-            original_sale: ret.original_sale_number ?? '',
-            customer: ret.customer_name || 'Walk-in Customer',
+            reference: ret.return_number ? String(ret.return_number) : String(ret.id),
+            original_sale: ret.original_sale_number ? String(ret.original_sale_number) : '',
+            customer: ret.customer_name ? String(ret.customer_name) : 'Walk-in Customer',
             amount: Number(ret.total_amount ?? 0),
-            date: ret.return_date ?? '',
-            status: ret.is_posted ? 'completed' : 'pending',
+            date: ret.return_date ? String(ret.return_date) : '',
+            status: (ret.is_posted ? 'completed' : 'pending') as 'completed' | 'pending',
           }))
         );
       } catch (error) {

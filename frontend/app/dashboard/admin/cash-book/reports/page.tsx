@@ -85,7 +85,7 @@ export default function CashBookReportsPage() {
           break;
       }
       setReportData(data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Failed to generate report'));
     } finally {
       setLoading(false);
@@ -189,7 +189,7 @@ export default function CashBookReportsPage() {
               ) : !reportData ? (
                 <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
                   <p className="text-gray-600 mb-2">No report generated yet</p>
-                  <p className="text-sm text-gray-500">Select date range and click "Generate Report"</p>
+                  <p className="text-sm text-gray-500">Select date range and click &quot;Generate Report&quot;</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">

@@ -29,7 +29,7 @@ function AdminPageContent() {
     }
   }, [searchParams]);
 
-  const handleSuccess = () => {
+  const _handleSuccess = () => {
     // Trigger a refresh of both lists
     setRefreshKey((prev) => prev + 1);
   };

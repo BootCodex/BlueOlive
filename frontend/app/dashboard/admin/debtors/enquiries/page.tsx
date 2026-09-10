@@ -86,7 +86,7 @@ export default function DebtorsEnquiriesPage() {
     <div className="space-y-6 p-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Debtors' Enquiry Menu</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Debtors&apos; Enquiry Menu</h1>
         <p className="text-gray-600 mt-1">Select an enquiry option to view detailed debtor information, transactions, and reports</p>
       </div>
 

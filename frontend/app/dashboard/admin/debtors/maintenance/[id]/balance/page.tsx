@@ -45,7 +45,7 @@ export default function DebtorBalancePage({ params }: { params: Promise<{ id: st
       setLoading(true);
       const response = await apiRequest(`/api/v1/debtors/${debtorId}/`);
       setDebtor(response.data || response);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to load debtor:', err);
       setError('Failed to load debtor information');
     } finally {

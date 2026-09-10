@@ -7,6 +7,7 @@ import {
   useCreditorsAPI 
 } from '@/lib/creditorsApi';
 import OutstandingBalanceForm from './OutstandingBalanceForm';
+import type { MaybeAxiosError } from '@/lib/types/errors';
 
 export default function OutstandingBalanceMaintenance() {
   const api = useCreditorsAPI();
@@ -30,7 +31,7 @@ export default function OutstandingBalanceMaintenance() {
     try {
       const data = await api.listSuppliers({});
       setSuppliers(data.results || []);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to load suppliers:', err);
     }
   };
@@ -60,11 +61,11 @@ export default function OutstandingBalanceMaintenance() {
       if (balanceItems.length === 0) {
         console.warn('No outstanding balance data returned');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to load balances:', err);
-      if (err?.response?.status === 404) {
+      if ((err as MaybeAxiosError)?.response?.status === 404) {
         setError('Outstanding Balance feature is not yet available. The backend endpoint is still being implemented.');
-      } else if (err.message?.includes('500') || err.message?.includes('table')) {
+      } else if ((err as MaybeAxiosError).message?.includes('500') || (err as MaybeAxiosError).message?.includes('table')) {
         setError('Outstanding Balance feature is not yet available. The backend endpoint is still being implemented.');
       } else {
         setError('Failed to load outstanding balances');
@@ -84,9 +85,9 @@ export default function OutstandingBalanceMaintenance() {
       await api.deleteOutstandingBalance(id);
       setBalances(balances.filter(b => b.id !== id));
       alert('Outstanding balance record deleted successfully');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to delete record:', err);
-      alert(`Failed to delete: ${err.message}`);
+      alert(`Failed to delete: ${(err as MaybeAxiosError).message}`);
     }
   };
 

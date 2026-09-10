@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { ArrowLeft, Printer, Download } from 'lucide-react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useState } from 'react';
+import { ArrowLeft, Printer } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 
 interface PrintStockTakeFormsProps {
@@ -70,7 +70,7 @@ export default function PrintStockTakeForms({ onBack }: PrintStockTakeFormsProps
       // Generate print content
       const printWindow = window.open('', '', 'width=800,height=600');
       if (printWindow) {
-        let html = `
+        const html = `
           <html>
             <head>
               <title>Stock Take Forms</title>

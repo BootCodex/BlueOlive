@@ -18,7 +18,7 @@ export default function OwnerLoginPage() {
     setLoading(true);
     try {
       await login(username, password);
-      router.push('/owner');
+      router.push('/');
     } catch (err: any) {
       setError(err?.response?.data?.detail || 'Invalid credentials');
     } finally {

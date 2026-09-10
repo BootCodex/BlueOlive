@@ -177,7 +177,7 @@ export default function IBIPage() {
           </div>
         ) : filteredInvoices.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            No invoices found. Click "New Invoice" to create one.
+            No invoices found. Click &quot;New Invoice&quot; to create one.
           </div>
         ) : (
           <Table>

@@ -5,7 +5,6 @@ import { useQuery } from '@tanstack/react-query';
 import { creditorsApi } from '@/lib/creditorsApi';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Loader, Plus, Edit, Printer } from 'lucide-react';
 import Link from 'next/link';
 

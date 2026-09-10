@@ -18,6 +18,45 @@ interface ExpenseCategory {
   category_name: string;
 }
 
+interface MoneyTotals {
+  exclusive: number;
+  vat: number;
+  inclusive: number;
+}
+
+interface ExpenditureData {
+  expenditure: { total_exclusive: number; total_vat: number; total_inclusive: number };
+  transaction_count: number;
+}
+
+interface CategoryRow {
+  category_name: string;
+  mtd_exclusive: number;
+  mtd_vat: number;
+  mtd_inclusive: number;
+}
+
+interface CategoriesData {
+  categories: CategoryRow[];
+  grand_total: MoneyTotals;
+}
+
+interface DetailRow {
+  date: string;
+  transaction_number: string;
+  supplier_name: string;
+  description: string;
+  amount_exclusive: number;
+  tax_amount: number;
+  amount_inclusive: number;
+}
+
+interface DetailsData {
+  category: { name: string };
+  totals: MoneyTotals;
+  details: DetailRow[];
+}
+
 export default function ExpenseTaxAnalysis({ onBack }: { onBack: () => void }) {
   const [analysisType, setAnalysisType] = useState<'expenditure' | 'categories' | 'details'>(
     'expenditure'
@@ -26,9 +65,9 @@ export default function ExpenseTaxAnalysis({ onBack }: { onBack: () => void }) {
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [categories, setCategories] = useState<ExpenseCategory[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [expenditureData, setExpenditureData] = useState<any>(null);
-  const [categoriesData, setCategoriesData] = useState<any>(null);
-  const [detailsData, setDetailsData] = useState<any>(null);
+  const [expenditureData, setExpenditureData] = useState<ExpenditureData | null>(null);
+  const [categoriesData, setCategoriesData] = useState<CategoriesData | null>(null);
+  const [detailsData, setDetailsData] = useState<DetailsData | null>(null);
   const [loading, setLoading] = useState(false);
 
   // Fetch categories
@@ -155,7 +194,7 @@ export default function ExpenseTaxAnalysis({ onBack }: { onBack: () => void }) {
                   type="radio"
                   value="expenditure"
                   checked={analysisType === 'expenditure'}
-                  onChange={(e) => setAnalysisType(e.target.value as any)}
+                  onChange={(e) => setAnalysisType(e.target.value as 'expenditure' | 'categories' | 'details')}
                   className="w-4 h-4"
                 />
                 <div>
@@ -168,7 +207,7 @@ export default function ExpenseTaxAnalysis({ onBack }: { onBack: () => void }) {
                   type="radio"
                   value="categories"
                   checked={analysisType === 'categories'}
-                  onChange={(e) => setAnalysisType(e.target.value as any)}
+                  onChange={(e) => setAnalysisType(e.target.value as 'expenditure' | 'categories' | 'details')}
                   className="w-4 h-4"
                 />
                 <div>
@@ -181,7 +220,7 @@ export default function ExpenseTaxAnalysis({ onBack }: { onBack: () => void }) {
                   type="radio"
                   value="details"
                   checked={analysisType === 'details'}
-                  onChange={(e) => setAnalysisType(e.target.value as any)}
+                  onChange={(e) => setAnalysisType(e.target.value as 'expenditure' | 'categories' | 'details')}
                   className="w-4 h-4"
                 />
                 <div>
@@ -311,7 +350,7 @@ export default function ExpenseTaxAnalysis({ onBack }: { onBack: () => void }) {
                       </tr>
                     </thead>
                     <tbody>
-                      {categoriesData.categories.map((cat: any, idx: number) => (
+                      {categoriesData.categories.map((cat: CategoryRow, idx: number) => (
                         <tr key={idx} className="border-b hover:bg-gray-50">
                           <td className="py-2 px-4">{cat.category_name}</td>
                           <td className="text-right py-2 px-4">
@@ -396,7 +435,7 @@ export default function ExpenseTaxAnalysis({ onBack }: { onBack: () => void }) {
                       </tr>
                     </thead>
                     <tbody>
-                      {detailsData.details.map((detail: any, idx: number) => (
+                      {detailsData.details.map((detail: DetailRow, idx: number) => (
                         <tr key={idx} className="border-b hover:bg-gray-50">
                           <td className="py-2 px-4">
                             {new Date(detail.date).toLocaleDateString()}

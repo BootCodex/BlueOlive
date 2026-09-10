@@ -8,7 +8,7 @@ interface AgeAnalysisDisplayProps {
 }
 
 export default function AgeAnalysisDisplay({ ageAnalysis }: AgeAnalysisDisplayProps) {
-  const COLORS = {
+  const _COLORS = {
     current: { bg: 'bg-green-100', text: 'text-green-800' },
     30: { bg: 'bg-yellow-100', text: 'text-yellow-800' },
     60: { bg: 'bg-orange-100', text: 'text-orange-800' },

@@ -169,7 +169,7 @@ export default function DepartmentsPage() {
           </div>
         ) : filteredDepts.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            No departments found. Click "Add Department" to create one.
+            No departments found. Click &quot;Add Department&quot; to create one.
           </div>
         ) : (
           <Table>

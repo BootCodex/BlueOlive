@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowRight, ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react';
+import { ArrowRight, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface AnalysisResult {
   headers: string[];
@@ -67,7 +67,7 @@ export function FieldMapper({
           <div className="flex items-center gap-2">
             <AlertCircle className="w-5 h-5 text-red-600" />
             <span className="text-red-800">
-              Warning: Required field "{fieldLabels[requiredField] || requiredField}" is not mapped
+              Warning: Required field &quot;{fieldLabels[requiredField] || requiredField}&quot; is not mapped
             </span>
           </div>
         </div>

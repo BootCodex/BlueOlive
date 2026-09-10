@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useConversations, useMessages, useSendMessage, useMarkRead, useCreateConversation } from '@/lib/hooks/useMessaging';
 import { getUsers } from '@/lib/api';
-import type { Conversation, Message, MessageAttachment, Participant } from '@/lib/types/messaging';
+import type { Conversation, Message, MessageAttachment } from '@/lib/types/messaging';
 import { formatTime } from '@/lib/utils';
 import { Plus, X, Search, Users } from 'lucide-react';
 
@@ -522,6 +522,10 @@ function AttachmentItem({ attachment }: AttachmentItemProps) {
   if (isImage && attachment.url) {
     return (
       <div className="mt-2">
+        {/* attachment.url may be a relative media path rather than an
+            absolute https URL, which next/image's remotePatterns can't
+            match - a plain <img> avoids breaking attachment previews. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={attachment.url}
           alt={attachment.filename}

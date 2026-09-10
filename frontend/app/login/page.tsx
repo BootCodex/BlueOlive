@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { login, fetchCSRFToken, getTenantShops } from '@/lib/api';
+import Link from 'next/link';
+import { login, fetchCSRFToken } from '@/lib/api';
 import { useAuthContext } from '@/lib/AuthContext';
-import { setTenant, setShops, setCurrentShop, type Shop } from '@/lib/shopContext';
+import { setTenant, setShops, setCurrentShop } from '@/lib/shopContext';
+import type { MaybeAxiosError } from '@/lib/types/errors';
 
 interface LoginUser {
   id: number;
@@ -86,15 +88,18 @@ export default function LoginPage() {
         setUser(user);
         console.log('Set user in AuthContext:', user);
         
-        // Force redirect using window.location for reliability
+        // Force redirect using window.location for reliability - a hard
+        // navigation so AuthProvider re-bootstraps from the fresh session
+        // cookies rather than carrying over stale client-side auth state.
         console.log('Attempting redirect to /dashboard');
+        // eslint-disable-next-line @next/next/no-location-assign-relative-destination
         window.location.href = '/dashboard';
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Login error:', error);
       const errorMsg = 
-        error?.response?.data?.detail || 
-        error?.message ||
+        (error as MaybeAxiosError)?.response?.data?.detail || 
+        (error as MaybeAxiosError)?.message ||
         'Login failed. Please check your credentials.';
       setMessage(errorMsg);
       setMessageType('error');
@@ -177,7 +182,7 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-6 text-center text-sm text-gray-600">
-            Don't have an account? <a href="/" className="text-indigo-600 hover:text-indigo-700 font-medium">Sign up here</a>
+            Don&apos;t have an account? <Link href="/" className="text-indigo-600 hover:text-indigo-700 font-medium">Sign up here</Link>
           </div>
         </div>
       </div>

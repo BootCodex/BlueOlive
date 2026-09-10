@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Bell, X, MessageSquare } from 'lucide-react';
-import Link from 'next/link';
 import { useNotifications, useUnreadNotificationCount, useMarkNotificationRead, useMarkAllNotificationsRead } from '@/lib/hooks/useMessaging';
 import { formatTime } from '@/lib/utils';
 import type { Notification } from '@/lib/types/messaging';

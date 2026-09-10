@@ -2,31 +2,27 @@
 
 import React, { useState, useEffect } from 'react';
 import { debtorsApi } from '@/lib/debtorsApi';
-import { posAPI } from '@/lib/posApi';
 import { getStockSummary } from '@/lib/stockApi';
 import { creditorsApi } from '@/lib/creditorsApi';
-import { cashBookApi } from '@/lib/cashBookApi';
-import { generalLedgerApi } from '@/lib/generalLedgerApi';
-import { purchaseOrdersApi } from '@/lib/purchaseOrdersApi';
 import { jobCardsApi } from '@/lib/jobCardsApi';
 import { creditNotesApi } from '@/lib/creditNotesApi';
 import { cashControlApi } from '@/lib/cashControlApi';
-import { cashReturnsApi } from '@/lib/cashReturnsApi';
-import { chequeApi } from '@/lib/chequeApi';
 import { repairsApi } from '@/lib/repairsApi';
+import type { MaybeAxiosError } from '@/lib/types/errors';
+import type { JsonObject } from '@/lib/types/json';
 
 interface ReportData {
-  debtors?: any;
-  creditors?: any;
-  stock?: any;
-  sales?: any;
-  purchases?: any;
-  cashBook?: any;
-  generalLedger?: any;
-  jobCards?: any;
-  creditNotes?: any;
-  cashControl?: any;
-  repairs?: any;
+  debtors?: JsonObject | null;
+  creditors?: JsonObject | null;
+  stock?: JsonObject | null;
+  sales?: JsonObject | null;
+  purchases?: JsonObject | null;
+  cashBook?: JsonObject | null;
+  generalLedger?: JsonObject | null;
+  jobCards?: JsonObject | null;
+  creditNotes?: JsonObject | null;
+  cashControl?: JsonObject | null;
+  repairs?: JsonObject | null;
 }
 
 interface SummaryCard {
@@ -43,10 +39,6 @@ export default function ReportsPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState('month'); // month, quarter, year
   const [summaryCards, setSummaryCards] = useState<SummaryCard[]>([]);
-
-  useEffect(() => {
-    fetchReportData();
-  }, [selectedPeriod]);
 
   const fetchReportData = async () => {
     setLoading(true);
@@ -70,9 +62,9 @@ export default function ReportsPage() {
         repairsApi.getSummary?.(),
       ]);
 
-      const processedData = {
+      const processedData: ReportData = {
         debtors:
-          debtorsSummary.status === 'fulfilled' ? debtorsSummary.value : null,
+          (debtorsSummary.status === 'fulfilled' ? debtorsSummary.value : null) as JsonObject | null,
         creditors:
           creditorsSummary.status === 'fulfilled' ? creditorsSummary.value : null,
         stock: stockSummary.status === 'fulfilled' ? stockSummary.value : null,
@@ -90,9 +82,9 @@ export default function ReportsPage() {
 
       setData(processedData);
       buildSummaryCards(processedData);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(
-        err.message || 'Failed to load report data. Please try again later.'
+        (err as MaybeAxiosError).message || 'Failed to load report data. Please try again later.'
       );
       console.error('Report data fetch error:', err);
     } finally {
@@ -104,41 +96,41 @@ export default function ReportsPage() {
     const cards: SummaryCard[] = [
       {
         label: 'Debtors Accounts',
-        value: reportData.debtors?.total_accounts || 0,
+        value: Number(reportData.debtors?.total_accounts) || 0,
         icon: '👥',
         color: 'bg-blue-50',
       },
       {
         label: 'Outstanding Debtors',
         value:
-          `R${(reportData.debtors?.total_outstanding || 0).toLocaleString('en-ZA', { minimumFractionDigits: 2 })}` ||
+          `R${Number(reportData.debtors?.total_outstanding || 0).toLocaleString('en-ZA', { minimumFractionDigits: 2 })}` ||
           'R0.00',
         icon: '💰',
         color: 'bg-red-50',
       },
       {
         label: 'Stock Items',
-        value: reportData.stock?.total_items || 0,
+        value: Number(reportData.stock?.total_items) || 0,
         icon: '📦',
         color: 'bg-green-50',
       },
       {
         label: 'Stock Value',
         value:
-          `R${(reportData.stock?.total_value || 0).toLocaleString('en-ZA', { minimumFractionDigits: 2 })}` ||
+          `R${Number(reportData.stock?.total_value || 0).toLocaleString('en-ZA', { minimumFractionDigits: 2 })}` ||
           'R0.00',
         icon: '💵',
         color: 'bg-purple-50',
       },
       {
         label: 'Active Job Cards',
-        value: reportData.jobCards?.active_count || 0,
+        value: Number(reportData.jobCards?.active_count) || 0,
         icon: '🔧',
         color: 'bg-orange-50',
       },
       {
         label: 'Creditor Accounts',
-        value: reportData.creditors?.total_accounts || 0,
+        value: Number(reportData.creditors?.total_accounts) || 0,
         icon: '🏢',
         color: 'bg-indigo-50',
       },
@@ -146,6 +138,14 @@ export default function ReportsPage() {
 
     setSummaryCards(cards);
   };
+
+  // Standard fetch-on-mount/param-change effect; fetchReportData is
+  // recreated each render (not memoized) so it's intentionally omitted
+  // from deps to avoid a refetch loop.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchReportData();
+  }, [selectedPeriod]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) {
     return (
@@ -247,14 +247,14 @@ export default function ReportsPage() {
             <div className="flex justify-between items-center pb-3 border-b border-gray-100">
               <span className="text-gray-600">Total Debtors</span>
               <span className="font-semibold text-gray-900">
-                {data.debtors?.total_accounts || 0}
+                {Number(data.debtors?.total_accounts) || 0}
               </span>
             </div>
             <div className="flex justify-between items-center pb-3 border-b border-gray-100">
               <span className="text-gray-600">Outstanding Balance</span>
               <span className="font-semibold text-red-600">
                 R
-                {(data.debtors?.total_outstanding || 0).toLocaleString(
+                {Number(data.debtors?.total_outstanding || 0).toLocaleString(
                   'en-ZA',
                   { minimumFractionDigits: 2 }
                 )}
@@ -263,7 +263,7 @@ export default function ReportsPage() {
             <div className="flex justify-between items-center pb-3 border-b border-gray-100">
               <span className="text-gray-600">Overdue Accounts</span>
               <span className="font-semibold text-gray-900">
-                {data.debtors?.overdue_count || 0}
+                {Number(data.debtors?.overdue_count) || 0}
               </span>
             </div>
             <div className="text-center text-sm text-gray-500 py-4">
@@ -279,14 +279,14 @@ export default function ReportsPage() {
             <div className="flex justify-between items-center pb-3 border-b border-gray-100">
               <span className="text-gray-600">Total Items</span>
               <span className="font-semibold text-gray-900">
-                {data.stock?.total_items || 0}
+                {Number(data.stock?.total_items) || 0}
               </span>
             </div>
             <div className="flex justify-between items-center pb-3 border-b border-gray-100">
               <span className="text-gray-600">Stock Value</span>
               <span className="font-semibold text-green-600">
                 R
-                {(data.stock?.total_value || 0).toLocaleString('en-ZA', {
+                {Number(data.stock?.total_value || 0).toLocaleString('en-ZA', {
                   minimumFractionDigits: 2,
                 })}
               </span>
@@ -294,7 +294,7 @@ export default function ReportsPage() {
             <div className="flex justify-between items-center pb-3 border-b border-gray-100">
               <span className="text-gray-600">Low Stock Items</span>
               <span className="font-semibold text-orange-600">
-                {data.stock?.low_stock_count || 0}
+                {Number(data.stock?.low_stock_count) || 0}
               </span>
             </div>
             <div className="text-center text-sm text-gray-500 py-4">
@@ -312,19 +312,19 @@ export default function ReportsPage() {
             <div className="flex justify-between items-center pb-3 border-b border-gray-100">
               <span className="text-gray-600">Active Job Cards</span>
               <span className="font-semibold text-gray-900">
-                {data.jobCards?.active_count || 0}
+                {Number(data.jobCards?.active_count) || 0}
               </span>
             </div>
             <div className="flex justify-between items-center pb-3 border-b border-gray-100">
               <span className="text-gray-600">Repairs Awaiting Collection</span>
               <span className="font-semibold text-gray-900">
-                {data.repairs?.ready_for_collection || 0}
+                {Number(data.repairs?.ready_for_collection) || 0}
               </span>
             </div>
             <div className="flex justify-between items-center pb-3 border-b border-gray-100">
               <span className="text-gray-600">Pending Credit Notes</span>
               <span className="font-semibold text-gray-900">
-                {data.creditNotes?.pending_count || 0}
+                {Number(data.creditNotes?.pending_count) || 0}
               </span>
             </div>
             <div className="text-center text-sm text-gray-500 py-4">
@@ -342,14 +342,14 @@ export default function ReportsPage() {
             <div className="flex justify-between items-center pb-3 border-b border-gray-100">
               <span className="text-gray-600">Creditor Accounts</span>
               <span className="font-semibold text-gray-900">
-                {data.creditors?.total_accounts || 0}
+                {Number(data.creditors?.total_accounts) || 0}
               </span>
             </div>
             <div className="flex justify-between items-center pb-3 border-b border-gray-100">
               <span className="text-gray-600">Outstanding Payables</span>
               <span className="font-semibold text-red-600">
                 R
-                {(data.creditors?.total_outstanding || 0).toLocaleString(
+                {Number(data.creditors?.total_outstanding || 0).toLocaleString(
                   'en-ZA',
                   { minimumFractionDigits: 2 }
                 )}
@@ -359,7 +359,7 @@ export default function ReportsPage() {
               <span className="text-gray-600">Overdue Payables</span>
               <span className="font-semibold text-orange-600">
                 R
-                {(data.creditors?.overdue_amount || 0).toLocaleString('en-ZA', {
+                {Number(data.creditors?.overdue_amount || 0).toLocaleString('en-ZA', {
                   minimumFractionDigits: 2,
                 })}
               </span>
@@ -380,7 +380,7 @@ export default function ReportsPage() {
               <span className="text-gray-600">Current Cash Float</span>
               <span className="font-semibold text-green-600">
                 R
-                {(data.cashControl?.current_float || 0).toLocaleString('en-ZA', {
+                {Number(data.cashControl?.current_float || 0).toLocaleString('en-ZA', {
                   minimumFractionDigits: 2,
                 })}
               </span>
@@ -388,13 +388,13 @@ export default function ReportsPage() {
             <div className="flex justify-between items-center pb-3 border-b border-gray-100">
               <span className="text-gray-600">Pending Cheques</span>
               <span className="font-semibold text-gray-900">
-                {data.cashControl?.pending_cheques || 0}
+                {Number(data.cashControl?.pending_cheques) || 0}
               </span>
             </div>
             <div className="flex justify-between items-center pb-3 border-b border-gray-100">
               <span className="text-gray-600">Cash Returns</span>
               <span className="font-semibold text-gray-900">
-                {data.cashControl?.pending_returns || 0}
+                {Number(data.cashControl?.pending_returns) || 0}
               </span>
             </div>
             <div className="text-center text-sm text-gray-500 py-4">

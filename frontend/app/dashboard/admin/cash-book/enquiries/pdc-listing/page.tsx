@@ -60,7 +60,7 @@ export default function PdcListingPage() {
       await cashBookApi.unpresentedCheques.markPresented(id);
       setSuccess('Cheque marked as presented');
       await fetchData();
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Failed to mark cheque as presented'));
     }
   };

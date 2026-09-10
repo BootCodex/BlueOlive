@@ -29,7 +29,7 @@ export default function JournalEntryForm() {
     queryFn: () => creditorsApi.accounts.list({ page_size: 500 }),
   });
 
-  const { data: entry, isLoading } = useQuery({
+  const { data: _entry, isLoading } = useQuery({
     queryKey: ['journal-entry', entryId],
     queryFn: () => creditorsApi.journals.get(entryId),
     enabled: !isNew,

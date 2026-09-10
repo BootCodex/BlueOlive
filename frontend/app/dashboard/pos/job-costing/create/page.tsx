@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/useAuth';
-import { jobCardsApi, JobCardLineItem } from '@/lib/jobCardsApi';
+import { jobCardsApi } from '@/lib/jobCardsApi';
 import { DebtorPicker } from '@/components/pos/DebtorPicker';
 import { StockItemPicker } from '@/components/pos/StockItemPicker';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,7 +35,7 @@ interface StockItem {
 
 export default function CreateJobCostingPage() {
   const router = useRouter();
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: _authLoading } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -90,7 +90,7 @@ export default function CreateJobCostingPage() {
   };
 
   // Map frontend status to backend status
-  const mapStatusToBackend = (status: string): string => {
+  const _mapStatusToBackend = (status: string): string => {
     switch (status) {
       case 'open': return 'ACTIVE';
       case 'in_progress': return 'ACTIVE';

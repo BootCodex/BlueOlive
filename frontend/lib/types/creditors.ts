@@ -697,8 +697,8 @@ export interface ExpenseCategory {
   updated_at?:        string;
 }
 
-export interface ExpenseCategoryCreateData
-  extends Omit<ExpenseCategory, 'id' | 'transaction_count' | 'total_amount' | 'total_tax' | 'total_mtd' | 'total_ytd' | 'created_at' | 'updated_at'> {}
+export type ExpenseCategoryCreateData =
+  Omit<ExpenseCategory, 'id' | 'transaction_count' | 'total_amount' | 'total_tax' | 'total_mtd' | 'total_ytd' | 'created_at' | 'updated_at'>;
 
 export interface ExpenseCategoryFilters {
   search?:     string;
@@ -768,4 +768,4 @@ export interface Transaction {
   updated_at?:         string;
 }
 
-export interface TransactionCreateData extends Omit<Transaction, 'id' | 'created_at' | 'updated_at'> {}
+export type TransactionCreateData = Omit<Transaction, 'id' | 'created_at' | 'updated_at'>;

@@ -1,7 +1,8 @@
 'use client';
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { apiRequest } from './api';
-import { setTenant, setShops, setCurrentShop, getTenant } from './shopContext';
+import { setTenant, setShops, getTenant } from './shopContext';
+import type { MaybeAxiosError } from '@/lib/types/errors';
 
 export interface Shop {
   id: number;
@@ -126,9 +127,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else {
           setCurrentShop(null);
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Don't crash if shops endpoint fails - user might not have shop access yet
-      console.error('Could not fetch accessible shops:', error?.response?.data || error);
+      console.error('Could not fetch accessible shops:', (error as MaybeAxiosError)?.response?.data || error);
       setAccessibleShops([]);
       setCurrentShop(null);
     }
@@ -177,13 +178,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // Also fetch shops on profile fetch
       await refetchShops();
-    } catch (error: any) {
+    } catch (error: unknown) {
       // 401 is expected when user hasn't logged in - don't log as error
-      if (error?.response?.status === 401) {
+      if ((error as MaybeAxiosError)?.response?.status === 401) {
         setUser(null);
         setCurrentShop(null);
         setAccessibleShops([]);
-      } else if (error?.response?.status === 429) {
+      } else if ((error as MaybeAxiosError)?.response?.status === 429) {
         // Rate limited
         if (isInitialLoad) {
           // On initial load, just accept it as "not logged in" to avoid blocking login
@@ -193,7 +194,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.warn('Rate limited on auth profile fetch - likely due to stale tokens');
         }
         setUser(null);
-      } else if (error?.message === 'Network Error' || !error?.response) {
+      } else if ((error as MaybeAxiosError)?.message === 'Network Error' || !(error as MaybeAxiosError)?.response) {
         // Network error - backend might not be running
         console.warn('Network error connecting to API. Backend may not be running at:', process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8000');
         setUser(null);

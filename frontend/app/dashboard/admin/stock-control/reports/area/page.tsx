@@ -4,11 +4,8 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { 
-  Loader, ArrowLeft, Users, Download, Search,
-  TrendingUp, DollarSign, Percent
+import {  ArrowLeft, Users, Download, Percent
 } from 'lucide-react';
 import Link from 'next/link';
 import { apiRequest } from '@/lib/api';
@@ -36,7 +33,7 @@ export default function AreaSalesmanReportPage() {
   const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
 
   // Fetch sales areas from API
-  const { data: salesAreasData, isLoading: loadingAreas } = useQuery({
+  const { data: salesAreasData, isLoading: _loadingAreas } = useQuery({
     queryKey: ['sales-areas'],
     queryFn: () => apiRequest('/api/v1/debtors/sales-areas/'),
     select: (response) => response.data.results || response.data,
@@ -48,7 +45,7 @@ export default function AreaSalesmanReportPage() {
   const areas = [...new Set(salesAreas.map((a: SalesArea) => a.darea))];
 
   // Build performance data from API areas
-  const performanceData: SalesmanPerformance[] = salesAreas.map((area: SalesArea, index: number) => ({
+  const performanceData: SalesmanPerformance[] = salesAreas.map((area: SalesArea, _index: number) => ({
     id: area.id,
     area: area.darea,
     salesman: area.darea,

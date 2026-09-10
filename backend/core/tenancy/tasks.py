@@ -58,7 +58,8 @@ def setup_tenant_database_async(self, tenant_id):
         migrate_tenant_database(tenant)
 
         tenant.setup_status = "db_ready"
-        tenant.save(update_fields=["setup_status"])
+        tenant.setup_error = ""
+        tenant.save(update_fields=["setup_status", "setup_error"])
         logger.info(f"[CELERY] ✅ Database ready for tenant: {tenant.name}")
         return tenant_id
 
@@ -71,7 +72,8 @@ def setup_tenant_database_async(self, tenant_id):
             self.retry(exc=e, countdown=5 * (2**self.request.retries))
         except self.MaxRetriesExceededError:
             tenant.setup_status = "failed"
-            tenant.save(update_fields=["setup_status"])
+            tenant.setup_error = str(e)
+            tenant.save(update_fields=["setup_status", "setup_error"])
             logger.error(f"[CELERY] Max retries exceeded setting up tenant {tenant_id}")
             return f"Failed to setup tenant {tenant_id} after max retries"
 
@@ -129,7 +131,8 @@ def complete_tenant_signup_async(
             self.retry(countdown=5 * (2**self.request.retries))
         except self.MaxRetriesExceededError:
             tenant.setup_status = "failed"
-            tenant.save(update_fields=["setup_status"])
+            tenant.setup_error = "Database provisioning never completed (timed out waiting for setup_status=db_ready)"
+            tenant.save(update_fields=["setup_status", "setup_error"])
             logger.error(
                 f"[CELERY] Tenant {tenant_id} database never became ready, giving up on signup completion"
             )
@@ -197,7 +200,8 @@ def complete_tenant_signup_async(
             )
 
         tenant.setup_status = "ready"
-        tenant.save(update_fields=["setup_status"])
+        tenant.setup_error = ""
+        tenant.save(update_fields=["setup_status", "setup_error"])
         logger.info(f"[CELERY] ✅ Signup complete for tenant: {tenant.name}")
         return tenant_id
 
@@ -210,7 +214,8 @@ def complete_tenant_signup_async(
             self.retry(exc=e, countdown=5 * (2**self.request.retries))
         except self.MaxRetriesExceededError:
             tenant.setup_status = "failed"
-            tenant.save(update_fields=["setup_status"])
+            tenant.setup_error = str(e)
+            tenant.save(update_fields=["setup_status", "setup_error"])
             logger.error(
                 f"[CELERY] Max retries exceeded completing signup for tenant {tenant_id}"
             )
@@ -289,7 +294,8 @@ def setup_shop_schema_async(self, shop_id):
 
             # Update shop status to ready
             shop.setup_status = "ready"
-            shop.save(update_fields=["setup_status"])
+            shop.setup_error = ""
+            shop.save(update_fields=["setup_status", "setup_error"])
             logger.info(f"[CELERY] ✅ Shop is now ready: {shop.name}")
 
             return f"Shop {shop_id} setup completed successfully"
@@ -299,7 +305,8 @@ def setup_shop_schema_async(self, shop_id):
 
             # Update shop status to failed
             shop.setup_status = "failed"
-            shop.save(update_fields=["setup_status"])
+            shop.setup_error = str(e)
+            shop.save(update_fields=["setup_status", "setup_error"])
 
             # Retry the task with exponential backoff
             raise self.retry(exc=e, countdown=5 * (2**self.request.retries))
@@ -309,7 +316,9 @@ def setup_shop_schema_async(self, shop_id):
         try:
             shop = Shop.objects.get(id=shop_id)
             shop.setup_status = "failed"
-            shop.save(update_fields=["setup_status"])
+            if not shop.setup_error:
+                shop.setup_error = "Max retries exceeded during schema setup"
+            shop.save(update_fields=["setup_status", "setup_error"])
         except Exception:
             logger.error(f"[CELERY] Could not persist failed status for shop {shop_id}")
         return f"Failed to setup shop {shop_id} after max retries"

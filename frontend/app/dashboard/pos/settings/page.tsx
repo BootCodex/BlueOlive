@@ -5,7 +5,8 @@ import { useState, useEffect, useRef } from "react";
 import { Settings, Upload, Image as ImageIcon, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { api } from "@/lib/api";
-import { getCurrentShopId, getCurrentShop, setCurrentShop, Shop } from "@/lib/shopContext";
+import { getCurrentShopId, getCurrentShop, setCurrentShop } from "@/lib/shopContext";
+import type { MaybeAxiosError } from '@/lib/types/errors';
 
 interface ShopSettings {
   id: number;
@@ -111,9 +112,9 @@ export default function POSSettingsPage() {
       }
 
       setMessage({ type: 'success', text: 'Logo uploaded successfully!' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to upload logo:', error);
-      setMessage({ type: 'error', text: error.response?.data?.detail || 'Failed to upload logo' });
+      setMessage({ type: 'error', text: (error as MaybeAxiosError).response?.data?.detail || 'Failed to upload logo' });
       // Revert preview on error
       setLogoPreview(shopSettings.logo);
     } finally {
@@ -130,7 +131,7 @@ export default function POSSettingsPage() {
 
     try {
       // Create an empty FormData to clear the logo
-      const formData = new FormData();
+      const _formData = new FormData();
       // Send empty string to clear the logo
       await api.patch(`/api/shops/${shopId}/`, { logo: '' });
 
@@ -144,7 +145,7 @@ export default function POSSettingsPage() {
       }
 
       setMessage({ type: 'success', text: 'Logo removed successfully!' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to remove logo:', error);
       setMessage({ type: 'error', text: 'Failed to remove logo' });
     } finally {
@@ -192,9 +193,9 @@ export default function POSSettingsPage() {
       }
 
       setMessage({ type: 'success', text: 'Settings saved successfully!' });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to save settings:', error);
-      setMessage({ type: 'error', text: error.response?.data?.detail || 'Failed to save settings' });
+      setMessage({ type: 'error', text: (error as MaybeAxiosError).response?.data?.detail || 'Failed to save settings' });
     } finally {
       setSaving(false);
     }
@@ -233,9 +234,14 @@ export default function POSSettingsPage() {
                 {/* Logo Preview */}
                 <div className="w-32 h-32 border-2 border-dashed border-gray-200 rounded-lg flex items-center justify-center bg-gray-50 overflow-hidden">
                   {logoPreview ? (
-                    <img 
-                      src={logoPreview} 
-                      alt="Shop logo preview" 
+                    // logoPreview is a data: URL while previewing a local file
+                    // (FileReader.readAsDataURL, before upload) as well as a
+                    // real shop.logo URL after load - next/image doesn't
+                    // optimize data: URLs, so a plain <img> is intentional here.
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={logoPreview}
+                      alt="Shop logo preview"
                       className="w-full h-full object-contain"
                     />
                   ) : (

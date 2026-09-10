@@ -1,13 +1,32 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { ArrowLeft, Save, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowLeft, Save, X } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { stockControlApi } from '@/lib/stockControlApi';
+import type { StockTransaction } from '@/lib/types/stockControl';
+import type { MaybeAxiosError } from '@/lib/types/errors';
 
 interface ManufactureItemsProps {
   onBack: () => void;
+}
+
+interface BundleStockItem {
+  stock_code: string;
+  description: string;
+  quantity_on_hand: number;
+}
+
+interface BundleIngredient {
+  quantity: number;
+  ingredient_stock: BundleStockItem;
+}
+
+interface PackBundle {
+  stock_item: BundleStockItem;
+  total_cost: number;
+  ingredients?: BundleIngredient[];
 }
 
 export default function ManufactureItems({ onBack }: ManufactureItemsProps) {
@@ -15,10 +34,8 @@ export default function ManufactureItems({ onBack }: ManufactureItemsProps) {
   const [quantityManufactured, setQuantityManufactured] = useState(1);
   const [dateOfManufacture, setDateOfManufacture] = useState(new Date().toISOString().split('T')[0]);
   const [warnOutOfStock, setWarnOutOfStock] = useState(true);
-  const [bundles, setBundles] = useState<any[]>([]);
-  const [selectedBundle, setSelectedBundle] = useState<any>(null);
+  const [selectedBundle, setSelectedBundle] = useState<PackBundle | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredBundles, setFilteredBundles] = useState<any[]>([]);
   const [showBundlesList, setShowBundlesList] = useState(false);
   const queryClient = useQueryClient();
 
@@ -27,9 +44,10 @@ export default function ManufactureItems({ onBack }: ManufactureItemsProps) {
     queryKey: ['pack-bundles'],
     queryFn: async () => {
       const response = await api.get('/api/stock-control/pack-bundles/');
-      return response.data.results || response.data;
+      return (response.data.results || response.data) as PackBundle[];
     },
   });
+  const bundles = bundlesData || [];
 
   // Create manufacture transaction. A single MANUFACTURE post is enough —
   // the backend (StockTransactionService.create_manufacture_transaction)
@@ -38,7 +56,7 @@ export default function ManufactureItems({ onBack }: ManufactureItemsProps) {
   // post the bundle and each ingredient as separate client-driven
   // transactions to a URL that didn't exist.
   const createManufacture = useMutation({
-    mutationFn: async (data: any) => stockControlApi.transactions.create(data),
+    mutationFn: async (data: Partial<StockTransaction>) => stockControlApi.transactions.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pack-bundles'] });
       queryClient.invalidateQueries({ queryKey: ['stock-items'] });
@@ -48,33 +66,20 @@ export default function ManufactureItems({ onBack }: ManufactureItemsProps) {
       setDateOfManufacture(new Date().toISOString().split('T')[0]);
       onBack();
     },
-    onError: (error: any) => {
-      alert(`Error: ${error.response?.data?.detail || error.message}`);
+    onError: (error: unknown) => {
+      alert(`Error: ${(error as MaybeAxiosError).response?.data?.detail || (error as MaybeAxiosError).message}`);
     },
   });
 
-  useEffect(() => {
-    if (bundlesData) {
-      setBundles(bundlesData);
-    }
-  }, [bundlesData]);
-
-  useEffect(() => {
-    if (searchTerm) {
-      const filtered = bundles.filter(
+  const filteredBundles = searchTerm
+    ? bundles.filter(
         (bundle) =>
           bundle.stock_item.stock_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
           bundle.stock_item.description.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredBundles(filtered);
-      setShowBundlesList(true);
-    } else {
-      setFilteredBundles([]);
-      setShowBundlesList(false);
-    }
-  }, [searchTerm, bundles]);
+      )
+    : [];
 
-  const handleSelectBundle = (bundle: any) => {
+  const handleSelectBundle = (bundle: PackBundle) => {
     setSelectedBundleCode(bundle.stock_item.stock_code);
     setSelectedBundle(bundle);
     setSearchTerm(bundle.stock_item.stock_code);
@@ -94,9 +99,9 @@ export default function ManufactureItems({ onBack }: ManufactureItemsProps) {
 
     try {
       // Check ingredients availability if needed
-      const outOfStockItems = selectedBundle.ingredients
-        .filter((ing: any) => ing.ingredient_stock.quantity_on_hand < ing.quantity * quantityManufactured)
-        .map((ing: any) => ing.ingredient_stock.stock_code);
+      const outOfStockItems = (selectedBundle.ingredients || [])
+        .filter((ing) => ing.ingredient_stock.quantity_on_hand < ing.quantity * quantityManufactured)
+        .map((ing) => ing.ingredient_stock.stock_code);
 
       if (outOfStockItems.length > 0 && warnOutOfStock) {
         const proceed = window.confirm(
@@ -142,7 +147,7 @@ export default function ManufactureItems({ onBack }: ManufactureItemsProps) {
           <input
             type="text"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => { setSearchTerm(e.target.value); setShowBundlesList(!!e.target.value); }}
             placeholder="Search bundles..."
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -203,7 +208,7 @@ export default function ManufactureItems({ onBack }: ManufactureItemsProps) {
                 </tr>
               </thead>
               <tbody>
-                {selectedBundle.ingredients?.map((ing: any) => {
+                {selectedBundle.ingredients?.map((ing: BundleIngredient) => {
                   const required = ing.quantity * quantityManufactured;
                   const available = ing.ingredient_stock.quantity_on_hand;
                   const isAvailable = available >= required;

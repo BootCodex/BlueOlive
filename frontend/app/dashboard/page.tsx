@@ -2,9 +2,7 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import {
-  BarChart,
-  Bar,
+import {
   XAxis,
   YAxis,
   Tooltip,
@@ -16,6 +14,7 @@ import {
   Line,
 } from "recharts";
 import { api } from "@/lib/api";
+import type { MaybeAxiosError } from '@/lib/types/errors';
 
 interface Invoice {
   id: number;
@@ -75,8 +74,8 @@ function DashboardContent() {
       // Test API connectivity
       try {
         await api.get("/api/shops/");
-      } catch (testError: any) {
-        console.warn("API test endpoint failed:", testError.response?.status, testError.message);
+      } catch (testError: unknown) {
+        console.warn("API test endpoint failed:", (testError as MaybeAxiosError).response?.status, (testError as MaybeAxiosError).message);
       }
 
       // Fetch invoices
@@ -87,8 +86,8 @@ function DashboardContent() {
         const invoicesData =
           invoicesResponse.data.results || invoicesResponse.data || [];
         invoices = Array.isArray(invoicesData) ? invoicesData : [];
-      } catch (invoiceError: any) {
-        console.warn("Failed to fetch invoices:", invoiceError.response?.status);
+      } catch (invoiceError: unknown) {
+        console.warn("Failed to fetch invoices:", (invoiceError as MaybeAxiosError).response?.status);
         try {
           const debtorsResponse = await api.get("/api/debtors/", {
             params: { limit: 100 },
@@ -109,8 +108,8 @@ function DashboardContent() {
         const cashSalesData =
           cashSalesResponse.data.results || cashSalesResponse.data || [];
         cashSales = Array.isArray(cashSalesData) ? cashSalesData : [];
-      } catch (cashError: any) {
-        console.warn("Failed to fetch cash sales:", cashError.response?.status);
+      } catch (cashError: unknown) {
+        console.warn("Failed to fetch cash sales:", (cashError as MaybeAxiosError).response?.status);
         try {
           const posResponse = await api.get("/api/pos/", {
             params: { limit: 100 },
@@ -154,7 +153,7 @@ function DashboardContent() {
         totalRevenue,
         pendingInvoices,
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error fetching dashboard data:", err);
       setError(
         "Failed to load dashboard data. Check browser console for API endpoint details."

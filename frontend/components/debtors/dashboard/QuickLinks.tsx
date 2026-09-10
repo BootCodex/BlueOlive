@@ -5,11 +5,9 @@ import { Card } from '@/components/ui/card';
 import {
   FileText,
   Users,
-  TrendingUp,
-  PieChart,
+  TrendingUp,
   CreditCard,
-  BarChart3,
-  Settings,
+  BarChart3,
   FileCheck,
 } from 'lucide-react';
 

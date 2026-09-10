@@ -23,7 +23,7 @@ export default function VarianceReport({ onBack }: VarianceReportProps) {
 
   // Fetch variance items — the dedicated variance-report action already
   // filters to non-zero variance server-side.
-  const { data: varianceItems, isLoading } = useQuery({
+  const { data: varianceItems, isLoading: _isLoading } = useQuery({
     queryKey: ['variance-items', selectedStockTake],
     queryFn: async () => {
       if (!selectedStockTake) return [];

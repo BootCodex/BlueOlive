@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/useAuth';
 import { usePOSAPI } from '@/lib/posApi';
@@ -21,7 +21,7 @@ import { DebtorPicker, StockItemPicker } from '@/components/pos';
 
 export default function CreateQuotationPage() {
   const router = useRouter();
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: _authLoading } = useAuth();
   const posAPI = usePOSAPI(user?.tenant?.slug);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -138,7 +138,7 @@ export default function CreateQuotationPage() {
 
       setSuccess('Quotation created successfully');
       setTimeout(() => router.push('/dashboard/pos/quotes'), 2000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Failed to create quotation'));
     } finally {
       setLoading(false);

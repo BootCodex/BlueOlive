@@ -12,6 +12,7 @@ import { ArrowLeft, Loader2, FileCheck2, Receipt } from 'lucide-react';
 import { DebtorPicker } from '@/components/pos/DebtorPicker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import type { MaybeAxiosError } from '@/lib/types/errors';
 import {
   Select,
   SelectContent,
@@ -69,9 +70,9 @@ export default function QuoteDetail() {
       setError(null);
       const response = await posAPI.getQuotation(quoteId);
       setQuote(response);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error loading quotation:', err);
-      setError(err.message || 'Failed to load quotation');
+      setError((err as MaybeAxiosError).message || 'Failed to load quotation');
     } finally {
       setLoading(false);
     }
@@ -113,9 +114,9 @@ export default function QuoteDetail() {
         setConvertDialogOpen(false);
         await loadQuote();
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error converting quotation:', err);
-      setConvertError(err.message || 'Failed to convert quotation to invoice');
+      setConvertError((err as MaybeAxiosError).message || 'Failed to convert quotation to invoice');
     } finally {
       setConverting(null);
     }
@@ -143,9 +144,9 @@ export default function QuoteDetail() {
         setConvertDialogOpen(false);
         await loadQuote();
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error converting quotation to cash sale:', err);
-      setConvertError(err.message || 'Failed to convert quotation to cash sale');
+      setConvertError((err as MaybeAxiosError).message || 'Failed to convert quotation to cash sale');
     } finally {
       setConverting(null);
     }

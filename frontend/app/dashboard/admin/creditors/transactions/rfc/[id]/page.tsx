@@ -44,7 +44,7 @@ export default function RFCForm() {
     queryFn: () => creditorsApi.accounts.list({ page_size: 500 }),
   });
 
-  const { data: rfc, isLoading } = useQuery({
+  const { data: _rfc, isLoading } = useQuery({
     queryKey: ['rfc', rfcId],
     queryFn: () => creditorsApi.rfc.get(rfcId),
     enabled: !isNew && rfcId !== 'edit',
@@ -57,7 +57,7 @@ export default function RFCForm() {
         rfc_number: `RFC-${Date.now()}`, // Would need proper RFC number generation
         return_date: data.rfc_date,
         status: data.status,
-        line_items: data.items.map((item, index) => ({
+        line_items: data.items.map((item, _index) => ({
           stock_item: 0,
           quantity_returned: item.quantity,
           line_value: item.quantity * item.unit_value,

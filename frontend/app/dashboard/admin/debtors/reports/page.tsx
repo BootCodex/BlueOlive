@@ -1,19 +1,10 @@
 'use client';
 
-import Link from 'next/link';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { api } from '@/lib/api';
+import type { MaybeAxiosError } from '@/lib/types/errors';
 
-import {
-  BarChart3,
-  FileText,
-  TrendingUp,
-  PieChart,
-  Calendar,
-  Users,
-  AlertCircle,
+import {
   Download,
   Filter,
   RotateCcw,
@@ -125,8 +116,8 @@ export default function DebtorsReportsPage() {
         }
       );
       setReportData(response.data);
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to generate report');
+    } catch (err: unknown) {
+      setError((err as MaybeAxiosError).response?.data?.detail || 'Failed to generate report');
     } finally {
       setLoading(false);
     }
@@ -152,7 +143,7 @@ export default function DebtorsReportsPage() {
       link.click();
       link.parentNode?.removeChild(link);
       window.URL.revokeObjectURL(url);
-    } catch (err: any) {
+    } catch {
       setError('Failed to download report');
     }
   };

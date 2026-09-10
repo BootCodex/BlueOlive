@@ -7,6 +7,7 @@
 
 import { api } from './api';
 import { ENDPOINTS } from './api-config';
+import type { MaybeAxiosError } from '@/lib/types/errors';
 import type {
   DebtorAccount,
   DebtorCreateData,
@@ -40,12 +41,13 @@ export const debtorsApi = {
           { params: filters }
         );
         return response.data;
-      } catch (error: any) {
-    // Log the error details for debugging
-    if (error.response) {
-      console.error('API error:', error.response.status, error.response.data);
+      } catch (error: unknown) {
+        // Log the error details for debugging
+        const err = error as MaybeAxiosError;
+        if (err.response) {
+          console.error('API error:', err.response.status, err.response.data);
         } else {
-          console.error('API error:', error.message);
+          console.error('API error:', err.message);
         }
         throw error;
       }

@@ -41,7 +41,7 @@ export default function BatchReceiptPostingForm() {
       if ((response as any).results) {
         setDebtors((response as any).results);
       }
-    } catch (err) {
+    } catch {
       console.error('Failed to load debtors');
     } finally {
       setLoadingDebtors(false);
@@ -134,7 +134,7 @@ export default function BatchReceiptPostingForm() {
         posting_date: new Date().toISOString().split('T')[0],
         receipts: [{ id: '1', debtor_id: 0, debtor_name: '', amount: '', reference: '' }],
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Failed to post batch receipts'));
     } finally {
       setLoading(false);

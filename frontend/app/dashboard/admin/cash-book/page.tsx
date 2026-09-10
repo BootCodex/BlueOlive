@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ArrowRight, TrendingUp, TrendingDown, AlertCircle } from 'lucide-react';
+import { ArrowRight, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import cashBookApi from '@/lib/cashBookApi';
-import { BalanceCard, ReconciliationStatus, TransactionTypeBadge, CategoryBadge } from '@/components/cash-book';
+import { BalanceCard, ReconciliationStatus } from '@/components/cash-book';
 import { CashBookTransaction } from '@/lib/types/cashBook';
 
 interface DashboardData {
@@ -61,7 +61,7 @@ export default function CashBookDashboardPage() {
     setLoading(true);
     try {
       // Fetch multiple data sources in parallel
-      const [incomeRes, expenseRes, transRes, reconcRes, chequesRes] = await Promise.all([
+      const [_incomeRes, _expenseRes, transRes, reconcRes, chequesRes] = await Promise.all([
         cashBookApi.otherIncome.list({ page_size: 1 }).catch(() => ({ results: [] })),
         cashBookApi.otherExpenses.list({ page_size: 1 }).catch(() => ({ results: [] })),
         cashBookApi.transactions.list({ page_size: 5 }).catch(() => ({ results: [] })),
@@ -72,11 +72,11 @@ export default function CashBookDashboardPage() {
       // Calculate totals from recent transactions
       const transactions = transRes.results || [];
       const totalIncome = transactions
-        .filter((t: any) => t.amount > 0)
-        .reduce((sum: number, t: any) => sum + t.amount, 0);
+        .filter((t) => t.amount > 0)
+        .reduce((sum: number, t) => sum + t.amount, 0);
       const totalExpense = transactions
-        .filter((t: any) => t.amount < 0)
-        .reduce((sum: number, t: any) => sum + Math.abs(t.amount), 0);
+        .filter((t) => t.amount < 0)
+        .reduce((sum: number, t) => sum + Math.abs(t.amount), 0);
 
       const lastReconciliation = reconcRes.results?.[0];
       
@@ -84,8 +84,8 @@ export default function CashBookDashboardPage() {
         totalIncome,
         totalExpense,
         netPosition: totalIncome - totalExpense,
-        bankBalance: lastReconciliation?.bank_statement_balance || 0,
-        cashBalance: lastReconciliation?.system_balance || 0,
+        bankBalance: (lastReconciliation?.bank_statement_balance as number | undefined) || 0,
+        cashBalance: (lastReconciliation?.system_balance as number | undefined) || 0,
         outstandingCheques: chequesRes.results?.length || 0,
         reconciliationStatus: lastReconciliation?.variance === 0 ? 'RECONCILED' : 'PENDING',
         recentTransactions: transactions,

@@ -463,7 +463,7 @@ export default function SpecialDealMaintenance({ onBack }: SpecialDealMaintenanc
                 </div>
 
                 <p className="text-xs text-gray-500 md:col-span-2">
-                  Applies to all active items in the department, adjusting each item's own
+                  Applies to all active items in the department, adjusting each item&apos;s own
                   Selling Price 1/2/3 by this amount.
                 </p>
               </>

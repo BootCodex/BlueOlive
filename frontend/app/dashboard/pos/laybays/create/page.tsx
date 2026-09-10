@@ -110,7 +110,7 @@ export default function CreateLaybyePage() {
       ...prev,
       deposit_amount: totalAmount > 0 ? defaultDeposit.toFixed(2) : '',
     }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [totalAmount, depositTouched]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -136,7 +136,7 @@ export default function CreateLaybyePage() {
 
     setLoading(true);
     try {
-      const rental = await posAPI.createLaybye({
+      const _rental = await posAPI.createLaybye({
         laybye_number: formData.laybye_number.trim() || undefined,
         customer_name: formData.customer_name,
         telephone: formData.telephone,
@@ -157,7 +157,7 @@ export default function CreateLaybyePage() {
 
       setSuccess('Laybye created — items reserved into laybye stock');
       setTimeout(() => router.push(`/dashboard/pos/laybays`), 1500);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Failed to create laybye'));
     } finally {
       setLoading(false);

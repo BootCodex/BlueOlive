@@ -15,7 +15,7 @@ await authApi.logout();
 await authApi.getProfile();
 
 // Check if authenticated
-const isAuth = await authApi.isAuthenticated();
+const _isAuth = await authApi.isAuthenticated();
 
 
 // ============================================================
@@ -244,14 +244,14 @@ console.log(response.count);     // Total count
 console.log(response.next);      // URL to next page
 
 // Filtering example
-const filtered = await creditorsApi.accounts.list({
+const _filtered = await creditorsApi.accounts.list({
   search: 'ABC',
   status: 'ACTIVE'
 });
 
 // Error handling
 try {
-  const debtor = await debtorsApi.accounts.get(999);
+  const _debtor = await debtorsApi.accounts.get(999);
 } catch (error) {
   if (error.response?.status === 404) {
     console.error('Debtor not found');
@@ -263,7 +263,7 @@ try {
 }
 
 // Updating record
-const updated = await debtorsApi.accounts.update(123, {
+const _updated = await debtorsApi.accounts.update(123, {
   name: 'New Name',
   status: 'ACTIVE'
 });

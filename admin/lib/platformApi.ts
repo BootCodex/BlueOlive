@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import { ENDPOINTS } from './api-config';
-import { fetchCSRFToken } from './api';
+import { fetchCSRFToken } from './csrf';
 
 /**
  * Platform-owner API client.
@@ -319,4 +319,273 @@ export async function setSuperuserPassword(id: number, password: string) {
     password,
   });
   return response.data;
+}
+
+// ===== Billing (subscription tiers, subscriptions, payments) =====
+
+export interface SubscriptionPlan {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  price: string;
+  setup_fee: string;
+  billing_period_days: 30 | 90 | 365;
+  billing_period_display: string;
+  max_shops: number;
+  max_users: number;
+  max_invoices_per_month: number;
+  features: Record<string, boolean>;
+  is_active: boolean;
+  is_trial: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export type CreateSubscriptionPlanPayload = Partial<
+  Omit<SubscriptionPlan, 'id' | 'billing_period_display' | 'created_at' | 'updated_at'>
+> & { name: string; slug: string; price: string };
+
+export async function fetchSubscriptionPlans() {
+  const response = await platformApi.get(ENDPOINTS.SAAS_ADMIN.SUBSCRIPTION_PLANS);
+  const data = response.data;
+  return (Array.isArray(data) ? data : data.results) as SubscriptionPlan[];
+}
+
+export async function createSubscriptionPlan(payload: CreateSubscriptionPlanPayload) {
+  const response = await platformApi.post(ENDPOINTS.SAAS_ADMIN.SUBSCRIPTION_PLANS, payload);
+  return response.data as SubscriptionPlan;
+}
+
+export async function updateSubscriptionPlan(id: number, payload: Partial<CreateSubscriptionPlanPayload>) {
+  const response = await platformApi.patch(ENDPOINTS.SAAS_ADMIN.SUBSCRIPTION_PLAN_DETAIL(id), payload);
+  return response.data as SubscriptionPlan;
+}
+
+export interface SubscriptionPayment {
+  id: number;
+  subscription: number;
+  amount: string;
+  currency: string;
+  payment_method: string;
+  payment_method_display: string;
+  status: 'PENDING' | 'PROCESSING' | 'SUCCEEDED' | 'FAILED' | 'REFUNDED' | 'VOIDED';
+  status_display: string;
+  gateway_payment_id: string;
+  gateway_reference: string;
+  paid_at: string | null;
+  failed_at: string | null;
+  description: string;
+  invoice_number: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Subscription {
+  id: number;
+  tenant: number;
+  tenant_name: string;
+  plan: SubscriptionPlan;
+  status: 'TRIAL' | 'ACTIVE' | 'PAST_DUE' | 'CANCELLED' | 'EXPIRED' | 'SUSPENDED';
+  status_display: string;
+  start_date: string;
+  end_date: string;
+  trial_end_date: string | null;
+  cancelled_at: string | null;
+  auto_renew: boolean;
+  current_period_start: string | null;
+  current_period_end: string | null;
+  invoices_this_period: number;
+  gateway_customer_id: string;
+  gateway_subscription_id: string;
+  is_active_display: boolean;
+  is_trial_display: boolean;
+  is_expired_display: boolean;
+  days_remaining: number;
+  payments: SubscriptionPayment[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BillingOverview {
+  status_counts: Record<Subscription['status'], number>;
+  mrr: string;
+  revenue_this_month: string;
+  total_subscriptions: number;
+  expiring_within_7_days: number;
+}
+
+export async function fetchBillingOverview() {
+  const response = await platformApi.get(ENDPOINTS.SAAS_ADMIN.SUBSCRIPTION_OVERVIEW);
+  return response.data as BillingOverview;
+}
+
+export async function fetchSubscriptions(params?: { tenant_id?: number; status?: string }) {
+  const response = await platformApi.get(ENDPOINTS.SAAS_ADMIN.SUBSCRIPTIONS, { params });
+  const data = response.data;
+  return (Array.isArray(data) ? data : data.results) as Subscription[];
+}
+
+export interface CreateSubscriptionPayload {
+  tenant: number;
+  plan: number;
+  auto_renew?: boolean;
+}
+
+export async function createSubscription(payload: CreateSubscriptionPayload) {
+  const response = await platformApi.post(ENDPOINTS.SAAS_ADMIN.SUBSCRIPTIONS, payload);
+  return response.data as Subscription;
+}
+
+export async function changeSubscriptionPlan(id: number, planId: number) {
+  const response = await platformApi.post(ENDPOINTS.SAAS_ADMIN.SUBSCRIPTION_CHANGE_PLAN(id), {
+    plan_id: planId,
+  });
+  return response.data as Subscription;
+}
+
+export async function cancelSubscription(id: number, immediately: boolean, reason?: string) {
+  const response = await platformApi.post(ENDPOINTS.SAAS_ADMIN.SUBSCRIPTION_CANCEL(id), {
+    immediately,
+    reason,
+  });
+  return response.data as Subscription;
+}
+
+export async function renewSubscription(id: number) {
+  const response = await platformApi.post(ENDPOINTS.SAAS_ADMIN.SUBSCRIPTION_RENEW(id));
+  return response.data as Subscription;
+}
+
+export async function suspendSubscription(id: number) {
+  const response = await platformApi.post(ENDPOINTS.SAAS_ADMIN.SUBSCRIPTION_SUSPEND(id));
+  return response.data as Subscription;
+}
+
+export async function reactivateSubscription(id: number) {
+  const response = await platformApi.post(ENDPOINTS.SAAS_ADMIN.SUBSCRIPTION_REACTIVATE(id));
+  return response.data as Subscription;
+}
+
+export async function fetchSubscriptionPayments(subscriptionId?: number) {
+  const response = await platformApi.get(ENDPOINTS.SAAS_ADMIN.SUBSCRIPTION_PAYMENTS, {
+    params: subscriptionId ? { subscription_id: subscriptionId } : undefined,
+  });
+  const data = response.data;
+  return (Array.isArray(data) ? data : data.results) as SubscriptionPayment[];
+}
+
+export async function refundSubscriptionPayment(id: number) {
+  const response = await platformApi.post(ENDPOINTS.SAAS_ADMIN.SUBSCRIPTION_PAYMENT_REFUND(id));
+  return response.data as SubscriptionPayment;
+}
+
+// ===== Audit log =====
+
+export const AUDIT_ACTIONS = [
+  'LOGIN',
+  'LOGOUT',
+  'LOGIN_FAILED',
+  'USER_CREATE',
+  'USER_UPDATE',
+  'USER_DELETE',
+  'PERMISSION_CHANGE',
+  'ROLE_CHANGE',
+  'TENANT_ACCESS',
+  'SUPERUSER_IMPERSONATION',
+  'DATA_ACCESS',
+  'PASSWORD_CHANGE',
+  'POS_POSTED',
+  'POS_CANCELLED',
+] as const;
+
+export type AuditAction = (typeof AUDIT_ACTIONS)[number];
+
+export interface AuditLogEntry {
+  id: number;
+  action: AuditAction;
+  action_display: string;
+  user_id: number | null;
+  username: string;
+  tenant_id: number | null;
+  tenant_name: string | null;
+  resource_type: string;
+  resource_id: string;
+  ip_address: string | null;
+  details: Record<string, unknown>;
+  success: boolean;
+  error_message: string;
+  timestamp: string;
+}
+
+export interface AuditLogPage {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: AuditLogEntry[];
+}
+
+export async function fetchAuditLogs(params?: {
+  action?: string;
+  tenant_id?: number;
+  success?: boolean;
+  search?: string;
+  page?: number;
+}) {
+  const response = await platformApi.get(ENDPOINTS.SAAS_ADMIN.AUDIT_LOGS, { params });
+  return response.data as AuditLogPage;
+}
+
+// ===== Provisioning health =====
+
+export interface ProvisioningTenant {
+  id: number;
+  name: string;
+  slug: string;
+  setup_status: 'pending' | 'db_ready' | 'ready' | 'failed';
+  setup_error: string;
+  created_at: string;
+  minutes_since_created: number;
+}
+
+export interface ProvisioningShop {
+  id: number;
+  name: string;
+  tenant_id: number;
+  tenant_name: string;
+  setup_status: 'pending' | 'ready' | 'failed';
+  setup_error: string;
+  created_at: string;
+  minutes_since_created: number;
+}
+
+export interface ProvisioningHealth {
+  tenants: ProvisioningTenant[];
+  shops: ProvisioningShop[];
+}
+
+export async function fetchProvisioningHealth() {
+  const response = await platformApi.get(ENDPOINTS.SAAS_ADMIN.PROVISIONING_HEALTH);
+  return response.data as ProvisioningHealth;
+}
+
+export async function retryTenantProvisioning(id: number) {
+  const response = await platformApi.post(ENDPOINTS.SAAS_ADMIN.RETRY_TENANT_PROVISIONING(id));
+  return response.data as { message: string };
+}
+
+export async function retryShopProvisioning(id: number) {
+  const response = await platformApi.post(ENDPOINTS.SAAS_ADMIN.RETRY_SHOP_PROVISIONING(id));
+  return response.data as { message: string };
+}
+
+// ===== Support login (tenant impersonation) =====
+
+export async function startSupportLogin(tenantId: number, userId: number, reason?: string) {
+  const response = await platformApi.post(ENDPOINTS.SAAS_ADMIN.TENANT_SUPPORT_LOGIN(tenantId), {
+    user_id: userId,
+    reason,
+  });
+  return response.data as { redirect_url: string };
 }

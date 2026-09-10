@@ -18,7 +18,8 @@ import {
 } from 'lucide-react';
 import { signup, login, checkTenantSetupStatus, validateSubdomain, getActiveSubscriptionPlans } from '@/lib/api';
 import { useAuthContext } from '@/lib/AuthContext';
-import { setTenant, setShops, setCurrentShop } from '@/lib/shopContext';
+import { setTenant } from '@/lib/shopContext';
+import type { MaybeAxiosError } from '@/lib/types/errors';
 
 // Signup provisions the tenant's database + admin user in the background
 // (can take a while under load), so we poll rather than assume it's done
@@ -116,7 +117,7 @@ export default function MultiStepSignupForm() {
     error: '',
     suggestions: [],
   });
-  const [plans, setPlans] = useState<any[]>([]);
+  const [plans, setPlans] = useState<Record<string, unknown>[]>([]);
   const [plansLoading, setPlansLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
@@ -133,9 +134,9 @@ export default function MultiStepSignupForm() {
         const data = await getActiveSubscriptionPlans();
         setPlans(data);
         // Set default to first non-trial plan if available
-        const nonTrialPlan = data.find((p: any) => !p.is_trial);
+        const nonTrialPlan = data.find((p) => !p.is_trial);
         if (nonTrialPlan) {
-          setFormData(prev => ({ ...prev, subscriptionPlanId: nonTrialPlan.id.toString() }));
+          setFormData(prev => ({ ...prev, subscriptionPlanId: String(nonTrialPlan.id) }));
         }
       } catch (error) {
         console.error('Failed to fetch plans:', error);
@@ -182,12 +183,12 @@ export default function MultiStepSignupForm() {
           error: '',
           suggestions: result.suggestions || [],
         });
-      } catch (error: any) {
+      } catch (error: unknown) {
         setSubdomainStatus({
           validated: false,
           checking: false,
           available: null,
-          error: error?.response?.data?.detail || 'Unable to validate subdomain',
+          error: (error as MaybeAxiosError)?.response?.data?.detail || 'Unable to validate subdomain',
           suggestions: [],
         });
       }
@@ -409,11 +410,11 @@ export default function MultiStepSignupForm() {
       // "Log In" (see handleLoginNow) rather than silently logging them in
       // and redirecting, so it's unmistakable that their account is ready.
       setReadyToLogin(true);
-    } catch (error: any) {
+    } catch (error: unknown) {
       setSubmitSuccess(false);
       applyServerError(
-        error?.response?.data,
-        error?.response?.data?.message || error?.message || 'Signup failed. Please check your details and try again.'
+        (error as MaybeAxiosError)?.response?.data,
+        (error as MaybeAxiosError)?.response?.data?.message || (error as MaybeAxiosError)?.message || 'Signup failed. Please check your details and try again.'
       );
     } finally {
       setSubmitting(false);
@@ -439,19 +440,19 @@ export default function MultiStepSignupForm() {
       // Refetch user profile
       try {
         await refetch();
-      } catch (e) {
+      } catch {
         console.warn('Refetch failed, proceeding with redirect anyway');
       }
 
       router.push('/dashboard');
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Stay on the "ready" screen and let them retry the button - the
       // account is already provisioned, this was just a login-call hiccup
       // (network blip, etc.), not a reason to send them back to the form.
       const errorMsg =
-        error?.response?.data?.detail ||
-        error?.response?.data?.message ||
-        error?.message ||
+        (error as MaybeAxiosError)?.response?.data?.detail ||
+        (error as MaybeAxiosError)?.response?.data?.message ||
+        (error as MaybeAxiosError)?.message ||
         'Login failed. Please try again.';
       setSubmitError(errorMsg);
     } finally {
@@ -743,7 +744,7 @@ export default function MultiStepSignupForm() {
           <Check className="h-8 w-8 text-green-500" />
         </div>
         <h3 className="text-2xl font-bold text-white mb-2">Account Created!</h3>
-        <p className="text-gray-400 mb-6">This can take a few moments, please don't close this page.</p>
+        <p className="text-gray-400 mb-6">This can take a few moments, please don&apos;t close this page.</p>
         <div className="flex items-center justify-center gap-2">
           <Loader2 className="h-5 w-5 text-indigo-500 animate-spin" />
           <span className="text-gray-400">{setupMessage}</span>

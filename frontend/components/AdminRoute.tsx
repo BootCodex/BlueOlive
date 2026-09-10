@@ -112,7 +112,7 @@ export default function AdminRoute({ children }: AdminRouteProps) {
 
             <div className="p-4 bg-amber-50 rounded-lg border border-amber-200">
               <p className="text-sm text-amber-700">
-                <strong>💡 Tip:</strong> If you're an administrator, make sure you're logged in with an admin account.
+                <strong>💡 Tip:</strong> If you&apos;re an administrator, make sure you&apos;re logged in with an admin account.
               </p>
             </div>
           </div>

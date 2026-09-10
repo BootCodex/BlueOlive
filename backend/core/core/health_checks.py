@@ -5,10 +5,16 @@ Includes /health/, /ready/, and /metrics/ endpoints.
 
 import logging
 
+from apps.saas_admin.auth import PlatformOwnerJWTAuthentication
+from apps.saas_admin.permissions import IsPlatformSuperuser
 from django.db import connections
 from django.db.utils import OperationalError
 from django.http import JsonResponse
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import (
+    api_view,
+    authentication_classes,
+    permission_classes,
+)
 from rest_framework.permissions import AllowAny
 from rest_framework.status import HTTP_200_OK, HTTP_503_SERVICE_UNAVAILABLE
 
@@ -64,7 +70,8 @@ def ready(request):
 
 
 @api_view(["GET"])
-@permission_classes([AllowAny])
+@authentication_classes([PlatformOwnerJWTAuthentication])
+@permission_classes([IsPlatformSuperuser])
 def metrics(request):
     """
     Basic metrics endpoint.
@@ -74,6 +81,14 @@ def metrics(request):
     - Cache status
 
     Note: For advanced metrics, integrate Prometheus/StatsD.
+
+    Restricted to platform superusers (unlike /health/ and /ready/, which
+    stay AllowAny - see module docstring / CLAUDE conversation): this leaks
+    real operational data (DB response times, cache backend status), while
+    health/ready are conventionally hit unauthenticated by load balancers,
+    container orchestrators, and Docker HEALTHCHECK directives that have no
+    way to attach credentials. Locking those down too would need confirming
+    nothing external depends on them being open first.
     """
     db_status = check_database()
 

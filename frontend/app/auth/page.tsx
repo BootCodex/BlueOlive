@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { login, signup, fetchCSRFToken, getTenantShops, getActiveSubscriptionPlans } from '@/lib/api';
+import { login, signup, getActiveSubscriptionPlans } from '@/lib/api';
 import { useAuthContext } from '@/lib/AuthContext';
 import { setTenant, setShops, setCurrentShop } from '@/lib/shopContext';
 import { ArrowLeft, BarChart3, Check } from 'lucide-react';
+import type { MaybeAxiosError } from '@/lib/types/errors';
 
 export default function AuthPage() {
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
@@ -47,9 +48,9 @@ export default function AuthPage() {
         const data = await getActiveSubscriptionPlans();
         setPlans(data);
         // Set default to first non-trial plan if available
-        const nonTrialPlan = data.find((p: any) => !p.is_trial);
+        const nonTrialPlan = data.find((p) => !p.is_trial);
         if (nonTrialPlan) {
-          setSignupData(prev => ({ ...prev, subscriptionPlanId: nonTrialPlan.id.toString() }));
+          setSignupData(prev => ({ ...prev, subscriptionPlanId: String(nonTrialPlan.id) }));
         }
       } catch (error) {
         console.error('Failed to fetch plans:', error);
@@ -105,10 +106,10 @@ export default function AuthPage() {
         await new Promise(resolve => setTimeout(resolve, 500));
         router.push('/dashboard');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       const errorMsg = 
-        error?.response?.data?.detail || 
-        error?.message ||
+        (error as MaybeAxiosError)?.response?.data?.detail || 
+        (error as MaybeAxiosError)?.message ||
         'Login failed. Please check your credentials.';
       setMessage(errorMsg);
       setMessageType('error');
@@ -165,7 +166,7 @@ export default function AuthPage() {
         // Try to refetch user profile, but redirect anyway even if it fails
         try {
           await refetch();
-        } catch (e) {
+        } catch {
           console.warn('Refetch failed, proceeding with redirect anyway');
         }
         
@@ -174,10 +175,10 @@ export default function AuthPage() {
           router.push('/dashboard');
         }, 1500);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       const errorMsg = 
-        error?.response?.data?.detail || 
-        error?.message ||
+        (error as MaybeAxiosError)?.response?.data?.detail || 
+        (error as MaybeAxiosError)?.message ||
         'Signup failed. Please try again.';
       setMessage(errorMsg);
       setMessageType('error');
@@ -280,7 +281,7 @@ export default function AuthPage() {
                     value={loginData.subdomain}
                     onChange={(e) => setLoginData({ ...loginData, subdomain: e.target.value })}
                   />
-                  <p className="mt-1 text-xs text-gray-500">Your company's unique identifier</p>
+                  <p className="mt-1 text-xs text-gray-500">Your company&apos;s unique identifier</p>
                 </div>
 
                 <div>
@@ -490,7 +491,7 @@ export default function AuthPage() {
                           </div>
                           {signupData.subscriptionPlanId === plan.id.toString() && (
                             <div className="mt-2 flex items-center gap-1 text-xs text-indigo-600">
-                              <Check className="h-3 w-3" /> Selected - You'll start with a 14-day free trial
+                              <Check className="h-3 w-3" /> Selected - You&apos;ll start with a 14-day free trial
                             </div>
                           )}
                         </div>
@@ -498,7 +499,7 @@ export default function AuthPage() {
                     </div>
                   )}
                   <p className="text-xs text-gray-500 mt-2">
-                    You'll start with a 14-day free trial. Payment will be required after the trial ends.
+                    You&apos;ll start with a 14-day free trial. Payment will be required after the trial ends.
                   </p>
                 </div>
 
@@ -511,7 +512,7 @@ export default function AuthPage() {
                 </button>
 
                 <p className="text-xs text-gray-500 text-center mt-4">
-                  You'll be automatically logged in and taken to your dashboard after account creation.
+                  You&apos;ll be automatically logged in and taken to your dashboard after account creation.
                   Your subscription will be activated based on the plan you selected.
                 </p>
 

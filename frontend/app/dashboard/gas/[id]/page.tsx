@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AlertCircle, AlertTriangle, Loader2 } from 'lucide-react';
+import type { MaybeAxiosError } from '@/lib/types/errors';
 
 const RECONCILIATION_OPTIONS: { value: ReconciliationState; label: string; note: string }[] = [
   { value: 'REFUNDED', label: 'Refunded', note: 'Cylinder returned in good condition — deposit paid back.' },
@@ -64,8 +65,8 @@ export default function GasDetailPage() {
           selectedState === 'BILLED_FOR_REPLACEMENT' ? Number(replacementPrice) : undefined,
       });
       setRental(updated);
-    } catch (err: any) {
-      if (err?.response?.status === 403) {
+    } catch (err: unknown) {
+      if ((err as MaybeAxiosError)?.response?.status === 403) {
         setError(
           "You don't have permission to write off or dispute a deposit — this requires an Accountant or Admin role."
         );

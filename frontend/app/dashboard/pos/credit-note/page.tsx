@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/lib/useAuth';
-import { usePOSAPI } from '@/lib/posApi';
+import { usePOSAPI, type TransactionResponse } from '@/lib/posApi';
 import Link from 'next/link';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -21,11 +21,23 @@ import {
   AlertCircle,
 } from 'lucide-react';
 
+interface CreditNoteRow {
+  id: string | number;
+  reference: string;
+  customer: string;
+  debtor_account: string;
+  original_sale_number: string;
+  amount: number;
+  refund_type: string;
+  date: string;
+  is_posted: boolean;
+}
+
 export default function CreditNotesPage() {
   const { user, isLoading: authLoading } = useAuth();
   const posAPI = usePOSAPI(user?.tenant?.slug);
   const posAPIRef = useRef(posAPI);
-  const [creditNotes, setCreditNotes] = useState<any[]>([]);
+  const [creditNotes, setCreditNotes] = useState<CreditNoteRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -44,17 +56,17 @@ export default function CreditNotesPage() {
         });
         if (cancelled) return;
 
-        const raw: any[] = Array.isArray(response) ? response : (response as any).results ?? [];
+        const raw: TransactionResponse[] = Array.isArray(response) ? response : (response.results ?? []);
         setCreditNotes(
-          raw.map((cn: any) => ({
+          raw.map((cn: TransactionResponse) => ({
             id: cn.id,
-            reference: cn.credit_number ?? String(cn.id),
-            customer: cn.customer_name || 'Unknown',
-            debtor_account: cn.debtor_account ?? '',
-            original_sale_number: cn.original_sale_number ?? '',
+            reference: cn.credit_number ? String(cn.credit_number) : String(cn.id),
+            customer: cn.customer_name ? String(cn.customer_name) : 'Unknown',
+            debtor_account: cn.debtor_account ? String(cn.debtor_account) : '',
+            original_sale_number: cn.original_sale_number ? String(cn.original_sale_number) : '',
             amount: Number(cn.total_amount ?? 0),
-            refund_type: cn.refund_type_display ?? cn.refund_type ?? 'CASH',
-            date: cn.credit_date ?? '',
+            refund_type: cn.refund_type_display ? String(cn.refund_type_display) : cn.refund_type ? String(cn.refund_type) : 'CASH',
+            date: cn.credit_date ? String(cn.credit_date) : '',
             is_posted: !!cn.is_posted,
           }))
         );

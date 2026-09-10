@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Plus, AlertCircle, CheckCircle2, Trash2 } from 'lucide-react';
 import cashBookApi from '@/lib/cashBookApi';
 import { ExpenseCategory, OtherExpenseTransaction } from '@/lib/types/cashBook';
-import { TransactionTypeBadge, BalanceCard } from '@/components/cash-book';
+import { BalanceCard } from '@/components/cash-book';
 
 interface OtherExpenseEntry extends OtherExpenseTransaction {
   vat_rate?: number;
@@ -152,7 +152,7 @@ export default function OtherExpensesEntryPage() {
     try {
       setSuccess('Transaction deleted successfully!');
       await fetchData();
-    } catch (err) {
+    } catch {
       setError('Failed to delete transaction');
     } finally {
       setLoading(false);
@@ -241,7 +241,7 @@ export default function OtherExpensesEntryPage() {
                     <option value={0}>Select Category</option>
                     {categories.filter(c => c.is_active).map(cat => (
                       <option key={cat.id} value={cat.id || 0}>
-                        {cat.code} - {cat.name}
+                        {String(cat.code)} - {String(cat.name)}
                       </option>
                     ))}
                   </select>
@@ -431,7 +431,7 @@ export default function OtherExpensesEntryPage() {
                     </td>
                     <td className="px-6 py-3 text-sm text-gray-900">{trans.description}</td>
                     <td className="px-6 py-3 text-sm text-gray-600">
-                      {categories.find(c => c.id === trans.expense_category_id)?.code}
+                      {String(categories.find(c => c.id === trans.expense_category_id)?.code ?? '')}
                     </td>
                     <td className="px-6 py-3 text-sm text-right font-medium text-gray-900">
                       R{(trans.amount || 0).toFixed(2)}

@@ -54,7 +54,7 @@ export default function TrialBalanceReportPage() {
         </Link>
         <div>
           <h1 className="text-3xl font-bold">Trial Balance</h1>
-          <p className="text-gray-600 mt-1">Every account's balance as of a chosen period</p>
+          <p className="text-gray-600 mt-1">Every account&apos;s balance as of a chosen period</p>
         </div>
       </div>
 

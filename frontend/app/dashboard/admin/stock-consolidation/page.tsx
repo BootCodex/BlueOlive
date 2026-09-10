@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { stockControlApi } from '@/lib/stockControlApi';
 import { getStockItems } from '@/lib/stockApi';
+import type { StockItem } from '@/lib/types/stockControl';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -65,7 +66,7 @@ export default function StockConsolidationPage() {
     notes: '',
   });
   const [newItem, setNewItem] = useState({ stock_code: '', quantity_requested: 0 });
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<StockItem[]>([]);
   const [hqBranchCode, setHqBranchCode] = useState('');
   const [consolidatedSearch, setConsolidatedSearch] = useState('');
 
@@ -79,7 +80,7 @@ export default function StockConsolidationPage() {
     queryFn: () => stockControlApi.branches.list(),
   });
 
-  const hqBranches = (branches?.results || []).filter((b: any) => b.branch_type === 'HQ');
+  const hqBranches = (branches?.results || []).filter((b) => b.branch_type === 'HQ');
 
   const { data: consolidatedStock, isLoading: isLoadingConsolidated } = useQuery({
     queryKey: ['consolidated-stock', hqBranchCode, consolidatedSearch],
@@ -201,7 +202,7 @@ export default function StockConsolidationPage() {
   const handleSearchStock = (value: string) => {
     setNewItem((prev) => ({ ...prev, stock_code: value }));
     if (value.length >= 2 && stockItems) {
-      const filtered = stockItems.results.filter((item: any) =>
+      const filtered = stockItems.results.filter((item) =>
         item.stock_code.toLowerCase().includes(value.toLowerCase()) ||
         item.description.toLowerCase().includes(value.toLowerCase())
       );
@@ -287,7 +288,7 @@ export default function StockConsolidationPage() {
         ) : filteredTransfers.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             <Package className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-            <p>No transfers found. Click "New Transfer" to create one.</p>
+            <p>No transfers found. Click &quot;New Transfer&quot; to create one.</p>
           </div>
         ) : (
           <Table>
@@ -343,7 +344,7 @@ export default function StockConsolidationPage() {
               <SelectValue placeholder="Select HQ branch" />
             </SelectTrigger>
             <SelectContent>
-              {hqBranches.map((b: any) => (
+              {hqBranches.map((b) => (
                 <SelectItem key={b.branch_code} value={b.branch_code}>
                   {b.branch_name}
                 </SelectItem>
@@ -430,7 +431,7 @@ export default function StockConsolidationPage() {
                   <SelectValue placeholder="Select source branch" />
                 </SelectTrigger>
                 <SelectContent>
-                  {branches?.results?.map((b: any) => (
+                  {branches?.results?.map((b) => (
                     <SelectItem key={b.branch_code} value={b.branch_code}>
                       {b.branch_name}
                     </SelectItem>
@@ -448,7 +449,7 @@ export default function StockConsolidationPage() {
                   <SelectValue placeholder="Select destination branch" />
                 </SelectTrigger>
                 <SelectContent>
-                  {branches?.results?.map((b: any) => (
+                  {branches?.results?.map((b) => (
                     <SelectItem key={b.branch_code} value={b.branch_code}>
                       {b.branch_name}
                     </SelectItem>
@@ -502,7 +503,7 @@ export default function StockConsolidationPage() {
                   />
                   {searchResults.length > 0 && (
                     <div className="absolute z-10 w-full mt-1 border rounded-lg divide-y bg-white shadow-lg max-h-40 overflow-y-auto">
-                      {searchResults.map((item: any) => (
+                      {searchResults.map((item) => (
                         <button
                           key={item.stock_code}
                           onClick={() => {
@@ -552,7 +553,7 @@ export default function StockConsolidationPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {selectedTransferDetail.items.map((item: any) => (
+                  {selectedTransferDetail.items.map((item) => (
                     <TableRow key={item.id}>
                       <TableCell className="font-medium">{item.stock_item}</TableCell>
                       <TableCell>{item.stock_item_detail?.description}</TableCell>

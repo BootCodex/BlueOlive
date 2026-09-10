@@ -21,7 +21,7 @@ interface ErrorFallbackProps {
   resetError?: () => void;
 }
 
-const DefaultErrorFallback = ({ error, resetError }: ErrorFallbackProps) => (
+const _DefaultErrorFallback = ({ error, resetError }: ErrorFallbackProps) => (
   <div className="flex items-center justify-center min-h-[200px] p-6">
     <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
       <h3 className="text-lg font-bold text-red-900 mb-2">Error Loading Component</h3>
@@ -54,7 +54,7 @@ export function createDynamicImport<T extends ComponentType<any>>(
     loading = <DefaultLoading />, 
     errorFallback,
     ssr = false,
-    prefetch = false 
+    prefetch: _prefetch = false
   } = options || {};
 
   return dynamic(importFunc, {

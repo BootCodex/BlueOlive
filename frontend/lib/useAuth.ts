@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
 import { apiRequest } from './api';
+import type { MaybeAxiosError } from '@/lib/types/errors';
 
 export interface Tenant {
   id: number;
@@ -39,9 +40,9 @@ export function useAuth(): UseAuthReturn {
       setIsLoading(true);
       const response = await apiRequest('/api/v1/users/auth/profile/');
       setUser(response.data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       // 401 is expected when user hasn't logged in - don't log as error
-      if (error?.response?.status === 401) {
+      if ((error as MaybeAxiosError)?.response?.status === 401) {
         setUser(null);
       } else {
         console.error('Failed to fetch user profile:', error);

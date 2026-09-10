@@ -18,6 +18,8 @@
 
 import { api } from './api';
 import { ENDPOINTS } from './api-config';
+import type { MaybeAxiosError } from '@/lib/types/errors';
+import type { JsonValue } from '@/lib/types/json';
 
 export interface LineItem {
   // Primary field names (backend compatible)
@@ -251,7 +253,11 @@ export interface TransactionResponse {
   number?: string;
   status?: string;
   created_at?: string;
-  [key: string]: any;
+  // A real union (not `unknown`) for the remaining, per-document-type
+  // fields (return_number, customer_name, total_amount, etc.) - `unknown`
+  // here would make every `field ?? fallback` / `field?.x` read on those
+  // collapse to the near-useless type `{}` instead of narrowing normally.
+  [key: string]: JsonValue;
 }
 
 export class POSTransactionAPI {
@@ -261,7 +267,7 @@ export class POSTransactionAPI {
   private async request<T>(
     method: string,
     endpoint: string,
-    data?: any
+    data?: unknown
   ): Promise<T> {
     try {
       console.log(`\n=== POS API REQUEST ===`);
@@ -298,20 +304,21 @@ export class POSTransactionAPI {
       console.log('Response status:', response.status);
       console.log('Response data:', response.data);
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as MaybeAxiosError;
       console.error(
         `=== POS API ERROR === ${method} ${endpoint} -> ` +
-        `status=${error.response?.status ?? 'n/a'} ` +
-        `data=${JSON.stringify(error.response?.data) ?? 'n/a'} ` +
-        `message=${error.message}`
+        `status=${err.response?.status ?? 'n/a'} ` +
+        `data=${JSON.stringify(err.response?.data) ?? 'n/a'} ` +
+        `message=${err.message}`
       );
 
-      if (error.response?.data?.detail) {
-        throw new Error(error.response.data.detail);
+      if (err.response?.data?.detail) {
+        throw new Error(err.response.data.detail);
       }
-      if (error.response?.data) {
+      if (err.response?.data) {
         // Format validation errors nicely
-        const errors = error.response.data;
+        const errors = err.response.data;
         console.error('Full error data:', JSON.stringify(errors, null, 2));
         if (typeof errors === 'object') {
           // Handle nested serializer errors (like {lines: [{...}]})
@@ -463,7 +470,7 @@ export class POSTransactionAPI {
   /**
    * Search debtors by name or account number
    */
-  async searchDebtors(query: string): Promise<{ results: any[]; count: number }> {
+  async searchDebtors(query: string): Promise<{ results: Record<string, unknown>[]; count: number }> {
     return this.request('GET', `${ENDPOINTS.DEBTORS.ACCOUNTS}?search=${encodeURIComponent(query)}&limit=20`);
   }
 
@@ -476,8 +483,8 @@ export class POSTransactionAPI {
     query: string,
     limit = 20,
     offset = 0
-  ): Promise<{ results: any[]; count: number; hasMore: boolean }> {
-    const data = await this.request<{ results: any[]; count: number; has_more: boolean }>(
+  ): Promise<{ results: Record<string, unknown>[]; count: number; hasMore: boolean }> {
+    const data = await this.request<{ results: Record<string, unknown>[]; count: number; has_more: boolean }>(
       'GET',
       `${ENDPOINTS.DEBTORS.ACCOUNTS}lookup/?search=${encodeURIComponent(query)}&limit=${limit}&offset=${offset}`
     );
@@ -491,7 +498,7 @@ export class POSTransactionAPI {
   /**
    * Search stock items by code or description
    */
-  async searchStock(query: string): Promise<{ results: any[]; count: number }> {
+  async searchStock(query: string): Promise<{ results: Record<string, unknown>[]; count: number }> {
     return this.request('GET', `${ENDPOINTS.STOCK_CONTROL.STOCK_ITEMS}?search=${encodeURIComponent(query)}&limit=20`);
   }
 
@@ -739,7 +746,7 @@ export class POSTransactionAPI {
    * Convert laybye to invoice
    */
   async convertLaybyeToInvoice(laybyeId: string | number, debtorId?: number, debtorAccountNumber?: string): Promise<TransactionResponse> {
-    const data: any = {};
+    const data: Record<string, unknown> = {};
     if (debtorId) {
       data.debtor_id = debtorId;
     }
@@ -811,7 +818,7 @@ export class POSTransactionAPI {
   }
 
   async convertQuotationToInvoice(quotationId: string | number, debtorId?: number, debtorAccountNumber?: string): Promise<TransactionResponse> {
-    const data: any = {};
+    const data: Record<string, unknown> = {};
     if (debtorId) {
       data.debtor_id = debtorId;
     }
@@ -1046,7 +1053,7 @@ export class POSTransactionAPI {
   async getTransactionSummary(filters?: {
     from_date?: string;
     to_date?: string;
-  }): Promise<any> {
+  }): Promise<Record<string, unknown>> {
     let endpoint = ENDPOINTS.POS.TRANSACTION_QUERIES;
     if (filters) {
       const params = new URLSearchParams();
@@ -1101,7 +1108,7 @@ export class POSTransactionAPI {
     customer_name?: string;
     date_from?: string;
     date_to?: string;
-  }): Promise<{ query_type: string; results_count: number; results: any[] }> {
+  }): Promise<{ query_type: string; results_count: number; results: Record<string, unknown>[] }> {
     return this.request('POST', `${ENDPOINTS.POS.TRANSACTION_QUERIES}search/`, params);
   }
 
@@ -1184,7 +1191,7 @@ export class POSTransactionAPI {
     date?: string;
     cashier?: string | number;
     station_number?: string | number;
-  }): Promise<any> {
+  }): Promise<Record<string, unknown>> {
     let endpoint = `${ENDPOINTS.POS.CASH_CONTROL}daily_summary/`;
     if (filters) {
       const params = new URLSearchParams();
@@ -1232,7 +1239,7 @@ let posAPIInstance: POSTransactionAPI | null = null;
  * @param tenantSlug - Optional tenant slug to set context
  * @returns POSTransactionAPI instance
  */
-export const usePOSAPI = (tenantSlug?: string): POSTransactionAPI => {
+export const usePOSAPI = (_tenantSlug?: string): POSTransactionAPI => {
   if (!posAPIInstance) {
     posAPIInstance = new POSTransactionAPI();
   }

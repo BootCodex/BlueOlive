@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { ExpenseCategory, useCreditorsAPI } from '@/lib/creditorsApi';
 import ExpenseCategoryForm from './ExpenseCategoryForm';
+import type { MaybeAxiosError } from '@/lib/types/errors';
 
 export default function ExpenseCategoryMaintenance() {
   const api = useCreditorsAPI();
@@ -33,7 +34,7 @@ export default function ExpenseCategoryMaintenance() {
       const categoriesArray = (data as any).results ? (data as any).results : (Array.isArray(data) ? data : []);
       console.log('Extracted categories array:', categoriesArray);
       setCategories(categoriesArray);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to load categories:', err);
       setError('Failed to load expense categories');
       setCategories([]);
@@ -49,9 +50,9 @@ export default function ExpenseCategoryMaintenance() {
       await api.deleteExpenseCategory(id);
       setCategories(categories.filter(c => c.id !== id));
       alert('Expense category deleted successfully');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to delete category:', err);
-      alert(`Failed to delete: ${err.message}`);
+      alert(`Failed to delete: ${(err as MaybeAxiosError).message}`);
     }
   };
 

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Search, Download, AlertCircle } from 'lucide-react';
 import cashBookApi from '@/lib/cashBookApi';
-import { BankingAccountEnquiry, CashBookTransaction } from '@/lib/types/cashBook';
+import { BankingAccountEnquiry } from '@/lib/types/cashBook';
 import { BalanceCard, ReconciliationStatus, TransactionTypeBadge } from '@/components/cash-book';
 
 // The real per-transaction figures this enquiry needs (running_balance_bank,

@@ -76,7 +76,7 @@ export default function RFCForm({ onComplete }: RFCFormProps) {
       }
 
       // Note: In production, this would send to an RFC endpoint
-      const payload = {
+      const _payload = {
         supplier: formData.supplier,
         rfc_type: formData.rfc_type,
         return_date: formData.return_date,

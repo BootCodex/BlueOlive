@@ -202,6 +202,130 @@ class TenantTokenView(APIView):
             raise AuthenticationFailed(f"Login failed: {str(e)}")
 
 
+class SupportLoginExchangeView(APIView):
+    """
+    POST /api/v1/users/auth/support-login/exchange/
+    { "code": "..." }
+
+    Redeems a one-time code minted by the platform-owner admin app
+    (apps.saas_admin.impersonation_views.support_login) for a real tenant
+    session, exactly as TenantTokenView would after a password login - same
+    cookies, same claims, so nothing downstream needs to know the session
+    started via support login rather than a password.
+
+    Deliberately AllowAny: the tenant frontend calls this from its own
+    origin with no existing session. Security lives in the code itself -
+    256 bits of entropy, single-use, 60s TTL (tenancy/support_login.py) -
+    not in an auth check here, which is why this is throttled the same as a
+    real login attempt.
+    """
+
+    permission_classes = [AllowAny]
+    throttle_classes = [LoginThrottle]
+
+    @method_decorator(csrf_exempt)
+    def post(self, request):
+        from tenancy.support_login import consume_support_login_code
+        from tenancy.utils import register_tenant_connection
+
+        code = request.data.get("code")
+        if not code:
+            return Response(
+                {"detail": "Missing code"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        payload = consume_support_login_code(code)
+        if not payload:
+            return Response(
+                {"detail": "This support login link is invalid or has expired"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            tenant = Tenant.objects.get(id=payload["tenant_id"], is_active=True)
+        except Tenant.DoesNotExist:
+            return Response(
+                {"detail": "Tenant not found or inactive"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        register_tenant_connection(tenant)
+        set_current_tenant(tenant)
+
+        try:
+            user = ShopUser.objects.using(tenant.db_alias).get(
+                id=payload["user_id"], tenant_id=tenant.id, is_active=True
+            )
+        except ShopUser.DoesNotExist:
+            return Response(
+                {"detail": "User not found or inactive"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        refresh = RefreshToken()
+        refresh["user_id"] = user.id
+        refresh["username"] = user.username
+        refresh["email"] = getattr(user, "email", "")
+        refresh["tenant_id"] = tenant.id
+        refresh["tenant_slug"] = tenant.slug
+
+        access_token = str(refresh.access_token)
+        refresh_token = str(refresh)
+
+        response = Response(
+            {
+                "user": {
+                    "id": user.id,
+                    "username": user.username,
+                    "role": getattr(user, "role", "USER"),
+                },
+                "tenant_name": tenant.name,
+                "support_superuser": payload.get("superuser_username", ""),
+            }
+        )
+
+        is_secure = not settings.DEBUG
+        samesite = "Lax" if settings.DEBUG else "None"
+
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            max_age=int(settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"].total_seconds()),
+            secure=is_secure,
+            httponly=True,
+            samesite=samesite,
+            path="/",
+        )
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            max_age=int(settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"].total_seconds()),
+            secure=is_secure,
+            httponly=True,
+            samesite=samesite,
+            path="/",
+        )
+        # Non-httpOnly marker so the tenant frontend can render a "you are
+        # in a support session" banner - deliberately not a source of trust
+        # for anything server-side, just a client-side display hint.
+        response.set_cookie(
+            key="support_session_username",
+            value=payload.get("superuser_username", "support"),
+            max_age=int(settings.SIMPLE_JWT["ACCESS_TOKEN_LIFETIME"].total_seconds()),
+            secure=is_secure,
+            httponly=False,
+            samesite=samesite,
+            path="/",
+        )
+
+        logger.info(
+            f"Support login: superuser={payload.get('superuser_username')} "
+            f"-> tenant={tenant.slug} user={user.username}"
+        )
+
+        return response
+
+
 class CookieTokenRefreshView(TokenRefreshView):
     """
     Custom token refresh view that reads refresh token from httpOnly cookie

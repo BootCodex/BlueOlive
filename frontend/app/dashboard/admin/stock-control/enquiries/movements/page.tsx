@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { 
-  Loader, Search, ArrowLeft, ArrowDown, ArrowUp, 
+  Loader, ArrowLeft, ArrowDown, ArrowUp, 
   Package, Filter, Download, Calendar
 } from 'lucide-react';
 import Link from 'next/link';
@@ -23,7 +23,7 @@ export default function MovementsPage() {
     date_to: '',
   });
 
-  const { data: stockItems } = useQuery({
+  const { data: _stockItems } = useQuery({
     queryKey: ['stock-items-minimal'],
     queryFn: () => getStockItems({ page_size: 100 }),
     staleTime: 5 * 60 * 1000,

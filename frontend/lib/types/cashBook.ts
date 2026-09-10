@@ -14,7 +14,7 @@ export interface IncomeCategory {
   is_active: boolean;
   created_at?: string;
   updated_at?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface ExpenseCategory {
@@ -26,7 +26,7 @@ export interface ExpenseCategory {
   is_active: boolean;
   created_at?: string;
   updated_at?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // ============ TRANSACTIONS ============
@@ -40,7 +40,7 @@ export interface CashBookTransaction {
   notes?: string;
   created_at?: string;
   updated_at?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface OtherIncomeTransaction extends CashBookTransaction {
@@ -87,7 +87,7 @@ export interface BankDeposit {
   depositing_entity?: string;
   created_at?: string;
   updated_at?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface BankWithdrawal {
@@ -99,7 +99,7 @@ export interface BankWithdrawal {
   withdrawing_entity?: string;
   created_at?: string;
   updated_at?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface BankTransfer {
@@ -112,7 +112,7 @@ export interface BankTransfer {
   notes?: string;
   created_at?: string;
   updated_at?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface BankCharge {
@@ -123,7 +123,7 @@ export interface BankCharge {
   reference?: string;
   created_at?: string;
   updated_at?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface InterestReceived {
@@ -134,7 +134,7 @@ export interface InterestReceived {
   reference?: string;
   created_at?: string;
   updated_at?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // ============ BANK RECONCILIATION ============
@@ -171,7 +171,7 @@ export interface ReconciliationItem {
   description: string;
   amount: number;
   status: 'RECONCILED' | 'OUTSTANDING' | 'CANCELLED';
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // ============ CASH MANAGEMENT ============
@@ -184,7 +184,7 @@ export interface CashFloat {
   updated_by?: string;
   created_at?: string;
   updated_at?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface UnpresentedCheque {
@@ -197,7 +197,7 @@ export interface UnpresentedCheque {
   bank_account?: string;
   created_at?: string;
   updated_at?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // ============ ANALYSIS & REPORTING ============
@@ -211,7 +211,7 @@ export interface CategoryBalance {
   closing_balance: number;
   period_start: string;
   period_end: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface MonthlyAnalysis {
@@ -221,7 +221,7 @@ export interface MonthlyAnalysis {
   category_name: string;
   total_amount: number;
   transaction_count: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface BankingAccountEnquiry {
@@ -237,7 +237,7 @@ export interface BankingAccountEnquiry {
   period_end: string;
   reconciliation_status: 'RECONCILED' | 'PENDING' | 'VARIANCE';
   variance_amount?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // ============ FILTERS & RESPONSES ============
@@ -268,7 +268,7 @@ export interface CashBookSummary {
   total_outstanding_cheques: number;
   reconciliation_status: 'RECONCILED' | 'PENDING' | 'VARIANCE';
   last_reconciliation_date?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // ============ VALIDATION TYPES ============

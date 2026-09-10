@@ -17,7 +17,6 @@ import {
 // Import components directly
 import { OrderStatusBadge } from '@/components/purchase-orders/common/OrderStatusBadge';
 import { OrderSummaryCard } from '@/components/purchase-orders/common/OrderSummaryCard';
-import { PurchaseOrderWizard } from '@/components/purchase-orders/transactions/PurchaseOrderWizard';
 import purchaseOrdersApi from '@/lib/purchaseOrdersApi';
 import type { PurchaseOrder } from '@/lib/types/purchaseOrders';
 

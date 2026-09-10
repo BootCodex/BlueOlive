@@ -121,7 +121,7 @@ export default function CreateCreditNotePage() {
 
       setSuccess(true);
       setTimeout(() => router.push('/dashboard/pos/credit-note'), 2000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Failed to create credit note'));
     } finally {
       setLoading(false);

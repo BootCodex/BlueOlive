@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ArrowLeft, Loader2, CircleDollarSign, Ban } from 'lucide-react';
+import type { MaybeAxiosError } from '@/lib/types/errors';
 import {
   Dialog,
   DialogContent,
@@ -19,7 +20,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-const CLOSED_STATUSES = ['COMPLETED', 'CANCELLED', 'CONVERTED_TO_INVOICE', 'EXPIRED'];
+const _CLOSED_STATUSES = ['COMPLETED', 'CANCELLED', 'CONVERTED_TO_INVOICE', 'EXPIRED'];
 
 export default function LaybyeDetail() {
   const { user, isLoading: authLoading } = useAuth();
@@ -54,9 +55,9 @@ export default function LaybyeDetail() {
       setError(null);
       const response = await posAPI.getLaybye(laybyeId);
       setLaybye(response);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error loading laybye:', err);
-      setError(err.message || 'Failed to load laybye');
+      setError((err as MaybeAxiosError).message || 'Failed to load laybye');
     } finally {
       setLoading(false);
     }
@@ -92,9 +93,9 @@ export default function LaybyeDetail() {
       } else {
         await loadLaybye();
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error recording laybye payment:', err);
-      setPaymentError(err.message || 'Failed to record payment');
+      setPaymentError((err as MaybeAxiosError).message || 'Failed to record payment');
     } finally {
       setRecordingPayment(false);
     }
@@ -115,9 +116,9 @@ export default function LaybyeDetail() {
       await posAPI.cancelLaybye(laybyeId, retention);
       setCancelDialogOpen(false);
       await loadLaybye();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error cancelling laybye:', err);
-      setCancelError(err.message || 'Failed to cancel laybye');
+      setCancelError((err as MaybeAxiosError).message || 'Failed to cancel laybye');
     } finally {
       setCancelling(false);
     }
@@ -319,7 +320,7 @@ export default function LaybyeDetail() {
               </div>
             )}
             <p className="text-xs text-slate-400 mt-3">
-              Deposit of R{Number(laybye.deposit_amount || 0).toFixed(2)} was recorded at creation and isn't listed as a separate payment here.
+              Deposit of R{Number(laybye.deposit_amount || 0).toFixed(2)} was recorded at creation and isn&apos;t listed as a separate payment here.
             </p>
           </CardContent>
         </Card>

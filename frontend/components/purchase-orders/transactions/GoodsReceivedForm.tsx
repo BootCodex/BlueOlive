@@ -48,7 +48,7 @@ export function GoodsReceivedForm({ orderId, onComplete, onCancel }: GoodsReceiv
             quantity_received: 0,
           }))
       );
-    } catch (err) {
+    } catch {
       setError('Failed to load order');
     }
   };
@@ -98,7 +98,7 @@ export function GoodsReceivedForm({ orderId, onComplete, onCancel }: GoodsReceiv
         create_back_order: createBackOrder,
       });
       onComplete();
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Failed to post GRN'));
     } finally {
       setLoading(false);

@@ -7,10 +7,7 @@
 import React from "react";
 import {
   Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+  CardContent,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +16,6 @@ import {
   CheckCircle2,
   Info,
   Loader2,
-  Plus,
   Trash2,
 } from "lucide-react";
 
@@ -310,7 +306,7 @@ export function LineItemRow({
   item,
   onUpdate,
   onRemove,
-  index,
+  index: _index,
 }: {
   item: any;
   onUpdate: (field: string, value: any) => void;
@@ -372,7 +368,7 @@ export function TenderRow({
   tender,
   onUpdate,
   onRemove,
-  index,
+  index: _index,
 }: {
   tender: any;
   onUpdate: (field: string, value: any) => void;

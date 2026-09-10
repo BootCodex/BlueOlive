@@ -1,7 +1,7 @@
 'use client';
 
 import { Supplier } from '@/lib/creditorsApi';
-import { Edit2, Trash2, Plus } from 'lucide-react';
+import { Edit2, Trash2 } from 'lucide-react';
 
 interface CreditorsTableProps {
   creditors: Supplier[];

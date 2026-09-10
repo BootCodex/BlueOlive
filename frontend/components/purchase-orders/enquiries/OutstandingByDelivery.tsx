@@ -16,10 +16,10 @@ interface OutstandingByDeliveryProps {
  * PurchaseOrderViewSet.outstanding action (delivery_date_from/to range).
  */
 export function OutstandingByDelivery({ onFilter }: OutstandingByDeliveryProps) {
-  const [filters, setFilters] = useState<OutstandingByDeliveryFilter>({
+  const [filters, setFilters] = useState<OutstandingByDeliveryFilter>(() => ({
     date_from: new Date().toISOString().split('T')[0],
     date_to: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-  });
+  }));
   const [results, setResults] = useState<PurchaseOrder[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');

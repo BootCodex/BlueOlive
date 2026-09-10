@@ -4,8 +4,6 @@ import { QueryProvider } from "@/lib/QueryProvider";
 import { AuthProvider } from "@/lib/AuthContext";
 import { ReactNode } from "react";
 import { ChunkErrorHandler } from "./ChunkErrorHandler";
-import Navbar from "@/components/navbar";
-
 export function RootLayoutClient({ children }: { children: ReactNode }) {
   return (
     <QueryProvider>

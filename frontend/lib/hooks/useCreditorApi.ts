@@ -22,14 +22,12 @@ import {
   CreditorJournal,
   SupplierLedgerEntry,
   CreditorOpenItem,
-  OpenItemAllocation,
   RFC,
   SupplierPaymentOrder,
   PaginatedResponse,
   CreditorCreateData,
   CreditorEditData,
   CreditorFilters,
-  CreditorsSummary,
   TransactionFilters,
   GoodsReceivedNoteCreateData,
   CreditorInvoiceCreateData,
@@ -101,42 +99,6 @@ function useApiFetch<T>(
   }, [enabled, refetch]);
 
   return { ...state, refetch, reset };
-}
-
-// ============================================================================
-// Generic mutation hook factory
-// ============================================================================
-
-function useApiMutation<TArgs extends any[], TResult>(
-  mutator: (...args: TArgs) => Promise<TResult>
-) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<ApiError | null>(null);
-
-  const execute = useCallback(
-    async (...args: TArgs): Promise<TResult> => {
-      setLoading(true);
-      setError(null);
-      try {
-        const result = await mutator(...args);
-        setLoading(false);
-        return result;
-      } catch (err) {
-        setError(err as ApiError);
-        setLoading(false);
-        throw err;
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
-
-  const reset = useCallback(() => {
-    setLoading(false);
-    setError(null);
-  }, []);
-
-  return { loading, error, execute, reset };
 }
 
 // ============================================================================

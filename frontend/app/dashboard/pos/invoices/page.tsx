@@ -1,11 +1,10 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Plus, FileText, Eye, ArrowLeft, TrendingUp, Clock, CheckCircle2, AlertCircle } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Plus, FileText, Eye, ArrowLeft, Clock, CheckCircle2, AlertCircle } from "lucide-react";
 import { useAuth } from "@/lib/useAuth";
 import { usePOSAPI } from "@/lib/posApi";
+import type { MaybeAxiosError } from '@/lib/types/errors';
 
 interface Invoice {
   id: string;
@@ -87,10 +86,10 @@ export default function InvoicesPage() {
             };
           })
         );
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (!cancelled) {
           console.error("Error fetching invoices:", err);
-          setError(err?.message ?? "Failed to load invoices");
+          setError((err as MaybeAxiosError)?.message ?? "Failed to load invoices");
           setInvoices([]);
         }
       } finally {

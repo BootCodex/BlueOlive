@@ -32,11 +32,11 @@ export default function PackBundleMaintenance({ onBack }: PackBundleMaintenanceP
             <h4 className="font-semibold text-gray-900 mb-2">Step 1: Create Stock Code</h4>
             <ol className="text-sm text-gray-700 space-y-2 list-decimal list-inside">
               <li>Enter stock code for the finished product</li>
-              <li>Enter description (e.g., "Ration Pack #1")</li>
+              <li>Enter description (e.g., &quot;Ration Pack #1&quot;)</li>
               <li>Select department</li>
               <li>Select tax code</li>
               <li>Set default selling quantity</li>
-              <li>Select supplier (usually "Internal")</li>
+              <li>Select supplier (usually &quot;Internal&quot;)</li>
               <li>Set negative quantity setting</li>
               <li>Set maximum discount % if needed</li>
             </ol>
@@ -69,7 +69,7 @@ export default function PackBundleMaintenance({ onBack }: PackBundleMaintenanceP
           <h3 className="font-semibold text-yellow-900 mb-2">Important Notes</h3>
           <ul className="text-sm text-yellow-800 space-y-1">
             <li>• All ingredient stock codes must exist before creating the bundle</li>
-            <li>• Create a supplier called "Internal" in Creditors before setup</li>
+            <li>• Create a supplier called &quot;Internal&quot; in Creditors before setup</li>
             <li>• System automatically calculates total cost of the bundle</li>
             <li>• You can use any combination of stock items</li>
           </ul>

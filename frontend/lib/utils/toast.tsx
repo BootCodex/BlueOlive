@@ -103,7 +103,7 @@ export function ToastContainer() {
       toastInstance = createToastManager();
     }
 
-    const listener = (updatedToasts: Toast[]) => {
+    const _listener = (updatedToasts: Toast[]) => {
       setToasts([...updatedToasts]);
     };
 

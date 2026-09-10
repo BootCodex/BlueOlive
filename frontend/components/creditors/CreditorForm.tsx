@@ -1,7 +1,22 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Supplier, SupplierCreateData, useCreditorsAPI, CreditTermsOption } from '@/lib/creditorsApi';
+import { Supplier, useCreditorsAPI, CreditTermsOption } from '@/lib/creditorsApi';
+/**
+ * Submission errors here may arrive as an axios error, a custom API wrapper,
+ * or a directly-thrown error object - the same unwrapped shape is checked at
+ * each of the three possible locations.
+ */
+interface UnwrappedSubmissionError {
+  field_errors?: Record<string, unknown>;
+  message?: string;
+}
+interface SubmissionErrorLike {
+  response?: { data?: { error?: UnwrappedSubmissionError } };
+  data?: { error?: UnwrappedSubmissionError };
+  error?: UnwrappedSubmissionError;
+  message?: string;
+}
 
 interface CreditorFormProps {
   creditor?: Supplier;
@@ -183,14 +198,14 @@ export default function CreditorForm({ creditor, onSuccess, onCancel }: Creditor
         const created = await api.createSupplier(submitData);
         onSuccess?.(created);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('=== SUBMISSION ERROR ===', err);
 
       // Unwrap structured API error - handles fetch, axios, and custom api wrappers
       const apiError =
-        err?.response?.data?.error ??  // axios
-        err?.data?.error ??            // custom wrapper
-        err?.error ??                  // direct throw of error object
+        (err as SubmissionErrorLike)?.response?.data?.error ??  // axios
+        (err as SubmissionErrorLike)?.data?.error ??            // custom wrapper
+        (err as SubmissionErrorLike)?.error ??                  // direct throw of error object
         null;
 
       if (apiError?.field_errors) {
@@ -202,7 +217,7 @@ export default function CreditorForm({ creditor, onSuccess, onCancel }: Creditor
         setFieldErrors(mapped);
         setError('Please correct the highlighted fields below.');
       } else {
-        setError(apiError?.message ?? err?.message ?? 'An error occurred');
+        setError(apiError?.message ?? (err as SubmissionErrorLike)?.message ?? 'An error occurred');
       }
     } finally {
       setLoading(false);

@@ -13,9 +13,10 @@ interface PlatformAuthContextType {
 const PlatformAuthContext = createContext<PlatformAuthContextType | undefined>(undefined);
 
 /**
- * Auth context for the platform-owner area (/owner/*).
- * Entirely separate from AuthContext (tenant users) - a different session,
- * different cookies, different backend endpoints. See lib/platformApi.ts.
+ * Auth context for this standalone admin app.
+ * Entirely separate from the tenant-facing frontend's AuthContext - a
+ * different session, different cookies, different backend endpoints. See
+ * lib/platformApi.ts.
  */
 export function PlatformAuthProvider({ children }: { children: ReactNode }) {
   const [owner, setOwner] = useState<PlatformOwner | null>(null);

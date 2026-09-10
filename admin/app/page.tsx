@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { KeyRound, LogOut, Plus, Power, PowerOff, Shield, X } from 'lucide-react';
+import { AlertTriangle, CreditCard, FileClock, KeyRound, LogOut, Plus, Power, PowerOff, Shield, X } from 'lucide-react';
 import PlatformOwnerRoute from '@/components/PlatformOwnerRoute';
 import { usePlatformAuth } from '@/lib/PlatformAuthContext';
 import {
@@ -12,12 +12,14 @@ import {
   createTenant,
   activateTenant,
   deactivateTenant,
+  fetchProvisioningHealth,
 } from '@/lib/platformApi';
 
 function OwnerDashboard() {
   const { owner, logout } = usePlatformAuth();
   const [stats, setStats] = useState<TenantStats | null>(null);
   const [tenants, setTenants] = useState<Tenant[]>([]);
+  const [stuckCount, setStuckCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showCreate, setShowCreate] = useState(false);
@@ -27,9 +29,14 @@ function OwnerDashboard() {
     setLoading(true);
     setError('');
     try {
-      const [statsData, tenantsData] = await Promise.all([fetchTenantStats(), fetchTenants()]);
+      const [statsData, tenantsData, provisioning] = await Promise.all([
+        fetchTenantStats(),
+        fetchTenants(),
+        fetchProvisioningHealth().catch(() => ({ tenants: [], shops: [] })),
+      ]);
       setStats(statsData);
       setTenants(tenantsData);
+      setStuckCount(provisioning.tenants.length + provisioning.shops.length);
     } catch (err: any) {
       setError(err?.response?.data?.detail || 'Failed to load tenants');
     } finally {
@@ -69,7 +76,30 @@ function OwnerDashboard() {
         </div>
         <div className="flex items-center gap-4">
           <Link
-            href="/owner/superusers"
+            href="/provisioning"
+            className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-100 transition"
+          >
+            <AlertTriangle className="h-4 w-4" /> Provisioning
+            {stuckCount > 0 && (
+              <span className="inline-flex items-center justify-center h-4 min-w-4 px-1 rounded-full bg-amber-500 text-slate-950 text-[10px] font-semibold">
+                {stuckCount}
+              </span>
+            )}
+          </Link>
+          <Link
+            href="/audit-logs"
+            className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-100 transition"
+          >
+            <FileClock className="h-4 w-4" /> Audit Log
+          </Link>
+          <Link
+            href="/billing"
+            className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-100 transition"
+          >
+            <CreditCard className="h-4 w-4" /> Billing
+          </Link>
+          <Link
+            href="/superusers"
             className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-100 transition"
           >
             <KeyRound className="h-4 w-4" /> Owner Accounts
@@ -129,7 +159,7 @@ function OwnerDashboard() {
               {tenants.map((tenant) => (
                 <tr key={tenant.id}>
                   <td className="px-4 py-2.5">
-                    <Link href={`/owner/tenants/${tenant.id}`} className="hover:underline">
+                    <Link href={`/tenants/${tenant.id}`} className="hover:underline">
                       {tenant.name}
                     </Link>
                   </td>

@@ -26,7 +26,7 @@ export interface Department {
   description?: string;
   is_active: boolean;
   created_at?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface SalesArea {
@@ -36,7 +36,7 @@ export interface SalesArea {
   description?: string;
   is_active: boolean;
   created_at?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface IncomeCategory {
@@ -46,7 +46,7 @@ export interface IncomeCategory {
   description?: string;
   is_active: boolean;
   created_at?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface ExpenseCategory {
@@ -64,7 +64,7 @@ export interface ExpenseCategory {
   total_ytd?: number;
   created_at?: string;
   updated_at?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface TaxCode {
@@ -75,7 +75,7 @@ export interface TaxCode {
   description?: string;
   is_active: boolean;
   created_at?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface CostingCategory {
@@ -85,7 +85,7 @@ export interface CostingCategory {
   description?: string;
   is_active: boolean;
   created_at?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface PaymentMethod {
@@ -95,7 +95,7 @@ export interface PaymentMethod {
   description?: string;
   is_active: boolean;
   created_at?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface CreditTerms {
@@ -106,22 +106,22 @@ export interface CreditTerms {
   description?: string;
   is_active: boolean;
   created_at?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface SystemConfig {
   id?: number;
   key: string;
-  value: any;
+  value: unknown;
   description?: string;
   created_at?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export const settingsApi = {
   // ============ DEPARTMENTS ============
   departments: {
-    list: async (filters?: any) => {
+    list: async (filters?: Record<string, unknown>) => {
       const response = await api.get<{ results: Department[] }>(
         ENDPOINTS.SETTINGS.DEPARTMENTS,
         { params: filters }
@@ -159,7 +159,7 @@ export const settingsApi = {
 
   // ============ SALES AREAS ============
   salesAreas: {
-    list: async (filters?: any) => {
+    list: async (filters?: Record<string, unknown>) => {
       const response = await api.get<{ results: SalesArea[] }>(
         ENDPOINTS.SETTINGS.SALES_AREAS,
         { params: filters }
@@ -197,7 +197,7 @@ export const settingsApi = {
 
   // ============ INCOME CATEGORIES ============
   incomeCategories: {
-    list: async (filters?: any) => {
+    list: async (filters?: Record<string, unknown>) => {
       const response = await api.get<{ results: IncomeCategory[] }>(
         ENDPOINTS.SETTINGS.INCOME_CATEGORIES,
         { params: filters }
@@ -235,7 +235,7 @@ export const settingsApi = {
 
   // ============ EXPENSE CATEGORIES ============
   expenseCategories: {
-    list: async (filters?: any) => {
+    list: async (filters?: Record<string, unknown>) => {
       const response = await api.get<PaginatedResponse<ExpenseCategory>>(
         ENDPOINTS.SETTINGS.EXPENSE_CATEGORIES,
         { params: filters }
@@ -273,7 +273,7 @@ export const settingsApi = {
 
   // ============ TAX CODES ============
   taxCodes: {
-    list: async (filters?: any) => {
+    list: async (filters?: Record<string, unknown>) => {
       const response = await api.get<{ results: TaxCode[] }>(
         ENDPOINTS.SETTINGS.TAX_CODES,
         { params: filters }
@@ -311,7 +311,7 @@ export const settingsApi = {
 
   // ============ COSTING CATEGORIES ============
   costingCategories: {
-    list: async (filters?: any) => {
+    list: async (filters?: Record<string, unknown>) => {
       const response = await api.get<{ results: CostingCategory[] }>(
         ENDPOINTS.SETTINGS.COSTING_CATEGORIES,
         { params: filters }
@@ -349,7 +349,7 @@ export const settingsApi = {
 
   // ============ PAYMENT METHODS ============
   paymentMethods: {
-    list: async (filters?: any) => {
+    list: async (filters?: Record<string, unknown>) => {
       const response = await api.get<{ results: PaymentMethod[] }>(
         ENDPOINTS.SETTINGS.PAYMENT_METHODS,
         { params: filters }
@@ -387,7 +387,7 @@ export const settingsApi = {
 
   // ============ CREDIT TERMS ============
   creditTerms: {
-    list: async (filters?: any) => {
+    list: async (filters?: Record<string, unknown>) => {
       const response = await api.get<{ results: CreditTerms[] }>(
         ENDPOINTS.SETTINGS.CREDIT_TERMS,
         { params: filters }
@@ -462,7 +462,7 @@ export const settingsApi = {
 
   // ============ DEPARTMENT STATS ============
   departmentStats: {
-    list: async (filters?: any) => {
+    list: async (filters?: Record<string, unknown>) => {
       const response = await api.get(
         ENDPOINTS.SETTINGS.DEPARTMENT_STATS,
         { params: filters }
@@ -480,7 +480,7 @@ export const settingsApi = {
 
   // ============ SALES AREA STATS ============
   salesAreaStats: {
-    list: async (filters?: any) => {
+    list: async (filters?: Record<string, unknown>) => {
       const response = await api.get(
         ENDPOINTS.SETTINGS.SALES_AREA_STATS,
         { params: filters }

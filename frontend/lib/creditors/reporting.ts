@@ -151,7 +151,7 @@ export const creditorsReportingApi = {
   // ── EXPENSE CATEGORIES ─────────────────────────────────────────────────────
   expenseCategories: {
     list: async (filters?: ExpenseCategoryFilters) => {
-      const data = await settingsApi.expenseCategories.list(filters);
+      const data = await settingsApi.expenseCategories.list(filters as Record<string, unknown> | undefined);
       return data;
     },
     create: async (body: ExpenseCategoryCreateData) => {
@@ -229,7 +229,7 @@ export function useCreditorsAPI() {
 
   const listExpenseCategories = useCallback(
     (f?: ExpenseCategoryFilters) =>
-      settingsApi.expenseCategories.list(f),
+      settingsApi.expenseCategories.list(f as Record<string, unknown> | undefined),
     []
   );
   const createExpenseCategory = useCallback(

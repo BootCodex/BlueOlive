@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { AlertCircle, Download } from 'lucide-react';
 import cashBookApi from '@/lib/cashBookApi';
-import { MonthlyAnalysis } from '@/lib/types/cashBook';
 import { BalanceCard, CategoryBadge } from '@/components/cash-book';
 
 interface MonthData {

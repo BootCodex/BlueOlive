@@ -4,15 +4,13 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import debtorsApi from '@/lib/debtorsApi';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TransactionForm from '@/components/debtors/forms/TransactionForm';
 import TransactionHistory from '@/components/debtors/transactions/TransactionHistory';
-import { TransactionType, type Transaction } from '@/lib/types/debtors';
+import { TransactionType } from '@/lib/types/debtors';
 
 export default function JournalsPage() {
-  const [activeType, setActiveType] = useState<TransactionType>(TransactionType.INVOICE);
+  const [activeType, _setActiveType] = useState<TransactionType>(TransactionType.INVOICE);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const { data: transactions } = useQuery({

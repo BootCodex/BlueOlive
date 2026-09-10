@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useAuth } from "@/lib/useAuth";
 import { jobCardsApi } from "@/lib/jobCardsApi";
 import Link from "next/link";
@@ -30,8 +29,8 @@ interface Job {
 }
 
 export default function JobCostingPage() {
-  const router = useRouter();
-  const { user } = useAuth();
+  const _router = useRouter();
+  const { user: _user } = useAuth();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");

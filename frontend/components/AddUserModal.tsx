@@ -39,13 +39,13 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
     setShopsLoading(true);
     setError('');
     try {
-      const shopsList = await getShops();
+      const shopsList = await getShops() as unknown as Shop[];
       setShops(shopsList);
       // Auto-select first shop if available
       if (shopsList.length > 0) {
         setSelectedShopIds([shopsList[0].id]);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching shops:', err);
       setError(extractErrorMessage(err));
       setShops([]);
@@ -93,7 +93,7 @@ export default function AddUserModal({ isOpen, onClose, onSuccess }: AddUserModa
       setSelectedShopIds([]);
       onSuccess();
       onClose();
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(extractErrorMessage(err));
     } finally {
       setLoading(false);

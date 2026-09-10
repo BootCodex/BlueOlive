@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { stockControlApi } from '@/lib/stockControlApi';
 import { getStockItems } from '@/lib/stockApi';
+import type { StockItem, StockTake } from '@/lib/types/stockControl';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,8 +31,8 @@ export default function StocktakePage() {
     stock_code: '',
     quantity_counted: 0,
   });
-  const [selectedStockItem, setSelectedStockItem] = useState<any>(null);
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [selectedStockItem, setSelectedStockItem] = useState<StockItem | null>(null);
+  const [searchResults, setSearchResults] = useState<StockItem[]>([]);
 
   // Fetch all stock takes
   const { data: stockTakes, isLoading: takesLoading } = useQuery({
@@ -57,7 +58,7 @@ export default function StocktakePage() {
 
   // Create stock take mutation
   const createMutation = useMutation({
-    mutationFn: (data: any) => stockControlApi.stockTakes.create(data),
+    mutationFn: (data: Partial<StockTake>) => stockControlApi.stockTakes.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['stock-takes'] });
       setActiveTab('list');
@@ -107,7 +108,7 @@ export default function StocktakePage() {
     setCountForm(prev => ({ ...prev, stock_code: value }));
     setSelectedStockItem(null);
     if (value.length >= 2 && stockItems) {
-      const filtered = stockItems.results.filter((item: any) =>
+      const filtered = stockItems.results.filter((item) =>
         item.stock_code.toLowerCase().includes(value.toLowerCase()) ||
         item.description.toLowerCase().includes(value.toLowerCase())
       );
@@ -135,8 +136,8 @@ export default function StocktakePage() {
 
   // The backend has no "not yet started" state — a stock take is created
   // directly as IN_PROGRESS, so there is no PENDING bucket to filter for.
-  const inProgressTakes = stockTakes?.results?.filter((t: any) => t.status === 'IN_PROGRESS') || [];
-  const completedTakes = stockTakes?.results?.filter((t: any) => t.status === 'COMPLETED' || t.status === 'UPDATED') || [];
+  const inProgressTakes = stockTakes?.results?.filter((t) => t.status === 'IN_PROGRESS') || [];
+  const completedTakes = stockTakes?.results?.filter((t) => t.status === 'COMPLETED' || t.status === 'UPDATED') || [];
 
   return (
     <div className="space-y-6">
@@ -175,9 +176,9 @@ export default function StocktakePage() {
                   <Activity className="w-5 h-5 mr-2 text-amber-500" />
                   Newly Created (not yet counted)
                 </h3>
-                {inProgressTakes.filter((t: any) => !t.item_count).length > 0 ? (
+                {inProgressTakes.filter((t) => !t.item_count).length > 0 ? (
                   <div className="space-y-2">
-                    {inProgressTakes.filter((t: any) => !t.item_count).map((take: any) => (
+                    {inProgressTakes.filter((t) => !t.item_count).map((take) => (
                       <div key={take.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
                         <div>
                           <p className="font-medium">Stock Take #{take.id}</p>
@@ -203,9 +204,9 @@ export default function StocktakePage() {
                   <Package className="w-5 h-5 mr-2 text-blue-500" />
                   In Progress
                 </h3>
-                {inProgressTakes.filter((t: any) => t.item_count).length > 0 ? (
+                {inProgressTakes.filter((t) => t.item_count).length > 0 ? (
                   <div className="space-y-2">
-                    {inProgressTakes.filter((t: any) => t.item_count).map((take: any) => (
+                    {inProgressTakes.filter((t) => t.item_count).map((take) => (
                       <div key={take.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
                         <div>
                           <p className="font-medium">Stock Take #{take.id}</p>
@@ -237,7 +238,7 @@ export default function StocktakePage() {
                 </h3>
                 {completedTakes.length > 0 ? (
                   <div className="space-y-2">
-                    {completedTakes.slice(0, 10).map((take: any) => (
+                    {completedTakes.slice(0, 10).map((take) => (
                       <div key={take.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
                         <div>
                           <p className="font-medium">Stock Take #{take.id}</p>
@@ -343,7 +344,7 @@ export default function StocktakePage() {
                       </div>
                       {searchResults.length > 0 && (
                         <div className="absolute z-10 w-full mt-1 border rounded-lg divide-y bg-white shadow-lg max-h-48 overflow-y-auto">
-                          {searchResults.map((item: any) => (
+                          {searchResults.map((item) => (
                             <button
                               key={item.stock_code}
                               onClick={() => {
@@ -386,7 +387,7 @@ export default function StocktakePage() {
                   </div>
                   {addItemMutation.isError && (
                     <p className="text-sm text-red-600 mt-2">
-                      {(addItemMutation.error as any)?.message || 'Failed to add item'}
+                      {(addItemMutation.error as Error | null)?.message || 'Failed to add item'}
                     </p>
                   )}
                 </Card>
@@ -408,15 +409,15 @@ export default function StocktakePage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {selectedTake.items.map((item: any) => (
+                        {selectedTake.items.map((item) => (
                           <tr key={item.id} className="border-b hover:bg-gray-50">
                             <td className="px-3 py-2 font-mono">{item.stock_item}</td>
                             <td className="px-3 py-2 text-gray-600">{item.stock_item_detail?.description}</td>
                             <td className="px-3 py-2 text-right">{item.quantity_on_hand}</td>
                             <td className="px-3 py-2 text-right">{item.quantity_counted}</td>
                             <td className={`px-3 py-2 text-right font-medium ${
-                              item.variance_quantity > 0 ? 'text-green-600' :
-                              item.variance_quantity < 0 ? 'text-red-600' : 'text-gray-500'
+                              (item.variance_quantity ?? 0) > 0 ? 'text-green-600' :
+                              (item.variance_quantity ?? 0) < 0 ? 'text-red-600' : 'text-gray-500'
                             }`}>
                               {item.variance_quantity}
                             </td>

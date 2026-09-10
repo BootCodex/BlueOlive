@@ -34,6 +34,7 @@ export interface StockItem {
   quantity_on_hand: number;
   quantity_on_order: number;
   quantity_allocated: number;
+  quantity_counted?: number;
   available_quantity?: number;
   sales_mtd_quantity?: number;
   cost_price: number;
@@ -206,22 +207,51 @@ export interface PaginatedPackBundles {
 // Stock Transactions
 // ============================================================================
 
+// Matches StockTransactionSerializer/StockTransaction on the backend
+// (apps/stock_control/models.py, serializers.py) - the fields and
+// transaction_type choices this previously listed (quantity/quantity_before/
+// quantity_after, 'IN'|'OUT'|'ADJ'|...) don't match any real backend value;
+// the actual model splits QTY into quantity_in/quantity_out and uses the
+// long-form type codes below.
 export interface StockTransaction {
   id: number;
   stock_item: string;
   stock_item_detail?: StockItem;
-  transaction_type: 'IN' | 'OUT' | 'ADJ' | 'SAL' | 'RET' | 'GRN' | 'TRF';
+  transaction_type:
+    | 'INCOMING'
+    | 'RETURN'
+    | 'SALE'
+    | 'SALE_RETURN'
+    | 'ADJUSTMENT'
+    | 'STOCK_TAKE'
+    | 'MANUFACTURE'
+    | 'BUNDLE_USE'
+    | 'BULK_ISSUE'
+    | 'LAYBYE_IN'
+    | 'LAYBYE_OUT'
+    | 'JOB_IN'
+    | 'JOB_OUT'
+    | 'RFC_IN'
+    | 'RFC_OUT';
   transaction_date: string;
-  quantity: number;
-  quantity_before: number;
-  quantity_after: number;
+  transaction_time?: string | null;
+  transaction_number?: number | null;
+  quantity_in?: number;
+  quantity_out?: number;
+  quantity_balance?: number;
+  discount?: number;
   unit_cost?: number;
-  total_cost?: number;
-  reference?: string;
-  reference_number?: string;
-  notes?: string;
+  unit_price?: number;
+  value?: number;
+  department?: number | null;
+  tax_code?: number | null;
+  debtor?: number | null;
+  supplier?: number | null;
+  station_number?: string | null;
+  comments?: string;
   created_by?: string;
   created_at?: string;
+  updated_at?: string;
 }
 
 export interface StockTransactionFilters {

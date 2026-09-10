@@ -2,14 +2,12 @@
 
 import type { Transaction, TransactionType } from '@/lib/types/debtors';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-
 interface TransactionHistoryProps {
   type: TransactionType;
   transactions: Transaction[];
 }
 
-const TYPE_LABELS: Record<TransactionType, { label: string; color: string }> = {
+const _TYPE_LABELS: Record<TransactionType, { label: string; color: string }> = {
   IN: { label: 'Invoice', color: 'bg-blue-100 text-blue-800' },
   CN: { label: 'Credit Note', color: 'bg-green-100 text-green-800' },
   CS: { label: 'Cash Sale', color: 'bg-purple-100 text-purple-800' },

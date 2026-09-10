@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { updateShop } from '@/lib/api';
 import { X } from 'lucide-react';
+import type { MaybeAxiosError } from '@/lib/types/errors';
 
 interface EditShopModalProps {
   isOpen: boolean;
@@ -40,8 +41,8 @@ export default function EditShopModal({
         is_head_office: isHeadOffice,
       });
       onSuccess();
-    } catch (err: any) {
-      setError(err.response?.data?.detail || err.message || 'Failed to update shop');
+    } catch (err: unknown) {
+      setError((err as MaybeAxiosError).response?.data?.detail || (err as MaybeAxiosError).message || 'Failed to update shop');
     } finally {
       setLoading(false);
     }

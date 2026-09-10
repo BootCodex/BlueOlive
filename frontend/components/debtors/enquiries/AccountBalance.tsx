@@ -25,7 +25,7 @@ interface AccountBalanceProps {
   balance: BalanceDetails;
 }
 
-export default function AccountBalance({ debtor, balance }: AccountBalanceProps) {
+export default function AccountBalance({ debtor: _debtor, balance }: AccountBalanceProps) {
   const getAgingColor = (amount: number) => {
     if (amount > 0) return 'text-red-600';
     return 'text-gray-600';
@@ -79,7 +79,7 @@ export default function AccountBalance({ debtor, balance }: AccountBalanceProps)
               </tr>
             </thead>
             <tbody>
-              {balanceStatuses.map((status, idx) => {
+              {balanceStatuses.map((status, _idx) => {
                 const isTotal = status.key === 'opening' || status.key === 'closing';
                 const isAgingRow = !isTotal;
                 const percentage = balance.current_balance !== 0 && isAgingRow 

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { apiRequest } from '@/lib/api';
+import type { MaybeAxiosError } from '@/lib/types/errors';
 
 interface ConvertCategoryModalProps {
   isOpen: boolean;
@@ -57,9 +58,9 @@ export default function ConvertCategoryModal({
 
       console.log('Conversion result:', result);
       onSuccess(result);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Conversion failed:', err);
-      setError(err.message || 'Failed to convert account category');
+      setError((err as MaybeAxiosError).message || 'Failed to convert account category');
     } finally {
       setLoading(false);
     }

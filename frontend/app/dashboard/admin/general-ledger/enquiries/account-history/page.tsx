@@ -48,7 +48,7 @@ export default function AccountHistoryEnquiryPage() {
           </Button>
         </div>
         <p className="text-xs text-gray-500 mt-2">
-          Enter the account's internal ID (visible on the Chart of Accounts list).
+          Enter the account&apos;s internal ID (visible on the Chart of Accounts list).
         </p>
       </Card>
 

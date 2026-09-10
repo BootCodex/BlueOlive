@@ -57,7 +57,7 @@ export const ValidationMessages = {
 export function validateField(
   value: any,
   rule: ValidationRule,
-  fieldName: string
+  _fieldName: string
 ): string | null {
   // Check required
   if (rule.required) {

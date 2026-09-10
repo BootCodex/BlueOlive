@@ -177,3 +177,50 @@ jobs:
       - name: Audit dependencies (high/critical)
         working-directory: frontend
         run: npm audit --audit-level=high || true
+
+  admin:
+    name: Admin
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          # 20 is EOL-adjacent (see the Node 20 deprecation warning on this
+          # workflow) and its bundled npm validates this app's lockfile
+          # (Tailwind 4's tooling pulls in an optional peer on picomatch
+          # that resolves to two coexisting major versions - normal for
+          # npm, but apparently not accepted by npm ci under Node 20) more
+          # strictly than the npm bundled with 22, which installs this
+          # lockfile cleanly.
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: admin/package-lock.json
+
+      - name: Install dependencies
+        working-directory: admin
+        run: npm ci
+
+      # Lint is non-blocking for the same reason as the frontend job above:
+      # eslint.config.mjs uses the ESLint 9 flat-config API but eslint@8.57
+      # is installed, so `eslint` errors out (ERR_PACKAGE_PATH_NOT_EXPORTED)
+      # before it can check anything. Type-check and build are both clean
+      # today, so they're blocking.
+      - name: Lint
+        working-directory: admin
+        run: npm run lint || true
+
+      - name: Type check
+        working-directory: admin
+        run: npm run type-check
+
+      - name: Build
+        working-directory: admin
+        run: npm run build
+
+      - name: Audit dependencies (high/critical)
+        working-directory: admin
+        run: npm audit --audit-level=high || true

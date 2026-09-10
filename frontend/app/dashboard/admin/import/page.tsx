@@ -640,7 +640,7 @@ export default function ImportDataPage() {
       setAnalysis(res.data);
       setMappings(res.data.suggested_mappings);
       setStep('map');
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(getErrorMessage(err));
     } finally {
       setLoading(false);
@@ -735,7 +735,7 @@ export default function ImportDataPage() {
               } else if (progress.status === 'error') {
                 throw new Error(progress.message || 'Import failed');
               }
-            } catch (e) {
+            } catch {
               // Ignore parse errors for incomplete lines
             }
           }
@@ -743,7 +743,7 @@ export default function ImportDataPage() {
       }
 
       setStep('done');
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(getErrorMessage(err));
       setStep('map');
     } finally {

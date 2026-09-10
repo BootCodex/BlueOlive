@@ -101,7 +101,7 @@ export default function BankReconciliationPage() {
       setShowForm(false);
 
       await fetchData();
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Failed to create reconciliation'));
     } finally {
       setLoading(false);
@@ -128,7 +128,7 @@ export default function BankReconciliationPage() {
       ]);
       setPendingTransactions((transRes.results || []) as unknown as TaggableTransaction[]);
       setOutstandingPreview(preview);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Failed to load transactions for tagging'));
     } finally {
       setTagLoading(false);
@@ -149,7 +149,7 @@ export default function BankReconciliationPage() {
       );
       const preview = await cashBookApi.reconciliations.outstandingSummary(recon.bank_account_number);
       setOutstandingPreview(preview);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Failed to tag transaction'));
     }
   };
@@ -166,7 +166,7 @@ export default function BankReconciliationPage() {
       setSuccess('Reconciliation completed successfully!');
       closeTagPanel();
       await fetchData();
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Failed to complete reconciliation'));
     } finally {
       setLoading(false);
@@ -182,7 +182,7 @@ export default function BankReconciliationPage() {
         `Month End closed. ${result.carried_forward_summary?.pending_transaction_count ?? 0} item(s) carried forward.`
       );
       await fetchData();
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Failed to run Month End'));
     }
   };

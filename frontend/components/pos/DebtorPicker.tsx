@@ -41,7 +41,7 @@ export function DebtorPicker({
   return (
     <SearchCombobox<DebtorLookupResult>
       queryKeyPrefix="debtor-lookup"
-      searchFn={(query, offset) => posAPI.lookupDebtors(query, 20, offset)}
+      searchFn={(query, offset) => posAPI.lookupDebtors(query, 20, offset) as unknown as Promise<{ results: DebtorLookupResult[]; count: number; hasMore: boolean }>}
       getId={(debtor) => debtor.account_number}
       getLabel={(debtor) => debtor.name}
       renderOption={(debtor) => (

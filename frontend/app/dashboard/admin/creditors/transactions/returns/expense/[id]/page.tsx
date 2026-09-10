@@ -37,7 +37,7 @@ export default function ExpenseReturnForm() {
     queryFn: () => settingsApi.expenseCategories.list({ page_size: 100 }),
   });
 
-  const { data: creditNoteData, isLoading } = useQuery({
+  const { data: _creditNoteData, isLoading } = useQuery({
     queryKey: ['expense-return', returnId],
     queryFn: () => creditorsApi.creditNotes.get(returnId),
     enabled: !isNew,

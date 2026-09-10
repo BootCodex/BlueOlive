@@ -8,9 +8,10 @@ interface PlatformOwnerRouteProps {
 }
 
 /**
- * Guards /owner/* pages. Checks the platform-owner session (is_superuser,
- * verified server-side by saas-admin/auth/profile/) - unrelated to
- * OwnerRoute/AdminRoute, which gate tenant-role access within /dashboard.
+ * Guards every page in this app except /login. Checks the platform-owner
+ * session (is_superuser, verified server-side by saas-admin/auth/profile/) -
+ * a separate app/session entirely from tenant-role access in the main
+ * frontend's /dashboard.
  */
 export default function PlatformOwnerRoute({ children }: PlatformOwnerRouteProps) {
   const { owner, isLoading } = usePlatformAuth();
@@ -24,8 +25,8 @@ export default function PlatformOwnerRoute({ children }: PlatformOwnerRouteProps
   }
 
   if (!owner) {
-    if (typeof window !== 'undefined' && !window.location.pathname.endsWith('/owner/login')) {
-      window.location.href = '/owner/login';
+    if (typeof window !== 'undefined' && !window.location.pathname.endsWith('/login')) {
+      window.location.href = '/login';
     }
     return (
       <div className="flex items-center justify-center min-h-screen bg-slate-900 text-slate-300 gap-2">

@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ExpenseCategory, ExpenseCategoryCreateData, useCreditorsAPI } from '@/lib/creditorsApi';
+import type { MaybeAxiosError } from '@/lib/types/errors';
 
 interface ExpenseCategoryFormProps {
   category?: ExpenseCategory;
@@ -47,9 +48,9 @@ export default function ExpenseCategoryForm({ category, onSuccess, onCancel }: E
       
       console.log('Calling onSuccess callback...');
       onSuccess();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to save expense category:', err);
-      setError(err.message || 'Failed to save expense category');
+      setError((err as MaybeAxiosError).message || 'Failed to save expense category');
     } finally {
       setLoading(false);
     }

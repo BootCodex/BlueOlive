@@ -5,7 +5,7 @@ import { useAuth } from '@/lib/useAuth';
 import { usePOSAPI } from '@/lib/posApi';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -17,11 +17,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
-  AlertCircle,
   Plus,
   ArrowLeft,
   Search,
-  Filter,
   Download,
   Eye,
   FileText,
@@ -79,7 +77,7 @@ export default function ReceiptsList() {
         }));
         
         setReceipts(mappedReceipts);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Error fetching receipts:', err);
         setError(err instanceof Error ? err.message : 'Failed to load receipts');
         setReceipts([]);
@@ -116,7 +114,7 @@ export default function ReceiptsList() {
       // Refresh the list
       setReceipts((prev) => prev.filter((r) => r.id !== id));
       setTimeout(() => setSuccess(null), 3000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error deleting receipt:', err);
       setError(err instanceof Error ? err.message : 'Failed to delete receipt');
       setTimeout(() => setError(null), 3000);

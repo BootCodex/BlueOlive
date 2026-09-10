@@ -11,6 +11,7 @@ from .views import (
     ShopUserViewSet,
     SignupView,
     SubdomainValidationView,
+    SupportLoginExchangeView,
     TenantTokenView,
     UnifiedLoginView,
 )
@@ -31,6 +32,11 @@ urlpatterns = [
     ),
     path("login/", TenantTokenView.as_view(), name="token_obtain_pair"),
     path("unified-login/", UnifiedLoginView.as_view(), name="unified_login"),
+    path(
+        "support-login/exchange/",
+        SupportLoginExchangeView.as_view(),
+        name="support_login_exchange",
+    ),
     path("logout/", LogoutView.as_view(), name="logout"),
     path("token/refresh/", CookieTokenRefreshView.as_view(), name="token_refresh"),
     path("profile/", ProfileView.as_view(), name="profile"),

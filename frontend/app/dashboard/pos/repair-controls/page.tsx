@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/lib/useAuth';
-import { usePOSAPI } from '@/lib/posApi';
+import { usePOSAPI, type TransactionResponse } from '@/lib/posApi';
 import Link from 'next/link';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -37,11 +37,22 @@ const STATUS_CLASSES: Record<string, string> = {
   X: 'bg-red-100 text-red-800',
 };
 
+interface RepairControlRow {
+  id: string | number;
+  reference: string;
+  customer_name: string;
+  repair_details: string;
+  date_required: string;
+  quoted_value: number | null;
+  telephone: string;
+  status: string;
+}
+
 export default function RepairControlPage() {
   const { user, isLoading: authLoading } = useAuth();
   const posAPI = usePOSAPI(user?.tenant?.slug);
   const posAPIRef = useRef(posAPI);
-  const [repairs, setRepairs] = useState<any[]>([]);
+  const [repairs, setRepairs] = useState<RepairControlRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -60,17 +71,17 @@ export default function RepairControlPage() {
         });
         if (cancelled) return;
 
-        const raw: any[] = Array.isArray(response) ? response : (response as any).results ?? [];
+        const raw: TransactionResponse[] = Array.isArray(response) ? response : (response.results ?? []);
         setRepairs(
-          raw.map((r: any) => ({
+          raw.map((r: TransactionResponse) => ({
             id: r.id,
-            reference: r.repair_number ?? String(r.id),
-            customer_name: r.customer_name ?? '',
-            repair_details: r.repair_details ?? '',
-            date_required: r.date_required ?? '',
+            reference: r.repair_number ? String(r.repair_number) : String(r.id),
+            customer_name: r.customer_name ? String(r.customer_name) : '',
+            repair_details: r.repair_details ? String(r.repair_details) : '',
+            date_required: r.date_required ? String(r.date_required) : '',
             quoted_value: r.quoted_value != null ? Number(r.quoted_value) : null,
-            telephone: r.telephone ?? '',
-            status: r.status ?? 'C',
+            telephone: r.telephone ? String(r.telephone) : '',
+            status: r.status ? String(r.status) : 'C',
           }))
         );
       } catch (error) {

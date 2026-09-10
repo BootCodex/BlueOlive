@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, {} from 'react';
 import {
-  PlusCircle,
-  Package,
+  PlusCircle,
   Truck,
   X,
   ArrowLeft,

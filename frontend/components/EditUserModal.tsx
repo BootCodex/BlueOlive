@@ -52,9 +52,9 @@ export default function EditUserModal({
   const fetchShops = async () => {
     setShopsLoading(true);
     try {
-      const shopsList = await getShops();
+      const shopsList = await getShops() as unknown as Shop[];
       setShops(shopsList);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(extractErrorMessage(err));
     } finally {
       setShopsLoading(false);
@@ -96,7 +96,7 @@ export default function EditUserModal({
       
       await updateUser(user.id, updateData);
       onSuccess();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Update error:', err);
       setError(extractErrorMessage(err));
     } finally {

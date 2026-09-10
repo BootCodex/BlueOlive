@@ -63,7 +63,7 @@ function SuperusersPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-8">
-      <Link href="/owner" className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-100 mb-6 w-fit">
+      <Link href="/" className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-100 mb-6 w-fit">
         <ArrowLeft className="h-4 w-4" /> Back to tenants
       </Link>
 

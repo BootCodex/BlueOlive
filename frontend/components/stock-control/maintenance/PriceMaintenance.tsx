@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { ArrowLeft, Plus } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+import type { JsonObject } from '@/lib/types/json';
 
 interface PriceMaintenanceProps {
   onBack: () => void;
@@ -14,8 +15,8 @@ type PriceOption = 'menu' | 'individual' | 'range-department' | 'range-supplier'
 export default function PriceMaintenance({ onBack }: PriceMaintenanceProps) {
   const [selectedOption, setSelectedOption] = useState<PriceOption>('menu');
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState<any>({});
-  const queryClient = useQueryClient();
+  const [formData, setFormData] = useState<Record<string, string | number>>({});
+  const _queryClient = useQueryClient();
 
   const priceOptions = [
     {
@@ -125,9 +126,9 @@ export default function PriceMaintenance({ onBack }: PriceMaintenanceProps) {
                   required
                 >
                   <option value="">-- Select Stock Item --</option>
-                  {stockItems.map((item: any) => (
-                    <option key={item.stock_code} value={item.stock_code}>
-                      {item.stock_code} - {item.description}
+                  {stockItems.map((item: JsonObject) => (
+                    <option key={String(item.stock_code)} value={String(item.stock_code)}>
+                      {String(item.stock_code)} - {String(item.description)}
                     </option>
                   ))}
                 </select>
@@ -206,9 +207,9 @@ export default function PriceMaintenance({ onBack }: PriceMaintenanceProps) {
                 required
               >
                 <option value="">-- Select Department --</option>
-                {departments.map((dept: any) => (
-                  <option key={dept.id} value={dept.id}>
-                    {dept.name}
+                {departments.map((dept: JsonObject) => (
+                  <option key={String(dept.id)} value={String(dept.id)}>
+                    {String(dept.name)}
                   </option>
                 ))}
               </select>
@@ -301,9 +302,9 @@ export default function PriceMaintenance({ onBack }: PriceMaintenanceProps) {
                 required
               >
                 <option value="">-- Select Supplier --</option>
-                {suppliers.map((supp: any) => (
-                  <option key={supp.id} value={supp.id}>
-                    {supp.name}
+                {suppliers.map((supp: JsonObject) => (
+                  <option key={String(supp.id)} value={String(supp.id)}>
+                    {String(supp.name)}
                   </option>
                 ))}
               </select>
@@ -396,9 +397,9 @@ export default function PriceMaintenance({ onBack }: PriceMaintenanceProps) {
                 required
               >
                 <option value="">-- Select Stock Item --</option>
-                {stockItems.map((item: any) => (
-                  <option key={item.stock_code} value={item.stock_code}>
-                    {item.stock_code} - {item.description}
+                {stockItems.map((item: JsonObject) => (
+                  <option key={String(item.stock_code)} value={String(item.stock_code)}>
+                    {String(item.stock_code)} - {String(item.description)}
                   </option>
                 ))}
               </select>
@@ -489,9 +490,9 @@ export default function PriceMaintenance({ onBack }: PriceMaintenanceProps) {
                   required
                 >
                   <option value="">-- Select Supplier --</option>
-                  {suppliers.map((supp: any) => (
-                    <option key={supp.id} value={supp.id}>
-                      {supp.name}
+                  {suppliers.map((supp: JsonObject) => (
+                    <option key={String(supp.id)} value={String(supp.id)}>
+                      {String(supp.name)}
                     </option>
                   ))}
                 </select>
@@ -506,9 +507,9 @@ export default function PriceMaintenance({ onBack }: PriceMaintenanceProps) {
                   required
                 >
                   <option value="">-- Select Department --</option>
-                  {departments.map((dept: any) => (
-                    <option key={dept.id} value={dept.id}>
-                      {dept.name}
+                  {departments.map((dept: JsonObject) => (
+                    <option key={String(dept.id)} value={String(dept.id)}>
+                      {String(dept.name)}
                     </option>
                   ))}
                 </select>
@@ -576,9 +577,9 @@ export default function PriceMaintenance({ onBack }: PriceMaintenanceProps) {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg"
             >
               <option value="">-- All Suppliers --</option>
-              {suppliers.map((supp: any) => (
-                <option key={supp.id} value={supp.id}>
-                  {supp.name}
+              {suppliers.map((supp: JsonObject) => (
+                <option key={String(supp.id)} value={String(supp.id)}>
+                  {String(supp.name)}
                 </option>
               ))}
             </select>
@@ -602,15 +603,15 @@ export default function PriceMaintenance({ onBack }: PriceMaintenanceProps) {
                     </td>
                   </tr>
                 ) : (
-                  suppliers.map((supp: any) => (
-                    <tr key={supp.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 text-sm text-gray-900">{supp.name}</td>
+                  suppliers.map((supp: JsonObject) => (
+                    <tr key={String(supp.id)} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 text-sm text-gray-900">{String(supp.name)}</td>
                       <td className="px-6 py-4 text-sm text-gray-600">Supplier</td>
                       <td className="px-6 py-4 text-sm text-gray-600">10%</td>
                       <td className="px-6 py-4 text-sm">
                         <button
                           onClick={() => {
-                            setFormData({ supplier_id: supp.id, max_discount_percent: 10 });
+                            setFormData({ supplier_id: String(supp.id), max_discount_percent: 10 });
                             setSelectedOption('max-discount');
                           }}
                           className="text-blue-600 hover:text-blue-800 mr-4"

@@ -59,7 +59,7 @@ export default function StockfinderOrdersPage() {
     try {
       const response = await api.get('/api/v1/stockfinder/orders/');
       setOrders(response.data.results || response.data);
-    } catch (err: any) {
+    } catch {
       setError('Failed to load orders');
     } finally {
       setLoading(false);
@@ -74,7 +74,7 @@ export default function StockfinderOrdersPage() {
       const response = await api.post(`/api/v1/stockfinder/orders/${orderId}/create_job_card/`);
       setSuccess(`JobCard created: ${response.data.job_card_reference}`);
       loadOrders();
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Failed to create JobCard'));
     } finally {
       setActionLoading(null);
@@ -89,7 +89,7 @@ export default function StockfinderOrdersPage() {
       const response = await api.post(`/api/v1/stockfinder/orders/${orderId}/create_invoice/`);
       setSuccess(`Invoice created: ${response.data.invoice_number}`);
       loadOrders();
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Failed to create Invoice'));
     } finally {
       setActionLoading(null);

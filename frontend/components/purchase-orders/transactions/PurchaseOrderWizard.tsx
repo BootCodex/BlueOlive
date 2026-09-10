@@ -136,7 +136,7 @@ export function PurchaseOrderWizard({ onComplete, onCancel }: PurchaseOrderWizar
 
       await purchaseOrdersApi.orders.create(payload as any);
       onComplete();
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Failed to create order'));
     } finally {
       setLoading(false);

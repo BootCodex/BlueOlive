@@ -4,7 +4,7 @@ import DebtorsList from '@/components/DebtorsList';
 import { useState } from 'react';
 
 export default function DebtorsMaintenancePage() {
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [refreshTrigger, _setRefreshTrigger] = useState(0);
 
   return (
     <div className="p-6 space-y-4">

@@ -33,7 +33,7 @@ export default function StockContributionPage() {
         </Link>
         <div>
           <h1 className="text-3xl font-bold">Stock Contribution</h1>
-          <p className="text-gray-600 mt-1">Each item's share of total sales value</p>
+          <p className="text-gray-600 mt-1">Each item&apos;s share of total sales value</p>
         </div>
       </div>
 

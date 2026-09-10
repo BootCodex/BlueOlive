@@ -102,7 +102,7 @@ export default function OneTouchLookupKeyMaintenance({ onBack }: OneTouchLookupK
 
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
         Link a single letter (A-Z) to a stock code for fast POS access — press Shift + the letter
-        instead of searching, and the linked item's details are pulled in automatically.
+        instead of searching, and the linked item&apos;s details are pulled in automatically.
       </div>
 
       {showForm && (

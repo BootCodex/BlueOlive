@@ -17,7 +17,7 @@ interface BalanceCardProps {
 export const BalanceCard: React.FC<BalanceCardProps> = ({
   title,
   amount,
-  currency = 'R',
+  currency: _currency = 'R',
   variant = 'default',
   trend,
   subtitle,

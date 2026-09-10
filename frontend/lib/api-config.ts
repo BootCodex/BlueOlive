@@ -19,16 +19,15 @@ export const ENDPOINTS = {
     LOGOUT: `${API_V1_BASE}/users/auth/logout/`,
     TOKEN_REFRESH: `${API_V1_BASE}/users/auth/token/refresh/`,
     PROFILE: `${API_V1_BASE}/users/auth/profile/`,
+    // Redeems a one-time code from the platform-owner admin app's "Support
+    // Login" action - see admin/app/tenants/[id]/page.tsx and
+    // backend shop_users.views.SupportLoginExchangeView.
+    SUPPORT_LOGIN_EXCHANGE: `${API_V1_BASE}/users/auth/support-login/exchange/`,
   },
 
   // ===== USERS =====
   USERS: {
     BASE: `${API_V1_BASE}/users/users/`,
-    // Platform superuser accounts (not tenant users) - platform-owner only.
-    SUPERUSERS: `${API_V1_BASE}/users/auth/admin/superusers/`,
-    SUPERUSER_DETAIL: (id: number | string) => `${API_V1_BASE}/users/auth/admin/superusers/${id}/`,
-    SUPERUSER_SET_PASSWORD: (id: number | string) => `${API_V1_BASE}/users/auth/admin/superusers/${id}/set_password/`,
-    SUPERUSER_TOGGLE_ACTIVE: (id: number | string) => `${API_V1_BASE}/users/auth/admin/superusers/${id}/toggle_active/`,
   },
 
   // ===== TENANTS/SHOPS =====
@@ -40,26 +39,11 @@ export const ENDPOINTS = {
     ALL_SHOPS: `${API_V1_BASE}/tenants/all_shops/`,
   },
 
-  // ===== SAAS ADMIN (platform owner only) =====
+  // ===== SAAS ADMIN =====
+  // Only the CSV import endpoints are used from the tenant-facing app (see
+  // app/dashboard/admin/import*). Tenant/shop/user/billing management moved
+  // to the standalone admin/ app - see admin/lib/api-config.ts.
   SAAS_ADMIN: {
-    AUTH_LOGIN: `${API_V1_BASE}/saas-admin/auth/login/`,
-    AUTH_LOGOUT: `${API_V1_BASE}/saas-admin/auth/logout/`,
-    AUTH_PROFILE: `${API_V1_BASE}/saas-admin/auth/profile/`,
-    AUTH_TOKEN_REFRESH: `${API_V1_BASE}/saas-admin/auth/token/refresh/`,
-    TENANTS: `${API_V1_BASE}/saas-admin/tenants/`,
-    TENANT_DETAIL: (id: number | string) => `${API_V1_BASE}/saas-admin/tenants/${id}/`,
-    TENANT_ACTIVATE: (id: number | string) => `${API_V1_BASE}/saas-admin/tenants/${id}/activate/`,
-    TENANT_DEACTIVATE: (id: number | string) => `${API_V1_BASE}/saas-admin/tenants/${id}/deactivate/`,
-    SHOPS: `${API_V1_BASE}/saas-admin/shops/`,
-    SHOP_DETAIL: (id: number | string) => `${API_V1_BASE}/saas-admin/shops/${id}/`,
-    SHOP_ACTIVATE: (id: number | string) => `${API_V1_BASE}/saas-admin/shops/${id}/activate/`,
-    SHOP_DEACTIVATE: (id: number | string) => `${API_V1_BASE}/saas-admin/shops/${id}/deactivate/`,
-    TENANT_STATS: `${API_V1_BASE}/saas-admin/tenant-stats/`,
-    USERS_CREATE_ADMIN: `${API_V1_BASE}/saas-admin/users/create-admin/`,
-    USERS_LIST: `${API_V1_BASE}/saas-admin/users/`,
-    USERS_TOGGLE_STATUS: `${API_V1_BASE}/saas-admin/users/toggle-status/`,
-    USERS_RESET_PASSWORD: `${API_V1_BASE}/saas-admin/users/reset-password/`,
-    USERS_ASSIGN_SHOPS: `${API_V1_BASE}/saas-admin/users/assign-shops/`,
     IMPORT_TENANTS: `${API_V1_BASE}/saas-admin/import/tenants/`,
     IMPORT_ANALYZE: `${API_V1_BASE}/saas-admin/import/analyze/`,
     IMPORT_EXECUTE: `${API_V1_BASE}/saas-admin/import/execute/`,

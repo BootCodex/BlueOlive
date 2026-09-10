@@ -323,9 +323,17 @@ MIDDLEWARE = [
 ]
 
 
+# Base URL of the tenant-facing frontend (port 3000), used to build the
+# redirect link for the platform-owner "support login" (log in as tenant)
+# feature - see tenancy/support_login.py.
+TENANT_FRONTEND_URL = os.environ.get("TENANT_FRONTEND_URL", "http://localhost:3000")
+
 # CORS settings
+# Port 3001 is the standalone admin app (frontend on 3000 is the
+# tenant-facing app) - see admin/README.md.
 CORS_ALLOWED_ORIGINS = os.environ.get(
-    "CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000"
+    "CORS_ALLOWED_ORIGINS",
+    "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001",
 ).split(",")
 
 CORS_ALLOW_CREDENTIALS = True
@@ -347,7 +355,8 @@ CORS_ALLOW_HEADERS = [
 
 # CSRF trusted origins for cross-origin requests
 CSRF_TRUSTED_ORIGINS = os.environ.get(
-    "CSRF_TRUSTED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000"
+    "CSRF_TRUSTED_ORIGINS",
+    "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001",
 ).split(",")
 
 ROOT_URLCONF = "core.urls"

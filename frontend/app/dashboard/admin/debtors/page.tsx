@@ -1,10 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import debtorsApi from '@/lib/debtorsApi';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import SummaryCards from '@/components/debtors/dashboard/SummaryCards';
 import AgeAnalysisChart from '@/components/debtors/dashboard/AgeAnalysisChart';
 import QuickLinks from '@/components/debtors/dashboard/QuickLinks';

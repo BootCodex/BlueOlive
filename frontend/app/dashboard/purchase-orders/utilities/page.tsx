@@ -77,7 +77,7 @@ export default function UtilitiesPage() {
                     What this does:
                   </h3>
                   <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
-                    <li>Recomputes each stock item's "quantity on order" from outstanding PO lines</li>
+                    <li>Recomputes each stock item&apos;s &quot;quantity on order&quot; from outstanding PO lines</li>
                     <li>Fixes drift caused by bugs, manual edits, or partial failures</li>
                     <li>Safe to run at any time — it only corrects quantity_on_order, nothing else</li>
                     <li>Requires Admin access</li>

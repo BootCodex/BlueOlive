@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import type { MaybeAxiosError } from '@/lib/types/errors';
 import { 
   Supplier, 
   OutstandingBalance, 
@@ -86,9 +87,9 @@ export default function OutstandingBalanceForm({
       }
       
       onSuccess();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to save outstanding balance:', err);
-      setError(err.message || 'Failed to save outstanding balance');
+      setError((err as MaybeAxiosError).message || 'Failed to save outstanding balance');
     } finally {
       setLoading(false);
     }

@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Plus, Trash2, Save, X, Search, PackageCheck, ChevronDown } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+import type { MaybeAxiosError } from '@/lib/types/errors';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -331,17 +332,18 @@ export default function IncomingStock({ onBack }: IncomingStockProps) {
       setLines([]);
       alert('Incoming stock saved successfully!');
       onBack();
-    } catch (error: any) {
-      const data = error?.response?.data;
+    } catch (error: unknown) {
+      const data = (error as MaybeAxiosError)?.response?.data;
+      const nonFieldErrors = data?.non_field_errors as string[] | undefined;
       const msg =
         data?.detail ??
-        data?.non_field_errors?.[0] ??
+        nonFieldErrors?.[0] ??
         (data && typeof data === 'object'
           ? Object.entries(data)
-              .map(([k, v]: any) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`)
+              .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`)
               .join(' | ')
           : null) ??
-        error?.message ??
+        (error as MaybeAxiosError)?.message ??
         'Unknown error occurred';
       alert(`Save failed: ${msg}`);
     }

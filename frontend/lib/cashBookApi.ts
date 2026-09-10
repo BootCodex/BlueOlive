@@ -24,7 +24,7 @@ export interface IncomeCategory {
   description?: string;
   is_active: boolean;
   created_at?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface Transaction {
@@ -35,7 +35,7 @@ export interface Transaction {
   category_id: number;
   reference?: string;
   created_at?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface BankDeposit {
@@ -45,7 +45,7 @@ export interface BankDeposit {
   reference?: string;
   notes?: string;
   created_at?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface BankTransfer {
@@ -56,7 +56,7 @@ export interface BankTransfer {
   date: string;
   reference?: string;
   created_at?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // Matches BankReconciliationSerializer (backend/core/apps/cash_book) —
@@ -80,7 +80,7 @@ export interface BankReconciliation {
   difference?: number;
   notes?: string;
   created_at?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface CashFloat {
@@ -90,7 +90,7 @@ export interface CashFloat {
   current_balance: number;
   date: string;
   created_at?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface UnpresentedCheque {
@@ -101,13 +101,13 @@ export interface UnpresentedCheque {
   date_issued: string;
   status: 'OUTSTANDING' | 'CLEARED' | 'CANCELLED';
   created_at?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export const cashBookApi = {
   // ============ INCOME CATEGORIES ============
   incomeCategories: {
-    list: async (filters?: any) => {
+    list: async (filters?: Record<string, unknown>) => {
       const response = await api.get<{ results: IncomeCategory[] }>(
         ENDPOINTS.CASH_BOOK.INCOME_CATEGORIES,
         { params: filters }
@@ -145,7 +145,7 @@ export const cashBookApi = {
 
   // ============ EXPENSE CATEGORIES ============
   expenseCategories: {
-    list: async (filters?: any) => {
+    list: async (filters?: Record<string, unknown>) => {
       const response = await api.get<{ results: IncomeCategory[] }>(
         ENDPOINTS.CASH_BOOK.EXPENSE_CATEGORIES,
         { params: filters }
@@ -183,7 +183,7 @@ export const cashBookApi = {
 
   // ============ TRANSACTIONS ============
   transactions: {
-    list: async (filters?: any) => {
+    list: async (filters?: Record<string, unknown>) => {
       const response = await api.get<{ results: Transaction[] }>(
         ENDPOINTS.CASH_BOOK.TRANSACTIONS,
         { params: filters }
@@ -277,7 +277,7 @@ export const cashBookApi = {
 
   // ============ OTHER INCOME ============
   otherIncome: {
-    list: async (filters?: any) => {
+    list: async (filters?: Record<string, unknown>) => {
       const response = await api.get<{ results: Transaction[] }>(
         ENDPOINTS.CASH_BOOK.OTHER_INCOME,
         { params: filters }
@@ -285,7 +285,7 @@ export const cashBookApi = {
       return response.data;
     },
 
-    create: async (data: any) => {
+    create: async (data: Record<string, unknown>) => {
       const response = await api.post(
         ENDPOINTS.CASH_BOOK.OTHER_INCOME,
         data
@@ -296,7 +296,7 @@ export const cashBookApi = {
 
   // ============ OTHER EXPENSES ============
   otherExpenses: {
-    list: async (filters?: any) => {
+    list: async (filters?: Record<string, unknown>) => {
       const response = await api.get<{ results: Transaction[] }>(
         ENDPOINTS.CASH_BOOK.OTHER_EXPENSES,
         { params: filters }
@@ -304,7 +304,7 @@ export const cashBookApi = {
       return response.data;
     },
 
-    create: async (data: any) => {
+    create: async (data: Record<string, unknown>) => {
       const response = await api.post(
         ENDPOINTS.CASH_BOOK.OTHER_EXPENSES,
         data
@@ -315,7 +315,7 @@ export const cashBookApi = {
 
   // ============ BANK DEPOSITS ============
   deposits: {
-    list: async (filters?: any) => {
+    list: async (filters?: Record<string, unknown>) => {
       const response = await api.get<{ results: BankDeposit[] }>(
         ENDPOINTS.CASH_BOOK.BANK_DEPOSITS,
         { params: filters }
@@ -341,7 +341,7 @@ export const cashBookApi = {
 
   // ============ CASH WITHDRAWALS ============
   withdrawals: {
-    list: async (filters?: any) => {
+    list: async (filters?: Record<string, unknown>) => {
       const response = await api.get(
         ENDPOINTS.CASH_BOOK.CASH_WITHDRAWALS,
         { params: filters }
@@ -349,7 +349,7 @@ export const cashBookApi = {
       return response.data;
     },
 
-    create: async (data: any) => {
+    create: async (data: Record<string, unknown>) => {
       const response = await api.post(
         ENDPOINTS.CASH_BOOK.CASH_WITHDRAWALS,
         data
@@ -360,7 +360,7 @@ export const cashBookApi = {
 
   // ============ BANK TRANSFERS ============
   transfers: {
-    list: async (filters?: any) => {
+    list: async (filters?: Record<string, unknown>) => {
       const response = await api.get<{ results: BankTransfer[] }>(
         ENDPOINTS.CASH_BOOK.BANK_TRANSFERS,
         { params: filters }
@@ -379,7 +379,7 @@ export const cashBookApi = {
 
   // ============ BANK CHARGES ============
   charges: {
-    list: async (filters?: any) => {
+    list: async (filters?: Record<string, unknown>) => {
       const response = await api.get(
         ENDPOINTS.CASH_BOOK.BANK_CHARGES,
         { params: filters }
@@ -387,7 +387,7 @@ export const cashBookApi = {
       return response.data;
     },
 
-    create: async (data: any) => {
+    create: async (data: Record<string, unknown>) => {
       const response = await api.post(
         ENDPOINTS.CASH_BOOK.BANK_CHARGES,
         data
@@ -398,7 +398,7 @@ export const cashBookApi = {
 
   // ============ INTEREST RECEIVED ============
   interestReceived: {
-    list: async (filters?: any) => {
+    list: async (filters?: Record<string, unknown>) => {
       const response = await api.get(
         ENDPOINTS.CASH_BOOK.INTEREST_RECEIVED,
         { params: filters }
@@ -406,7 +406,7 @@ export const cashBookApi = {
       return response.data;
     },
 
-    create: async (data: any) => {
+    create: async (data: Record<string, unknown>) => {
       const response = await api.post(
         ENDPOINTS.CASH_BOOK.INTEREST_RECEIVED,
         data
@@ -417,7 +417,7 @@ export const cashBookApi = {
 
   // ============ BANK RECONCILIATIONS ============
   reconciliations: {
-    list: async (filters?: any) => {
+    list: async (filters?: Record<string, unknown>) => {
       const response = await api.get<{ results: BankReconciliation[] }>(
         ENDPOINTS.CASH_BOOK.RECONCILIATIONS,
         { params: filters }
@@ -480,7 +480,7 @@ export const cashBookApi = {
 
   // ============ CASH FLOATS ============
   floats: {
-    list: async (filters?: any) => {
+    list: async (filters?: Record<string, unknown>) => {
       const response = await api.get<{ results: CashFloat[] }>(
         ENDPOINTS.CASH_BOOK.CASH_FLOATS,
         { params: filters }
@@ -514,7 +514,7 @@ export const cashBookApi = {
 
   // ============ CATEGORY BALANCES ============
   categoryBalances: {
-    list: async (filters?: any) => {
+    list: async (filters?: Record<string, unknown>) => {
       const response = await api.get(
         ENDPOINTS.CASH_BOOK.CATEGORY_BALANCES,
         { params: filters }
@@ -532,7 +532,7 @@ export const cashBookApi = {
 
   // ============ UNPRESENTED CHEQUES ============
   unpresentedCheques: {
-    list: async (filters?: any) => {
+    list: async (filters?: Record<string, unknown>) => {
       const response = await api.get<{ results: UnpresentedCheque[] }>(
         ENDPOINTS.CASH_BOOK.UNPRESENTED_CHEQUES,
         { params: filters }

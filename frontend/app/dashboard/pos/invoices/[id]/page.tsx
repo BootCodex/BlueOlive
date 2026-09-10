@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import type { TenderData } from '@/lib/posApi';
+import type { MaybeAxiosError } from '@/lib/types/errors';
 
 const TENDER_TYPES: { value: TenderData['tender_type']; label: string }[] = [
   { value: 'CASH', label: 'Cash' },
@@ -98,9 +99,9 @@ export default function InvoiceDetail() {
       
       const response = await posAPI.getInvoice(invoiceId);
       setInvoice(response);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error loading invoice:', err);
-      setError(err.message || 'Failed to load invoice');
+      setError((err as MaybeAxiosError).message || 'Failed to load invoice');
     } finally {
       setLoading(false);
     }
@@ -122,9 +123,9 @@ export default function InvoiceDetail() {
       } else {
         alert(result.message);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error sending email:', err);
-      alert(err.message || 'Failed to send email');
+      alert((err as MaybeAxiosError).message || 'Failed to send email');
     } finally {
       setSendingEmail(false);
     }
@@ -171,9 +172,9 @@ export default function InvoiceDetail() {
 
       setPaymentDialogOpen(false);
       await loadInvoice();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error recording payment:', err);
-      setPayError(err.message || 'Failed to record payment');
+      setPayError((err as MaybeAxiosError).message || 'Failed to record payment');
     } finally {
       setRecordingPayment(false);
     }
@@ -192,9 +193,9 @@ export default function InvoiceDetail() {
       setDiscountDialogOpen(false);
       setDiscountPercentage('');
       await loadInvoice();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error applying subtotal discount:', err);
-      setDiscountError(err.message || 'Failed to apply discount');
+      setDiscountError((err as MaybeAxiosError).message || 'Failed to apply discount');
     } finally {
       setApplyingDiscount(false);
     }
@@ -213,9 +214,9 @@ export default function InvoiceDetail() {
       setSetPriceDialogOpen(false);
       setTargetTotal('');
       await loadInvoice();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error setting invoice total:', err);
-      setSetPriceError(err.message || 'Failed to set price');
+      setSetPriceError((err as MaybeAxiosError).message || 'Failed to set price');
     } finally {
       setApplyingSetPrice(false);
     }
@@ -245,9 +246,9 @@ export default function InvoiceDetail() {
       await posAPI.partialUpdateInvoice(invoiceId, headerForm as any);
       setHeaderDialogOpen(false);
       await loadInvoice();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error saving invoice header:', err);
-      setHeaderError(err.message || 'Failed to save header');
+      setHeaderError((err as MaybeAxiosError).message || 'Failed to save header');
     } finally {
       setSavingHeader(false);
     }
@@ -762,7 +763,7 @@ export default function InvoiceDetail() {
           <DialogHeader>
             <DialogTitle>Set Invoice Total</DialogTitle>
             <DialogDescription>
-              Enter the revised inclusive total. Every line's price is scaled proportionally to reach it.
+              Enter the revised inclusive total. Every line&apos;s price is scaled proportionally to reach it.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
