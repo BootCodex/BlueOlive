@@ -7,6 +7,7 @@ import { api } from '@/lib/api';
 import { stockControlApi } from '@/lib/stockControlApi';
 import { useAuthContext } from '@/lib/AuthContext';
 import { Pagination } from '@/components/ui/pagination';
+import type { MaybeAxiosError } from '@/lib/types/errors';
 
 interface Supplier {
   id: number;
@@ -118,14 +119,14 @@ export default function StockItemMaintenance({ onBack }: StockItemMaintenancePro
         setSuppliers(suppliersRes.data.results || suppliersRes.data || []);
         setTaxCodes(taxRes.data.results || taxRes.data || []);
         setDepartments(deptRes.data.results || deptRes.data || []);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Error loading dependencies:', err);
-        if (err.response?.status === 401) {
+        if ((err as MaybeAxiosError).response?.status === 401) {
           setDepsError('Session expired. Please log in again.');
-        } else if (err.response?.status === 403) {
+        } else if ((err as MaybeAxiosError).response?.status === 403) {
           setDepsError('You do not have permission to access this data.');
         } else {
-          setDepsError(err.response?.data?.message || err.message || 'Failed to load dependencies. Please try again.');
+          setDepsError((err as MaybeAxiosError).response?.data?.message || (err as MaybeAxiosError).message || 'Failed to load dependencies. Please try again.');
         }
       } finally {
         setLoadingDeps(false);
@@ -151,9 +152,9 @@ export default function StockItemMaintenance({ onBack }: StockItemMaintenancePro
         // Handle paginated response
         setTotal(response.data.count || 0);
         return response.data.results || response.data || [];
-      } catch (err: any) {
+      } catch (err: unknown) {
         // If endpoint doesn't exist (404), return empty array instead of failing
-        if (err.response?.status === 404) {
+        if ((err as MaybeAxiosError).response?.status === 404) {
           console.warn('Stock items endpoint not found. This endpoint may not be implemented on the backend.');
           return [];
         }
@@ -203,7 +204,7 @@ export default function StockItemMaintenance({ onBack }: StockItemMaintenancePro
   };
 
   // Handle selling price change
-  const handlePriceChange = (level: 1 | 2 | 3, value: number) => {
+  const _handlePriceChange = (level: 1 | 2 | 3, value: number) => {
     const priceKey = `selling_price_${level}` as keyof StockItem;
     const markupKey = `markup_${level}` as keyof StockItem;
     

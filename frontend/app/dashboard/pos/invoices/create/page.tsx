@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/lib/useAuth';
-import { usePOSAPI, LineItem, InvoiceCreateData } from '@/lib/posApi';
+import { usePOSAPI, LineItem } from '@/lib/posApi';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -23,6 +23,7 @@ import {
   TotalsSummary,
 } from '@/components/pos/form-components';
 import { DebtorPicker, StockItemPicker } from '@/components/pos';
+import type { MaybeAxiosError } from '@/lib/types/errors';
 
 export default function CreateInvoice() {
   const { user, isLoading: authLoading } = useAuth();
@@ -209,12 +210,12 @@ export default function CreateInvoice() {
       );
       console.log('========================');
 
-      const result = await posAPI.createInvoice(invoiceData);
+      const _result = await posAPI.createInvoice(invoiceData);
       setSuccess('Invoice created successfully!');
       setTimeout(() => router.push('/dashboard/pos/invoices'), 2000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Invoice creation error:', err);
-      setError(err?.message || 'Failed to create invoice');
+      setError((err as MaybeAxiosError)?.message || 'Failed to create invoice');
     } finally {
       setLoading(false);
     }

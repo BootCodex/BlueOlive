@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getUsers, updateUser, deleteUser } from '@/lib/api';
+import { getUsers, deleteUser } from '@/lib/api';
 import { extractErrorMessage } from '@/lib/utils';
 import { Edit2, Trash2, Plus } from 'lucide-react';
 import AddUserModal from './AddUserModal';
@@ -39,9 +39,9 @@ export default function UsersListPanel({ refreshKey }: UsersListPanelProps) {
     setLoading(true);
     setError('');
     try {
-      const usersList = await getUsers();
+      const usersList = await getUsers() as unknown as User[];
       setUsers(usersList);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(extractErrorMessage(err));
     } finally {
       setLoading(false);
@@ -55,7 +55,7 @@ export default function UsersListPanel({ refreshKey }: UsersListPanelProps) {
     try {
       await deleteUser(id);
       setUsers(users.filter((u) => u.id !== id));
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(extractErrorMessage(err));
     } finally {
       setDeleting(null);

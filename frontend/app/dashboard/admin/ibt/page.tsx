@@ -62,7 +62,7 @@ export default function IBTPage() {
     notes: '',
   });
 
-  const { data: transfers, isLoading, refetch } = useQuery({
+  const { data: transfers, isLoading, refetch: _refetch } = useQuery({
     queryKey: ['branch-transfers', searchTerm],
     queryFn: () => apiRequest('/api/v1/stock-control/branch-transfers/'),
     select: (response) => response.data.results || response.data,
@@ -149,7 +149,7 @@ export default function IBTPage() {
           </div>
         ) : filteredTransfers.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            No transfers found. Click "New Transfer" to create one.
+            No transfers found. Click &quot;New Transfer&quot; to create one.
           </div>
         ) : (
           <Table>

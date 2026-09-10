@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/lib/useAuth';
-import { usePOSAPI } from '@/lib/posApi';
+import { usePOSAPI, type TransactionResponse } from '@/lib/posApi';
 import Link from 'next/link';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -21,11 +21,21 @@ import {
   AlertCircle,
 } from 'lucide-react';
 
+interface PayoutRow {
+  id: string | number;
+  reference: string;
+  description: string;
+  date: string;
+  amount: number;
+  payee: string;
+  cashier_name: string;
+}
+
 export default function PayoutPage() {
   const { user, isLoading: authLoading } = useAuth();
   const posAPI = usePOSAPI(user?.tenant?.slug);
   const posAPIRef = useRef(posAPI);
-  const [payouts, setPayouts] = useState<any[]>([]);
+  const [payouts, setPayouts] = useState<PayoutRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -40,16 +50,16 @@ export default function PayoutPage() {
         const response = await posAPIRef.current.listPayouts({ page: currentPage });
         if (cancelled) return;
 
-        const raw: any[] = Array.isArray(response) ? response : (response as any).results ?? [];
+        const raw: TransactionResponse[] = Array.isArray(response) ? response : (response.results ?? []);
         setPayouts(
-          raw.map((p: any) => ({
+          raw.map((p: TransactionResponse) => ({
             id: p.id,
-            reference: p.reference || '—',
-            description: p.description ?? '',
-            date: p.payout_date ?? '',
+            reference: p.reference ? String(p.reference) : '—',
+            description: p.description ? String(p.description) : '',
+            date: p.payout_date ? String(p.payout_date) : '',
             amount: Number(p.amount ?? 0),
-            payee: p.payee ?? '',
-            cashier_name: p.cashier_name ?? '',
+            payee: p.payee ? String(p.payee) : '',
+            cashier_name: p.cashier_name ? String(p.cashier_name) : '',
           }))
         );
       } catch (error) {

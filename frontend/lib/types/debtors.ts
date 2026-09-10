@@ -100,9 +100,9 @@ export interface DebtorAccount {
   dintflag?: string | boolean; // Legacy alias for interest_flag
 }
 
-export interface DebtorCreateData extends Omit<DebtorAccount, 'id' | 'total_balance' | 'overdue_balance' | 'available_credit' | 'credit_utilization_pct' | 'is_blocked_flag' | 'created_at' | 'updated_at'> {}
+export type DebtorCreateData = Omit<DebtorAccount, 'id' | 'total_balance' | 'overdue_balance' | 'available_credit' | 'credit_utilization_pct' | 'is_blocked_flag' | 'created_at' | 'updated_at'>;
 
-export interface DebtorEditData extends Partial<DebtorCreateData> {}
+export type DebtorEditData = Partial<DebtorCreateData>;
 
 // ============ Age Analysis ============
 export interface AgeAnalysisBucket {
@@ -191,7 +191,7 @@ export interface PostDatedCheque {
   created_at?: string;
 }
 
-export interface PostDatedChequeCreateData extends Omit<PostDatedCheque, 'id' | 'created_at'> {}
+export type PostDatedChequeCreateData = Omit<PostDatedCheque, 'id' | 'created_at'>;
 
 // ============ Sales Areas ============
 export interface SalesArea {

@@ -364,6 +364,11 @@ class Tenant(models.Model):
         default="pending",
         help_text="Status of tenant database/signup provisioning",
     )
+    setup_error = models.TextField(
+        blank=True,
+        default="",
+        help_text="Exception message from the last failed provisioning attempt, if any",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     tenant_control = models.BooleanField(default=True)
 
@@ -488,6 +493,11 @@ class Shop(models.Model):
         choices=SETUP_STATUS_CHOICES,
         default="pending",
         help_text="Status of shop schema setup",
+    )
+    setup_error = models.TextField(
+        blank=True,
+        default="",
+        help_text="Exception message from the last failed provisioning attempt, if any",
     )
     created_at = models.DateTimeField(auto_now_add=True)
 

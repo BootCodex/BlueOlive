@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/select';
 import { ArrowLeft, Search, AlertCircle, Download } from 'lucide-react';
 import { apiRequest } from '@/lib/api';
+import type { MaybeAxiosError } from '@/lib/types/errors';
 
 interface SupplierDetails {
   account_number: number;
@@ -88,8 +89,8 @@ export default function IndividualAccountEnquiry({ onBack }: { onBack: () => voi
       }
 
       setData(response.data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch supplier details');
+    } catch (err: unknown) {
+      setError((err as MaybeAxiosError).message || 'Failed to fetch supplier details');
       setData(null);
     } finally {
       setLoading(false);

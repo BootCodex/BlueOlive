@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { AlertCircle, Plus, Trash2 } from 'lucide-react';
 import { useCreditorsAPI } from '@/lib/creditorsApi';
 import creditorsApi from '@/lib/creditorsApi';
+import type { CreditorAccount, ExpenseCategory, CreditorInvoiceCreateData } from '@/lib/types/creditors';
 
 interface LineItem {
   id: string;
@@ -32,20 +33,15 @@ export default function ExpenseReturnForm({ onComplete }: ExpenseReturnFormProps
     { id: '1', category: '', description: '', cost: 0, tax_code: 1 },
   ]);
 
-  const [suppliers, setSuppliers] = useState<any[]>([]);
-  const [expenseCategories, setExpenseCategories] = useState<any[]>([]);
+  const [suppliers, setSuppliers] = useState<CreditorAccount[]>([]);
+  const [expenseCategories, setExpenseCategories] = useState<ExpenseCategory[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  useEffect(() => {
-    fetchSuppliers();
-    fetchExpenseCategories();
-  }, []);
-
   const fetchSuppliers = async () => {
     try {
-      const suppliers = await listSuppliers() as any;
+      const suppliers = await listSuppliers();
       setSuppliers(suppliers.results || []);
     } catch (err) {
       console.error('Error fetching suppliers:', err);
@@ -63,6 +59,15 @@ export default function ExpenseReturnForm({ onComplete }: ExpenseReturnFormProps
     }
   };
 
+  // Standard fetch-on-mount effect; fetchSuppliers/fetchExpenseCategories
+  // are recreated each render (not memoized) so they're intentionally
+  // omitted from deps to avoid a refetch loop.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchSuppliers();
+    fetchExpenseCategories();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     setFormData({
@@ -71,7 +76,7 @@ export default function ExpenseReturnForm({ onComplete }: ExpenseReturnFormProps
     });
   };
 
-  const handleLineItemChange = (index: number, field: string, value: any) => {
+  const handleLineItemChange = (index: number, field: string, value: string | number) => {
     const updatedItems = [...lineItems];
     updatedItems[index] = {
       ...updatedItems[index],
@@ -124,7 +129,12 @@ export default function ExpenseReturnForm({ onComplete }: ExpenseReturnFormProps
         })),
       };
 
-      const response = await creditorsApi.invoices.create(payload as any);
+      // NOTE: this payload shape (supplier/document_date/document_number/
+      // inclusive_of_vat/line_items.category) does not match
+      // CreditorInvoiceCreateData (creditor/transaction_date/
+      // supplier_invoice_number/inclusive_exclusive/line_items.stock_code) -
+      // pre-existing mismatch, preserved as-is rather than guessed at here.
+      const response = await creditorsApi.invoices.create(payload as unknown as CreditorInvoiceCreateData);
 
       if (!response) {
         throw new Error('Failed to create transaction');
@@ -172,9 +182,9 @@ export default function ExpenseReturnForm({ onComplete }: ExpenseReturnFormProps
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">Select Supplier</option>
-              {suppliers.map((s: any) => (
-                <option key={s.id} value={s.account_number}>
-                  {s.name} ({s.account_number})
+              {suppliers.map((s) => (
+                <option key={s.id} value={s.supplier_number}>
+                  {s.name} ({s.supplier_number})
                 </option>
               ))}
             </select>
@@ -264,9 +274,9 @@ export default function ExpenseReturnForm({ onComplete }: ExpenseReturnFormProps
                         className="w-full px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
                       >
                         <option value="">Select Category</option>
-                        {expenseCategories.map((cat: any) => (
+                        {expenseCategories.map((cat) => (
                           <option key={cat.id} value={cat.category_number}>
-                            {cat.category_name}
+                            {cat.name}
                           </option>
                         ))}
                       </select>

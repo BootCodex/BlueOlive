@@ -7,6 +7,7 @@
  */
 
 import { API_BASE_URL, ENDPOINTS, buildApiUrl } from '../api-config';
+import type { PostDatedCheque, SalesArea, AuditLog } from '../types/debtors';
 
 // ===== TYPE DEFINITIONS =====
 export interface DebtorAccount {
@@ -15,7 +16,7 @@ export interface DebtorAccount {
   dcrnt: number;
   dtype: 'IN' | 'CN' | 'CS' | 'CR' | 'RCP' | 'INT' | 'JD' | 'JC';
   created_at: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface DebtorTransaction {
@@ -24,7 +25,7 @@ export interface DebtorTransaction {
   dtype: 'IN' | 'CN' | 'CS' | 'CR' | 'RCP' | 'INT' | 'JD' | 'JC';
   amount: number;
   date: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface OpenItem {
@@ -32,7 +33,7 @@ export interface OpenItem {
   dno: string;
   amount: number;
   due_date: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface PaginatedResponse<T> {
@@ -54,7 +55,7 @@ export interface QueryParams {
   limit?: number;
   offset?: number;
   dtype?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // ===== DEBTORS API CLIENT =====
@@ -286,7 +287,7 @@ export class DebtorsApiClient {
   /**
    * Get post-dated cheques (PDC)
    */
-  async getPostDatedCheques(params: QueryParams = {}): Promise<PaginatedResponse<any>> {
+  async getPostDatedCheques(params: QueryParams = {}): Promise<PaginatedResponse<PostDatedCheque>> {
     const url = buildApiUrl(ENDPOINTS.DEBTORS.POST_DATED_CHEQUES) + this.buildQueryString(params);
 
     const response = await fetch(url, {
@@ -294,7 +295,7 @@ export class DebtorsApiClient {
       headers: this.getHeaders(),
     });
 
-    return this.handleResponse<PaginatedResponse<any>>(response);
+    return this.handleResponse<PaginatedResponse<PostDatedCheque>>(response);
   }
 
   // ===== AUDIT TRAIL =====
@@ -302,7 +303,7 @@ export class DebtorsApiClient {
   /**
    * Get audit trail for debtors
    */
-  async getAuditTrail(params: QueryParams = {}): Promise<PaginatedResponse<any>> {
+  async getAuditTrail(params: QueryParams = {}): Promise<PaginatedResponse<AuditLog>> {
     const url = buildApiUrl(ENDPOINTS.DEBTORS.AUDIT) + this.buildQueryString(params);
 
     const response = await fetch(url, {
@@ -310,7 +311,7 @@ export class DebtorsApiClient {
       headers: this.getHeaders(),
     });
 
-    return this.handleResponse<PaginatedResponse<any>>(response);
+    return this.handleResponse<PaginatedResponse<AuditLog>>(response);
   }
 
   // ===== SALES AREAS =====
@@ -318,7 +319,7 @@ export class DebtorsApiClient {
   /**
    * Get sales areas for debtors
    */
-  async getSalesAreas(): Promise<any[]> {
+  async getSalesAreas(): Promise<SalesArea[]> {
     const url = buildApiUrl(ENDPOINTS.DEBTORS.SALES_AREAS);
 
     const response = await fetch(url, {
@@ -326,7 +327,7 @@ export class DebtorsApiClient {
       headers: this.getHeaders(),
     });
 
-    return this.handleResponse<any[]>(response);
+    return this.handleResponse<SalesArea[]>(response);
   }
 
   // ===== SPECIAL ACTIONS =====
@@ -334,7 +335,7 @@ export class DebtorsApiClient {
   /**
    * Get age analysis for a debtor (aging of outstanding amounts)
    */
-  async getAgeAnalysis(dno: string): Promise<any> {
+  async getAgeAnalysis(dno: string): Promise<Record<string, unknown>> {
     const url = buildApiUrl(ENDPOINTS.DEBTORS.AGE_ANALYSIS(dno));
 
     const response = await fetch(url, {
@@ -342,13 +343,13 @@ export class DebtorsApiClient {
       headers: this.getHeaders(),
     });
 
-    return this.handleResponse<any>(response);
+    return this.handleResponse<Record<string, unknown>>(response);
   }
 
   /**
    * Get balance details for a debtor
    */
-  async getBalanceDetails(dno: string): Promise<any> {
+  async getBalanceDetails(dno: string): Promise<Record<string, unknown>> {
     const url = buildApiUrl(ENDPOINTS.DEBTORS.BALANCE_DETAILS(dno));
 
     const response = await fetch(url, {
@@ -356,13 +357,13 @@ export class DebtorsApiClient {
       headers: this.getHeaders(),
     });
 
-    return this.handleResponse<any>(response);
+    return this.handleResponse<Record<string, unknown>>(response);
   }
 
   /**
    * Block a debtor account (prevent further transactions)
    */
-  async blockDebtor(dno: string, reason?: string): Promise<any> {
+  async blockDebtor(dno: string, reason?: string): Promise<Record<string, unknown>> {
     const url = buildApiUrl(ENDPOINTS.DEBTORS.BLOCK_ACCOUNT(dno));
 
     const response = await fetch(url, {
@@ -371,13 +372,13 @@ export class DebtorsApiClient {
       body: JSON.stringify({ reason }),
     });
 
-    return this.handleResponse<any>(response);
+    return this.handleResponse<Record<string, unknown>>(response);
   }
 
   /**
    * Unblock a debtor account
    */
-  async unblockDebtor(dno: string, reason?: string): Promise<any> {
+  async unblockDebtor(dno: string, reason?: string): Promise<Record<string, unknown>> {
     const url = buildApiUrl(ENDPOINTS.DEBTORS.UNBLOCK_ACCOUNT(dno));
 
     const response = await fetch(url, {
@@ -386,13 +387,13 @@ export class DebtorsApiClient {
       body: JSON.stringify({ reason }),
     });
 
-    return this.handleResponse<any>(response);
+    return this.handleResponse<Record<string, unknown>>(response);
   }
 
   /**
    * Get summary of debtors (totals, counts, etc.)
    */
-  async getSummary(): Promise<any> {
+  async getSummary(): Promise<Record<string, unknown>> {
     const url = buildApiUrl(ENDPOINTS.DEBTORS.SUMMARY);
 
     const response = await fetch(url, {
@@ -400,7 +401,7 @@ export class DebtorsApiClient {
       headers: this.getHeaders(),
     });
 
-    return this.handleResponse<any>(response);
+    return this.handleResponse<Record<string, unknown>>(response);
   }
 }
 

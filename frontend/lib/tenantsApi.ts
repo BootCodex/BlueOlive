@@ -18,7 +18,7 @@ export interface Tenant {
   code: string;
   status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
   created_at: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface Shop {
@@ -31,7 +31,7 @@ export interface Shop {
   email?: string;
   status: 'ACTIVE' | 'INACTIVE';
   created_at: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface TenantShop {
@@ -41,7 +41,7 @@ export interface TenantShop {
   tenant?: Tenant;
   shop?: Shop;
   created_at: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface CurrentTenant {
@@ -49,7 +49,7 @@ export interface CurrentTenant {
   shop_id: number;
   tenant_name: string;
   shop_name: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export const tenantsApi = {
@@ -58,7 +58,7 @@ export const tenantsApi = {
     /**
      * List all tenants
      */
-    list: async (filters?: any) => {
+    list: async (filters?: Record<string, unknown>) => {
       const response = await api.get<{ results: Tenant[] }>(
         ENDPOINTS.TENANTS.BASE,
         { params: filters }
@@ -111,7 +111,7 @@ export const tenantsApi = {
     /**
      * List all shops
      */
-    list: async (filters?: any) => {
+    list: async (filters?: Record<string, unknown>) => {
       const response = await api.get<{ results: Shop[] }>(
         ENDPOINTS.TENANTS.SHOPS,
         { params: filters }
@@ -188,7 +188,7 @@ export const tenantsApi = {
     /**
      * List all tenant-shop relationships
      */
-    list: async (filters?: any) => {
+    list: async (filters?: Record<string, unknown>) => {
       const response = await api.get<{ results: TenantShop[] }>(
         ENDPOINTS.TENANTS.TENANT_SHOPS,
         { params: filters }
@@ -241,7 +241,7 @@ export const tenantsApi = {
     /**
      * Get list of all shops available in the system
      */
-    list: async (filters?: any) => {
+    list: async (filters?: Record<string, unknown>) => {
       const response = await api.get<{ results: Shop[] }>(
         ENDPOINTS.TENANTS.ALL_SHOPS,
         { params: filters }

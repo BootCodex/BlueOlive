@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Settings, Plus, Trash2, Edit2, Loader, Check, X, RefreshCw, Webhook } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/lib/api";
+import type { MaybeAxiosError } from '@/lib/types/errors';
 
 interface StockFinderConfig {
   id: number;
@@ -61,8 +62,8 @@ export default function StockfinderSettingsPage() {
     try {
       const response = await api.get('/api/v1/stockfinder/configs/');
       setConfigs(response.data.results || response.data);
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to load configurations');
+    } catch (err: unknown) {
+      setError((err as MaybeAxiosError).response?.data?.detail || 'Failed to load configurations');
     } finally {
       setLoading(false);
     }
@@ -146,8 +147,8 @@ export default function StockfinderSettingsPage() {
       loadConfigs();
       setEditingConfig(null);
       setIsCreating(false);
-    } catch (err: any) {
-      setError(err.response?.data?.detail || JSON.stringify(err.response?.data) || 'Failed to save configuration');
+    } catch (err: unknown) {
+      setError((err as MaybeAxiosError).response?.data?.detail || JSON.stringify((err as MaybeAxiosError).response?.data) || 'Failed to save configuration');
     } finally {
       setSaving(false);
     }
@@ -160,8 +161,8 @@ export default function StockfinderSettingsPage() {
       await api.delete(`/api/v1/stockfinder/configs/${id}/`);
       setSuccessMessage('Configuration deleted successfully!');
       loadConfigs();
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to delete configuration');
+    } catch (err: unknown) {
+      setError((err as MaybeAxiosError).response?.data?.detail || 'Failed to delete configuration');
     }
   };
 
@@ -170,8 +171,8 @@ export default function StockfinderSettingsPage() {
     try {
       const response = await api.post(`/api/v1/stockfinder/configs/${id}/test_connection/`);
       setSuccessMessage(response.data.message || 'Connection successful!');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Connection failed');
+    } catch (err: unknown) {
+      setError((err as MaybeAxiosError).response?.data?.message || 'Connection failed');
     } finally {
       setTesting(false);
     }
@@ -182,8 +183,8 @@ export default function StockfinderSettingsPage() {
     try {
       const response = await api.post(`/api/v1/stockfinder/configs/${id}/sync_stock/`);
       setSuccessMessage(response.data.message || 'Stock sync initiated!');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Sync failed');
+    } catch (err: unknown) {
+      setError((err as MaybeAxiosError).response?.data?.message || 'Sync failed');
     } finally {
       setTesting(false);
     }
@@ -440,7 +441,7 @@ export default function StockfinderSettingsPage() {
         ) : configs.length === 0 ? (
           <Card>
             <CardContent className="py-8 text-center text-gray-500">
-              No Stockfinder configurations found. Click "Add Configuration" to create one.
+              No Stockfinder configurations found. Click &quot;Add Configuration&quot; to create one.
             </CardContent>
           </Card>
         ) : (

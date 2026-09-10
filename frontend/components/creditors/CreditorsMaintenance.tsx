@@ -64,7 +64,7 @@ export default function CreditorsMaintenance() {
     }
   };
 
-  const handleFormSuccess = (creditor: Supplier) => {
+  const handleFormSuccess = (_creditor: Supplier) => {
     setShowForm(false);
     setSelectedCreditor(null);
     loadCreditors();

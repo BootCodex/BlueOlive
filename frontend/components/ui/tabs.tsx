@@ -36,7 +36,7 @@ Tabs.displayName = 'Tabs';
 const TabsList = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & { activeTab?: string; onTabChange?: (value: string) => void }
->(({ className, activeTab, onTabChange, ...props }, ref) => (
+>(({ className, activeTab: _activeTab, onTabChange: _onTabChange, ...props }, ref) => (
   <div
     ref={ref}
     className={cn(
@@ -70,7 +70,7 @@ TabsTrigger.displayName = 'TabsTrigger';
 const TabsContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & { value?: string; activeTab?: string; onTabChange?: (value: string) => void }
->(({ className, value, activeTab, onTabChange, ...props }, ref) => (
+>(({ className, value, activeTab, onTabChange: _onTabChange, ...props }, ref) => (
   <div
     ref={ref}
     className={cn(

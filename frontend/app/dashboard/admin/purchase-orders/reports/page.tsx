@@ -65,9 +65,9 @@ const REPORTS: ReportTemplate[] = [
 export default function ReportsPage() {
   const [selectedReport, setSelectedReport] = useState<string | null>(null);
   const [dateFrom, setDateFrom] = useState(
-    new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    () => new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
   );
-  const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
+  const [dateTo, setDateTo] = useState(() => new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [rows, setRows] = useState<any[]>([]);

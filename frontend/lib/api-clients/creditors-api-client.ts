@@ -25,11 +25,12 @@ import {
   ExpenseCategoryCreateData,
   Transaction,
   TransactionCreateData,
-  TransactionFilters,
-  CreditorFilters,
-  ExpenseCategoryFilters,
   CreditorsSummary,
   PaginatedResponse,
+  GoodsReceivedNote,
+  GoodsReceivedNoteCreateData,
+  RFC,
+  RFCCreateData,
 } from '../types/creditors';
 
 // ===== TYPE DEFINITIONS =====
@@ -48,7 +49,7 @@ export interface QueryParams {
   page_size?: number;
   is_active?: boolean;
   account_type?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 // ===== CREDITORS API CLIENT =====
@@ -273,7 +274,7 @@ export class CreditorsApiClient {
   /**
    * Get all GRNs
    */
-  async getGrns(params: QueryParams = {}): Promise<PaginatedResponse<any>> {
+  async getGrns(params: QueryParams = {}): Promise<PaginatedResponse<GoodsReceivedNote>> {
     const url = buildApiUrl(ENDPOINTS.CREDITORS.GRNS) + this.buildQueryString(params);
 
     const response = await fetch(url, {
@@ -281,13 +282,13 @@ export class CreditorsApiClient {
       headers: this.getHeaders(),
     });
 
-    return this.handleResponse<PaginatedResponse<any>>(response);
+    return this.handleResponse<PaginatedResponse<GoodsReceivedNote>>(response);
   }
 
   /**
    * Get a specific GRN by ID
    */
-  async getGrnById(id: string | number): Promise<any> {
+  async getGrnById(id: string | number): Promise<GoodsReceivedNote> {
     const url = buildApiUrl(`${ENDPOINTS.CREDITORS.GRNS}${id}/`);
 
     const response = await fetch(url, {
@@ -295,13 +296,13 @@ export class CreditorsApiClient {
       headers: this.getHeaders(),
     });
 
-    return this.handleResponse<any>(response);
+    return this.handleResponse<GoodsReceivedNote>(response);
   }
 
   /**
    * Create a new GRN
    */
-  async createGrn(data: any): Promise<any> {
+  async createGrn(data: GoodsReceivedNoteCreateData): Promise<GoodsReceivedNote> {
     const url = buildApiUrl(ENDPOINTS.CREDITORS.GRNS);
 
     const response = await fetch(url, {
@@ -310,13 +311,13 @@ export class CreditorsApiClient {
       body: JSON.stringify(data),
     });
 
-    return this.handleResponse<any>(response);
+    return this.handleResponse<GoodsReceivedNote>(response);
   }
 
   /**
    * Update a GRN
    */
-  async updateGrn(id: string | number, data: any): Promise<any> {
+  async updateGrn(id: string | number, data: Partial<GoodsReceivedNoteCreateData>): Promise<GoodsReceivedNote> {
     const url = buildApiUrl(`${ENDPOINTS.CREDITORS.GRNS}${id}/`);
 
     const response = await fetch(url, {
@@ -325,7 +326,7 @@ export class CreditorsApiClient {
       body: JSON.stringify(data),
     });
 
-    return this.handleResponse<any>(response);
+    return this.handleResponse<GoodsReceivedNote>(response);
   }
 
   // ===== INVOICES =====
@@ -514,7 +515,7 @@ export class CreditorsApiClient {
   /**
    * Get all RFC requests
    */
-  async getRfcs(params: QueryParams = {}): Promise<PaginatedResponse<any>> {
+  async getRfcs(params: QueryParams = {}): Promise<PaginatedResponse<RFC>> {
     const url = buildApiUrl(ENDPOINTS.CREDITORS.RFC) + this.buildQueryString(params);
 
     const response = await fetch(url, {
@@ -522,13 +523,13 @@ export class CreditorsApiClient {
       headers: this.getHeaders(),
     });
 
-    return this.handleResponse<PaginatedResponse<any>>(response);
+    return this.handleResponse<PaginatedResponse<RFC>>(response);
   }
 
   /**
    * Get a specific RFC request by ID
    */
-  async getRfcById(id: string | number): Promise<any> {
+  async getRfcById(id: string | number): Promise<RFC> {
     const url = buildApiUrl(`${ENDPOINTS.CREDITORS.RFC}${id}/`);
 
     const response = await fetch(url, {
@@ -536,13 +537,13 @@ export class CreditorsApiClient {
       headers: this.getHeaders(),
     });
 
-    return this.handleResponse<any>(response);
+    return this.handleResponse<RFC>(response);
   }
 
   /**
    * Create a new RFC request
    */
-  async createRfc(data: any): Promise<any> {
+  async createRfc(data: RFCCreateData): Promise<RFC> {
     const url = buildApiUrl(ENDPOINTS.CREDITORS.RFC);
 
     const response = await fetch(url, {
@@ -551,13 +552,13 @@ export class CreditorsApiClient {
       body: JSON.stringify(data),
     });
 
-    return this.handleResponse<any>(response);
+    return this.handleResponse<RFC>(response);
   }
 
   /**
    * Update an RFC request
    */
-  async updateRfc(id: string | number, data: any): Promise<any> {
+  async updateRfc(id: string | number, data: Partial<RFCCreateData>): Promise<RFC> {
     const url = buildApiUrl(`${ENDPOINTS.CREDITORS.RFC}${id}/`);
 
     const response = await fetch(url, {
@@ -566,7 +567,7 @@ export class CreditorsApiClient {
       body: JSON.stringify(data),
     });
 
-    return this.handleResponse<any>(response);
+    return this.handleResponse<RFC>(response);
   }
 
   // ===== EXPENSE CATEGORIES =====
@@ -638,7 +639,7 @@ export class CreditorsApiClient {
    * Get aging analysis for a specific creditor
    * Returns balance aging breakdown by days
    */
-  async getCreditorAgingAnalysis(id: string | number): Promise<any> {
+  async getCreditorAgingAnalysis(id: string | number): Promise<Record<string, unknown>> {
     const url = buildApiUrl(`${ENDPOINTS.CREDITORS.ACCOUNTS}${id}/aging-analysis/`);
 
     const response = await fetch(url, {
@@ -646,7 +647,7 @@ export class CreditorsApiClient {
       headers: this.getHeaders(),
     });
 
-    return this.handleResponse<any>(response);
+    return this.handleResponse<Record<string, unknown>>(response);
   }
 
   /**

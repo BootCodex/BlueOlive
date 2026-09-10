@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getStockItems, getStockSummary } from '@/lib/stockApi';
+import type { StockItem } from '@/lib/types/stockControl';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import {
   Loader, ArrowLeft, DollarSign, Package, TrendingUp,
   Layers, PieChart, Download
@@ -13,16 +13,16 @@ import {
 import Link from 'next/link';
 
 export default function ValuationPage() {
-  const [groupBy, setGroupBy] = useState('department');
+  const [_groupBy, _setGroupBy] = useState('department');
   // basis 'qoh' uses quantity_on_hand (live system stock); 'counted'
   // uses quantity_counted (last physical count captured on the item
   // master) — lets a stock take be valued before deciding to update QOH.
   const [basis, setBasis] = useState<'qoh' | 'counted'>('qoh');
   const [negativeOnly, setNegativeOnly] = useState(false);
 
-  const getQty = (item: any) => Number(basis === 'qoh' ? item.quantity_on_hand : item.quantity_counted) || 0;
+  const getQty = (item: StockItem) => Number(basis === 'qoh' ? item.quantity_on_hand : item.quantity_counted) || 0;
 
-  const { data: summary, isLoading: summaryLoading } = useQuery({
+  const { data: _summary, isLoading: summaryLoading } = useQuery({
     queryKey: ['stock-summary'],
     queryFn: getStockSummary,
     staleTime: 5 * 60 * 1000,
@@ -34,13 +34,13 @@ export default function ValuationPage() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const visibleItems = (allStockItems?.results || []).filter((item: any) =>
+  const visibleItems = (allStockItems?.results || []).filter((item) =>
     negativeOnly ? getQty(item) < 0 : true
   );
 
   const calculateValuationByDepartmentAll = () => {
     const deptMap = new Map();
-    visibleItems.forEach((item: any) => {
+    visibleItems.forEach((item) => {
       const deptName = item.department_detail?.name || 'Unassigned';
       const qty = getQty(item);
       const value = qty * (item.cost_price || 0);
@@ -204,7 +204,7 @@ export default function ValuationPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {valuationByDept.map((dept: any, idx: number) => (
+                  {valuationByDept.map((dept, idx: number) => (
                     <tr key={idx} className="border-b hover:bg-gray-50">
                       <td className="py-3 px-4 font-medium">{dept.name}</td>
                       <td className="py-3 px-4 text-right">{dept.count}</td>
@@ -284,9 +284,9 @@ export default function ValuationPage() {
               </thead>
               <tbody>
                 {[...visibleItems]
-                  .sort((a: any, b: any) => Math.abs(getQty(b) * (b.cost_price || 0)) - Math.abs(getQty(a) * (a.cost_price || 0)))
+                  .sort((a, b) => Math.abs(getQty(b) * (b.cost_price || 0)) - Math.abs(getQty(a) * (a.cost_price || 0)))
                   .slice(0, 20)
-                  .map((item: any) => {
+                  .map((item) => {
                     const qty = getQty(item);
                     const totalValue = qty * Number(item.cost_price || 0);
                     return (

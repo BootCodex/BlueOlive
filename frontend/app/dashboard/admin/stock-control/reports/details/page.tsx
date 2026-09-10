@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import {
-  Loader, Search, ArrowLeft, Download, Package,
+  Loader, ArrowLeft, Download, Package,
   Filter, AlertTriangle
 } from 'lucide-react';
 import Link from 'next/link';

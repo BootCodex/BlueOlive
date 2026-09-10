@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { getShops, updateShop, deleteShop, api } from '@/lib/api';
+import { getShops, deleteShop, api } from '@/lib/api';
 import { useAuthContext } from '@/lib/AuthContext';
 import { Edit2, Trash2, Plus, AlertCircle, CheckCircle, Clock } from 'lucide-react';
 import AddShopModal from './AddShopModal';
 import EditShopModal from './EditShopModal';
+import type { MaybeAxiosError } from '@/lib/types/errors';
 
 interface Shop {
   id: number;
@@ -115,9 +116,9 @@ export default function ShopsListPanel({ refreshKey }: ShopsListPanelProps) {
     setLoading(true);
     setError('');
     try {
-      const shopsList = await getShops();
+      const shopsList = await getShops() as unknown as Shop[];
       setShops(shopsList);
-    } catch (err: any) {
+    } catch {
       setError('Failed to load shops');
     } finally {
       setLoading(false);
@@ -133,8 +134,8 @@ export default function ShopsListPanel({ refreshKey }: ShopsListPanelProps) {
       setShops(shops.filter((s) => s.id !== id));
       // Also refresh the AuthContext accessible shops list
       refetchShops();
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to delete shop');
+    } catch (err: unknown) {
+      setError((err as MaybeAxiosError).response?.data?.detail || 'Failed to delete shop');
     } finally {
       setDeleting(null);
     }
@@ -153,7 +154,7 @@ export default function ShopsListPanel({ refreshKey }: ShopsListPanelProps) {
     setEditingShop(null);
   };
 
-  const getStatusIcon = (status?: string) => {
+  const _getStatusIcon = (status?: string) => {
     switch (status) {
       case 'ready':
         return <CheckCircle className="h-4 w-4 text-green-600" />;

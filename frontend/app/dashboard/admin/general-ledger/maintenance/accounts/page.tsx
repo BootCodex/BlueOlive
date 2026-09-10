@@ -154,7 +154,7 @@ export default function ChartOfAccountsPage() {
           </div>
         ) : accounts.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            No accounts found. Click "Add Account" to create one.
+            No accounts found. Click &quot;Add Account&quot; to create one.
           </div>
         ) : (
           <Table>

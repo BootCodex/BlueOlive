@@ -47,7 +47,7 @@ export default function StockReceiptForm() {
     queryFn: () => creditorsApi.accounts.list({ page_size: 500 }),
   });
 
-  const { data: grn, isLoading } = useQuery({
+  const { data: _grn, isLoading } = useQuery({
     queryKey: ['grn', grnId],
     queryFn: () => creditorsApi.grns.get(grnId),
     enabled: !isNew,

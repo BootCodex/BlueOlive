@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/lib/useAuth';
-import { usePOSAPI } from '@/lib/posApi';
+import { usePOSAPI, type TransactionResponse } from '@/lib/posApi';
 import Link from 'next/link';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -21,11 +21,22 @@ import {
   AlertCircle,
 } from 'lucide-react';
 
+interface ChequeCashingRow {
+  id: string | number;
+  cheque_number: string;
+  drawer_name: string;
+  bank_name: string;
+  date: string;
+  cheque_amount: number;
+  cash_paid: number;
+  is_processed: boolean;
+}
+
 export default function ChequeCashingPage() {
   const { user, isLoading: authLoading } = useAuth();
   const posAPI = usePOSAPI(user?.tenant?.slug);
   const posAPIRef = useRef(posAPI);
-  const [cheques, setCheques] = useState<any[]>([]);
+  const [cheques, setCheques] = useState<ChequeCashingRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -45,14 +56,14 @@ export default function ChequeCashingPage() {
         });
         if (cancelled) return;
 
-        const raw: any[] = Array.isArray(response) ? response : (response as any).results ?? [];
+        const raw: TransactionResponse[] = Array.isArray(response) ? response : (response.results ?? []);
         setCheques(
-          raw.map((c: any) => ({
+          raw.map((c: TransactionResponse) => ({
             id: c.id,
-            cheque_number: c.cheque_number ?? '',
-            drawer_name: c.drawer_name ?? '',
-            bank_name: c.bank_name ?? '',
-            date: c.transaction_date ?? '',
+            cheque_number: c.cheque_number ? String(c.cheque_number) : '',
+            drawer_name: c.drawer_name ? String(c.drawer_name) : '',
+            bank_name: c.bank_name ? String(c.bank_name) : '',
+            date: c.transaction_date ? String(c.transaction_date) : '',
             cheque_amount: Number(c.cheque_amount ?? 0),
             cash_paid: Number(c.cash_paid ?? 0),
             is_processed: !!c.is_processed,
@@ -208,7 +219,7 @@ export default function ChequeCashingPage() {
                       <TableCell className="text-right">
                         {!cheque.is_processed && (
                           <button
-                            onClick={() => handleProcess(cheque.id)}
+                            onClick={() => handleProcess(Number(cheque.id))}
                             disabled={processingId === cheque.id}
                             className="text-blue-600 hover:text-blue-700 text-sm font-medium disabled:opacity-50"
                           >

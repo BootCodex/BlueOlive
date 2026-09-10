@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getStockItems, getStockSummary } from '@/lib/stockApi';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
   Loader, Package, Search, TrendingUp, History, 
@@ -19,7 +18,7 @@ export default function StockControlEnquiriesPage() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
-  const { data: summary, isLoading: summaryLoading } = useQuery({
+  const { data: summary, isLoading: _summaryLoading } = useQuery({
     queryKey: ['stock-summary'],
     queryFn: getStockSummary,
     staleTime: 5 * 60 * 1000,
@@ -97,7 +96,7 @@ export default function StockControlEnquiriesPage() {
         )}
 
         {searchTerm.length >= 2 && searchResults.length === 0 && !isSearching && (
-          <p className="mt-2 text-gray-500 text-sm">No items found matching "{searchTerm}"</p>
+          <p className="mt-2 text-gray-500 text-sm">No items found matching &quot;{searchTerm}&quot;</p>
         )}
       </Card>
 
@@ -194,7 +193,7 @@ export default function StockControlEnquiriesPage() {
             <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer h-full">
               <TrendingUp className="w-10 h-10 text-indigo-600 mb-3" />
               <h3 className="font-bold text-lg">Stock Contribution</h3>
-              <p className="text-sm text-gray-600 mt-1">Each item's share of total sales value</p>
+              <p className="text-sm text-gray-600 mt-1">Each item&apos;s share of total sales value</p>
               <div className="mt-4 flex items-center text-indigo-600 text-sm font-medium">
                 Go to enquiry <ArrowRight className="w-4 h-4 ml-1" />
               </div>

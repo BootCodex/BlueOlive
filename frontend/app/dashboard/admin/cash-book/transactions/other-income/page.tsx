@@ -139,7 +139,7 @@ export default function OtherIncomeEntryPage() {
       setShowForm(false);
 
       await fetchData();
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Failed to create entry'));
     } finally {
       setLoading(false);
@@ -207,7 +207,7 @@ export default function OtherIncomeEntryPage() {
                     <option value={0}>Select Category</option>
                     {categories.filter((c) => c.is_active).map((cat) => (
                       <option key={cat.id} value={cat.id || 0}>
-                        {cat.code} - {cat.name}
+                        {String(cat.code)} - {cat.name}
                       </option>
                     ))}
                   </select>

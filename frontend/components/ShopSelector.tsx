@@ -7,8 +7,8 @@ interface ShopSelectorProps {
   onShopChange?: (shop: Shop) => void;
 }
 
-export default function ShopSelector({ onShopChange }: ShopSelectorProps) {
-  const { currentShop, accessibleShops, switchShop, isLoading, isAdmin } = useAuthContext();
+export default function ShopSelector({ onShopChange: _onShopChange }: ShopSelectorProps) {
+  const { currentShop, accessibleShops, switchShop, isLoading, isAdmin: _isAdmin } = useAuthContext();
   const [isOpen, setIsOpen] = useState(false);
   const [isSwitching, setIsSwitching] = useState(false);
 

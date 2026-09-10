@@ -5,6 +5,33 @@
 
 import { getCurrentShopId } from './shopContext';
 import { api } from './api';
+import type { MaybeAxiosError } from '@/lib/types/errors';
+import type { JsonObject } from '@/lib/types/json';
+
+/**
+ * The documents printed/emailed here (invoices, cash sales, laybyes, etc.)
+ * come from many different API response shapes that aren't modeled as TS
+ * interfaces anywhere - this is a loose "arbitrary JSON object" type for
+ * that data.
+ */
+type PrintableDoc = JsonObject;
+
+interface ShopPrintInfo {
+  name: string;
+  address: string;
+  phone: string;
+  email: string;
+  logo: string | null;
+}
+
+interface TenantPrintInfo {
+  company_name: string;
+  company_address: string;
+  vat_number: string;
+  registration_number: string;
+  phone: string;
+  email: string;
+}
 
 /**
  * Format currency value
@@ -41,13 +68,7 @@ function isSafeImageUrl(value: unknown): value is string {
 /**
  * Get shop details including logo for printing
  */
-export async function getShopForPrint(): Promise<{
-  name: string;
-  address: string;
-  phone: string;
-  email: string;
-  logo: string | null;
-} | null> {
+export async function getShopForPrint(): Promise<ShopPrintInfo | null> {
   const shopId = getCurrentShopId();
   if (!shopId) return null;
 
@@ -70,14 +91,7 @@ export async function getShopForPrint(): Promise<{
 /**
  * Get tenant details for printing (company info)
  */
-export async function getTenantForPrint(): Promise<{
-  company_name: string;
-  company_address: string;
-  vat_number: string;
-  registration_number: string;
-  phone: string;
-  email: string;
-} | null> {
+export async function getTenantForPrint(): Promise<TenantPrintInfo | null> {
   try {
     const response = await api.get('/api/tenants/current_tenant/');
     const tenant = response.data;
@@ -125,15 +139,16 @@ function watermarkHtml(isCopy?: boolean): string {
 /**
  * Generate print-friendly HTML for an invoice
  */
-export function generateInvoicePrintHTML(invoice: any, shop: any, tenant: any, isCopy?: boolean): string {
-  const lineItems = invoice.line_items || [];
-  const subtotal = lineItems.reduce((sum: number, item: any) => {
-    const itemTotal = (item.quantity || 0) * (item.unit_price || item.selling_price || 0);
-    const discount = itemTotal * ((item.discount_percentage || 0) / 100);
+export function generateInvoicePrintHTML(invoice: PrintableDoc, shop: ShopPrintInfo | null, tenant: TenantPrintInfo | null, isCopy?: boolean): string {
+  const lineItems = (invoice.line_items as PrintableDoc[] | undefined) || [];
+  const debtor = invoice.debtor as PrintableDoc | undefined;
+  const subtotal = lineItems.reduce((sum: number, item) => {
+    const itemTotal = Number(item.quantity || 0) * Number(item.unit_price || item.selling_price || 0);
+    const discount = itemTotal * (Number(item.discount_percentage || 0) / 100);
     return sum + itemTotal - discount;
   }, 0);
-  const tax = invoice.tax_amount || 0;
-  const total = invoice.total_amount || subtotal + tax;
+  const tax = Number(invoice.tax_amount || 0);
+  const total = Number(invoice.total_amount) || subtotal + tax;
 
   // Use shop logo if available, otherwise use tenant company info
   const companyName = shop?.name || tenant?.company_name || 'Company Name';
@@ -145,14 +160,14 @@ export function generateInvoicePrintHTML(invoice: any, shop: any, tenant: any, i
 
   const logoUrl = isSafeImageUrl(shop?.logo) ? shop.logo : null;
 
-  const itemsHtml = lineItems.map((item: any) => {
-    const itemTotal = (item.quantity || 0) * (item.unit_price || item.selling_price || 0);
-    const discountedTotal = itemTotal * (1 - (item.discount_percentage || 0) / 100);
+  const itemsHtml = lineItems.map((item) => {
+    const itemTotal = Number(item.quantity || 0) * Number(item.unit_price || item.selling_price || 0);
+    const discountedTotal = itemTotal * (1 - Number(item.discount_percentage || 0) / 100);
     return `
         <tr>
           <td>${escapeHtml(item.description || item.stock_code || 'Item')}</td>
           <td class="text-center">${escapeHtml(item.quantity || 0)}</td>
-          <td class="text-right">${formatCurrency(item.unit_price || item.selling_price || 0)}</td>
+          <td class="text-right">${formatCurrency(Number(item.unit_price || item.selling_price || 0))}</td>
           <td class="text-right">${escapeHtml(item.discount_percentage || 0)}%</td>
           <td class="text-right">${formatCurrency(discountedTotal)}</td>
         </tr>
@@ -225,10 +240,10 @@ ${COPY_WATERMARK_CSS}
     <div class="details-section">
       <div class="bill-to">
         <div class="label">Bill To:</div>
-        <div style="font-weight: bold;">${escapeHtml(invoice.debtor_name || invoice.debtor?.name || 'Customer Name')}</div>
-        ${invoice.debtor?.address ? `<div>${escapeHtml(invoice.debtor.address)}</div>` : ''}
-        ${invoice.debtor?.phone ? `<div>Tel: ${escapeHtml(invoice.debtor.phone)}</div>` : ''}
-        ${invoice.debtor?.vat_number ? `<div>VAT: ${escapeHtml(invoice.debtor.vat_number)}</div>` : ''}
+        <div style="font-weight: bold;">${escapeHtml(invoice.debtor_name || debtor?.name || 'Customer Name')}</div>
+        ${debtor?.address ? `<div>${escapeHtml(debtor.address)}</div>` : ''}
+        ${debtor?.phone ? `<div>Tel: ${escapeHtml(debtor.phone)}</div>` : ''}
+        ${debtor?.vat_number ? `<div>VAT: ${escapeHtml(debtor.vat_number)}</div>` : ''}
       </div>
       <div class="invoice-details">
         <div class="value"><span class="label">Date:</span> ${escapeHtml(invoice.invoice_date || '')}</div>
@@ -288,7 +303,7 @@ ${COPY_WATERMARK_CSS}
 /**
  * Generate print-friendly HTML for a receipt
  */
-export function generateReceiptPrintHTML(receipt: any, shop: any, tenant: any, isCopy?: boolean): string {
+export function generateReceiptPrintHTML(receipt: PrintableDoc, shop: ShopPrintInfo | null, tenant: TenantPrintInfo | null, isCopy?: boolean): string {
   const companyName = shop?.name || tenant?.company_name || 'Company Name';
   const companyAddress = shop?.address || tenant?.company_address || '';
   const companyPhone = shop?.phone || tenant?.phone || '';
@@ -339,10 +354,10 @@ ${COPY_WATERMARK_CSS}
     <div class="details">
       <div class="detail-row"><span>Date:</span><span>${escapeHtml(receipt.receipt_date || new Date().toLocaleDateString())}</span></div>
       ${receipt.debtor_name ? `<div class="detail-row"><span>Customer:</span><span>${escapeHtml(receipt.debtor_name)}</span></div>` : ''}
-      <div class="detail-row"><span>Amount:</span><span>${formatCurrency(receipt.amount || 0)}</span></div>
+      <div class="detail-row"><span>Amount:</span><span>${formatCurrency(Number(receipt.amount || 0))}</span></div>
     </div>
 
-    <div class="total">Total: ${formatCurrency(receipt.amount || 0)}</div>
+    <div class="total">Total: ${formatCurrency(Number(receipt.amount || 0))}</div>
 
     <div class="footer">
       <p>Thank you!</p>
@@ -396,8 +411,8 @@ export interface GenericDocumentConfig {
  */
 export function generateGenericDocumentHTML(
   config: GenericDocumentConfig,
-  shop: any,
-  tenant: any
+  shop: ShopPrintInfo | null,
+  tenant: TenantPrintInfo | null
 ): string {
   const companyName = shop?.name || tenant?.company_name || 'Company Name';
   const companyAddress = shop?.address || tenant?.company_address || '';
@@ -579,7 +594,7 @@ export function openPrintWindow(html: string): void {
 /**
  * Print an invoice with shop branding
  */
-export async function printInvoice(invoice: any, isReprint: boolean = false): Promise<void> {
+export async function printInvoice(invoice: PrintableDoc, isReprint: boolean = false): Promise<void> {
   const [shop, tenant] = await Promise.all([
     getShopForPrint(),
     getTenantForPrint(),
@@ -592,7 +607,7 @@ export async function printInvoice(invoice: any, isReprint: boolean = false): Pr
 /**
  * Print a receipt with shop branding
  */
-export async function printReceipt(receipt: any, isReprint: boolean = false): Promise<void> {
+export async function printReceipt(receipt: PrintableDoc, isReprint: boolean = false): Promise<void> {
   const [shop, tenant] = await Promise.all([
     getShopForPrint(),
     getTenantForPrint(),
@@ -609,7 +624,7 @@ export async function printReceipt(receipt: any, isReprint: boolean = false): Pr
  * @param isReprint - Marks the attached document as a COPY (manual §1 "6. Transaction Query")
  * @returns Promise with success/error status
  */
-export async function emailInvoice(invoice: any, recipientEmail: string, isReprint: boolean = false): Promise<{ success: boolean; message: string }> {
+export async function emailInvoice(invoice: PrintableDoc, recipientEmail: string, isReprint: boolean = false): Promise<{ success: boolean; message: string }> {
   try {
     const [shop, tenant] = await Promise.all([
       getShopForPrint(),
@@ -619,7 +634,7 @@ export async function emailInvoice(invoice: any, recipientEmail: string, isRepri
     const html = generateInvoicePrintHTML(invoice, shop, tenant, isReprint);
 
     // Send to backend API for email processing
-    const response = await api.post('/api/settings/email-document/', {
+    const _response = await api.post('/api/settings/email-document/', {
       document_type: 'invoice',
       document_id: invoice.id,
       document_number: invoice.invoice_number,
@@ -629,11 +644,11 @@ export async function emailInvoice(invoice: any, recipientEmail: string, isRepri
     });
 
     return { success: true, message: 'Invoice sent successfully!' };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Failed to email invoice:', error);
     return {
       success: false,
-      message: error.response?.data?.detail || error.message || 'Failed to send invoice email'
+      message: (error as MaybeAxiosError).response?.data?.detail || (error as MaybeAxiosError).message || 'Failed to send invoice email'
     };
   }
 }
@@ -645,7 +660,7 @@ export async function emailInvoice(invoice: any, recipientEmail: string, isRepri
  * @param isReprint - Marks the attached document as a COPY (manual §1 "6. Transaction Query")
  * @returns Promise with success/error status
  */
-export async function emailReceipt(receipt: any, recipientEmail: string, isReprint: boolean = false): Promise<{ success: boolean; message: string }> {
+export async function emailReceipt(receipt: PrintableDoc, recipientEmail: string, isReprint: boolean = false): Promise<{ success: boolean; message: string }> {
   try {
     const [shop, tenant] = await Promise.all([
       getShopForPrint(),
@@ -654,7 +669,7 @@ export async function emailReceipt(receipt: any, recipientEmail: string, isRepri
 
     const html = generateReceiptPrintHTML(receipt, shop, tenant, isReprint);
 
-    const response = await api.post('/api/settings/email-document/', {
+    const _response = await api.post('/api/settings/email-document/', {
       document_type: 'receipt',
       document_id: receipt.id,
       document_number: receipt.receipt_number || `Receipt-${receipt.id}`,
@@ -664,11 +679,11 @@ export async function emailReceipt(receipt: any, recipientEmail: string, isRepri
     });
 
     return { success: true, message: 'Receipt sent successfully!' };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Failed to email receipt:', error);
     return {
       success: false,
-      message: error.response?.data?.detail || error.message || 'Failed to send receipt email'
+      message: (error as MaybeAxiosError).response?.data?.detail || (error as MaybeAxiosError).message || 'Failed to send receipt email'
     };
   }
 }
@@ -708,19 +723,19 @@ async function emailGenericDocument(
     });
 
     return { success: true, message: `${config.title} sent successfully!` };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(`Failed to email ${documentType}:`, error);
     return {
       success: false,
-      message: error.response?.data?.detail || error.message || `Failed to send ${config.title.toLowerCase()} email`,
+      message: (error as MaybeAxiosError).response?.data?.detail || (error as MaybeAxiosError).message || `Failed to send ${config.title.toLowerCase()} email`,
     };
   }
 }
 
-function lineItemsFrom(lines: any[]): GenericDocumentLine[] {
+function lineItemsFrom(lines: PrintableDoc[] | undefined): GenericDocumentLine[] {
   return (lines || []).map((l) => ({
-    description: l.description || l.stock_code || 'Item',
-    quantity: l.quantity,
+    description: String(l.description || l.stock_code || 'Item'),
+    quantity: l.quantity as number | string | undefined,
     unit_price: Number(l.unit_price || 0),
     discount_percentage: Number(l.discount_percentage || 0),
     line_total: Number(l.line_total || 0),
@@ -729,191 +744,192 @@ function lineItemsFrom(lines: any[]): GenericDocumentLine[] {
 
 // ----- Cash Sale -----
 
-function cashSaleConfig(cashSale: any): GenericDocumentConfig {
+function cashSaleConfig(cashSale: PrintableDoc): GenericDocumentConfig {
   return {
     title: 'CASH SALE',
-    number: cashSale.sale_number || `CS-${cashSale.id}`,
-    date: cashSale.sale_date || '',
-    customerName: cashSale.customer_name || undefined,
-    customerExtra: [cashSale.delivery_address, cashSale.telephone ? `Tel: ${cashSale.telephone}` : ''].filter(Boolean),
-    lines: lineItemsFrom(cashSale.lines),
+    number: String(cashSale.sale_number || `CS-${cashSale.id}`),
+    date: String(cashSale.sale_date || ''),
+    customerName: cashSale.customer_name ? String(cashSale.customer_name) : undefined,
+    customerExtra: [cashSale.delivery_address, cashSale.telephone ? `Tel: ${cashSale.telephone}` : ''].filter(Boolean).map(String),
+    lines: lineItemsFrom(cashSale.lines as PrintableDoc[] | undefined),
     subtotal: Number(cashSale.subtotal || 0),
     vat: Number(cashSale.vat_amount || 0),
     total: Number(cashSale.total_amount || 0),
   };
 }
 
-export async function printCashSale(cashSale: any, isReprint: boolean = false): Promise<void> {
+export async function printCashSale(cashSale: PrintableDoc, isReprint: boolean = false): Promise<void> {
   return printGenericDocument({ ...cashSaleConfig(cashSale), isCopy: isReprint });
 }
 
-export async function emailCashSale(cashSale: any, recipientEmail: string, isReprint: boolean = false) {
-  return emailGenericDocument('cash_sale', cashSale.id, { ...cashSaleConfig(cashSale), isCopy: isReprint }, recipientEmail);
+export async function emailCashSale(cashSale: PrintableDoc, recipientEmail: string, isReprint: boolean = false) {
+  return emailGenericDocument('cash_sale', cashSale.id as string | number, { ...cashSaleConfig(cashSale), isCopy: isReprint }, recipientEmail);
 }
 
 // ----- Credit Note -----
 
-function creditNoteConfig(creditNote: any): GenericDocumentConfig {
+function creditNoteConfig(creditNote: PrintableDoc): GenericDocumentConfig {
   return {
     title: 'CREDIT NOTE',
-    number: creditNote.credit_number || `CN-${creditNote.id}`,
-    date: creditNote.credit_date || '',
-    customerName: creditNote.customer_name || undefined,
+    number: String(creditNote.credit_number || `CN-${creditNote.id}`),
+    date: String(creditNote.credit_date || ''),
+    customerName: creditNote.customer_name ? String(creditNote.customer_name) : undefined,
     detailRows: [
       ...(creditNote.debtor_account ? [{ label: 'Account', value: String(creditNote.debtor_account) }] : []),
       ...(creditNote.refund_type_display || creditNote.refund_type
-        ? [{ label: 'Refund Method', value: creditNote.refund_type_display || creditNote.refund_type }]
+        ? [{ label: 'Refund Method', value: String(creditNote.refund_type_display || creditNote.refund_type) }]
         : []),
     ],
-    lines: lineItemsFrom(creditNote.lines),
+    lines: lineItemsFrom(creditNote.lines as PrintableDoc[] | undefined),
     subtotal: Number(creditNote.subtotal || 0),
     vat: Number(creditNote.vat_amount || 0),
     total: Number(creditNote.total_amount || 0),
-    notes: creditNote.reason || undefined,
+    notes: creditNote.reason ? String(creditNote.reason) : undefined,
   };
 }
 
-export async function printCreditNote(creditNote: any, isReprint: boolean = false): Promise<void> {
+export async function printCreditNote(creditNote: PrintableDoc, isReprint: boolean = false): Promise<void> {
   return printGenericDocument({ ...creditNoteConfig(creditNote), isCopy: isReprint });
 }
 
-export async function emailCreditNote(creditNote: any, recipientEmail: string, isReprint: boolean = false) {
-  return emailGenericDocument('credit_note', creditNote.id, { ...creditNoteConfig(creditNote), isCopy: isReprint }, recipientEmail);
+export async function emailCreditNote(creditNote: PrintableDoc, recipientEmail: string, isReprint: boolean = false) {
+  return emailGenericDocument('credit_note', creditNote.id as string | number, { ...creditNoteConfig(creditNote), isCopy: isReprint }, recipientEmail);
 }
 
 // ----- Laybye -----
 
-function laybyeConfig(laybye: any): GenericDocumentConfig {
+function laybyeConfig(laybye: PrintableDoc): GenericDocumentConfig {
+  const laybyeLines = (laybye.lines as PrintableDoc[] | undefined) || [];
   return {
     title: 'LAYBYE',
-    number: laybye.laybye_number || `LAY-${laybye.id}`,
-    date: laybye.laybye_date || '',
-    customerName: laybye.customer_name || undefined,
-    customerExtra: [laybye.telephone ? `Tel: ${laybye.telephone}` : ''].filter(Boolean),
+    number: String(laybye.laybye_number || `LAY-${laybye.id}`),
+    date: String(laybye.laybye_date || ''),
+    customerName: laybye.customer_name ? String(laybye.customer_name) : undefined,
+    customerExtra: [laybye.telephone ? `Tel: ${laybye.telephone}` : ''].filter(Boolean).map(String),
     detailRows: [
-      { label: 'Status', value: laybye.status_display || laybye.status || '' },
-      { label: 'Expiry Date', value: laybye.expiry_date || '' },
+      { label: 'Status', value: String(laybye.status_display || laybye.status || '') },
+      { label: 'Expiry Date', value: String(laybye.expiry_date || '') },
       { label: 'Deposit', value: formatCurrency(Number(laybye.deposit_amount || 0)) },
       { label: 'Paid', value: formatCurrency(Number(laybye.amount_paid || 0)) },
       { label: 'Balance Due', value: formatCurrency(Number(laybye.balance_due || 0)) },
     ],
-    lines: lineItemsFrom((laybye.lines || []).filter((l: any) => l.transaction_type === 'SP')),
+    lines: lineItemsFrom(laybyeLines.filter((l) => l.transaction_type === 'SP')),
     total: Number(laybye.total_amount || 0),
   };
 }
 
-export async function printLaybye(laybye: any, isReprint: boolean = false): Promise<void> {
+export async function printLaybye(laybye: PrintableDoc, isReprint: boolean = false): Promise<void> {
   return printGenericDocument({ ...laybyeConfig(laybye), isCopy: isReprint });
 }
 
-export async function emailLaybye(laybye: any, recipientEmail: string, isReprint: boolean = false) {
-  return emailGenericDocument('laybye', laybye.id, { ...laybyeConfig(laybye), isCopy: isReprint }, recipientEmail);
+export async function emailLaybye(laybye: PrintableDoc, recipientEmail: string, isReprint: boolean = false) {
+  return emailGenericDocument('laybye', laybye.id as string | number, { ...laybyeConfig(laybye), isCopy: isReprint }, recipientEmail);
 }
 
 // ----- Quotation -----
 
-function quotationConfig(quotation: any): GenericDocumentConfig {
+function quotationConfig(quotation: PrintableDoc): GenericDocumentConfig {
   return {
     title: 'QUOTATION',
-    number: quotation.quotation_number || `QT-${quotation.id}`,
-    date: quotation.quotation_date || '',
-    customerName: quotation.debtor_account_name || quotation.customer_name || undefined,
+    number: String(quotation.quotation_number || `QT-${quotation.id}`),
+    date: String(quotation.quotation_date || ''),
+    customerName: (quotation.debtor_account_name || quotation.customer_name) ? String(quotation.debtor_account_name || quotation.customer_name) : undefined,
     customerExtra: [
       quotation.address_line1, quotation.address_line2, quotation.address_line3,
       quotation.telephone ? `Tel: ${quotation.telephone}` : '',
-    ].filter(Boolean),
-    detailRows: [{ label: 'Expiry Date', value: quotation.expiry_date || '' }],
-    lines: lineItemsFrom(quotation.lines),
+    ].filter(Boolean).map(String),
+    detailRows: [{ label: 'Expiry Date', value: String(quotation.expiry_date || '') }],
+    lines: lineItemsFrom(quotation.lines as PrintableDoc[] | undefined),
     subtotal: Number(quotation.subtotal || 0),
     vat: Number(quotation.vat_amount || 0),
     total: Number(quotation.total_amount || 0),
   };
 }
 
-export async function printQuotation(quotation: any, isReprint: boolean = false): Promise<void> {
+export async function printQuotation(quotation: PrintableDoc, isReprint: boolean = false): Promise<void> {
   return printGenericDocument({ ...quotationConfig(quotation), isCopy: isReprint });
 }
 
-export async function emailQuotation(quotation: any, recipientEmail: string, isReprint: boolean = false) {
-  return emailGenericDocument('quotation', quotation.id, { ...quotationConfig(quotation), isCopy: isReprint }, recipientEmail);
+export async function emailQuotation(quotation: PrintableDoc, recipientEmail: string, isReprint: boolean = false) {
+  return emailGenericDocument('quotation', quotation.id as string | number, { ...quotationConfig(quotation), isCopy: isReprint }, recipientEmail);
 }
 
 // ----- Job Card -----
 
-function jobCardConfig(jobCard: any): GenericDocumentConfig {
+function jobCardConfig(jobCard: PrintableDoc): GenericDocumentConfig {
   return {
     title: 'JOB CARD',
-    number: jobCard.job_number || `JB-${jobCard.id}`,
-    date: jobCard.job_date || '',
-    customerName: jobCard.customer_name || undefined,
+    number: String(jobCard.job_number || `JB-${jobCard.id}`),
+    date: String(jobCard.job_date || ''),
+    customerName: jobCard.customer_name ? String(jobCard.customer_name) : undefined,
     customerExtra: [
       jobCard.address, jobCard.telephone ? `Tel: ${jobCard.telephone}` : '',
       jobCard.registration_number ? `Reg: ${jobCard.registration_number}` : '',
-    ].filter(Boolean),
-    detailRows: [{ label: 'Status', value: jobCard.status_display || jobCard.status || '' }],
-    lines: lineItemsFrom(jobCard.lines),
+    ].filter(Boolean).map(String),
+    detailRows: [{ label: 'Status', value: String(jobCard.status_display || jobCard.status || '') }],
+    lines: lineItemsFrom(jobCard.lines as PrintableDoc[] | undefined),
     subtotal: Number(jobCard.subtotal || 0),
     vat: Number(jobCard.vat_amount || 0),
     total: Number(jobCard.total_amount || 0),
-    notes: jobCard.job_description || undefined,
+    notes: jobCard.job_description ? String(jobCard.job_description) : undefined,
   };
 }
 
-export async function printJobCard(jobCard: any, isReprint: boolean = false): Promise<void> {
+export async function printJobCard(jobCard: PrintableDoc, isReprint: boolean = false): Promise<void> {
   return printGenericDocument({ ...jobCardConfig(jobCard), isCopy: isReprint });
 }
 
-export async function emailJobCard(jobCard: any, recipientEmail: string, isReprint: boolean = false) {
-  return emailGenericDocument('job_card', jobCard.id, { ...jobCardConfig(jobCard), isCopy: isReprint }, recipientEmail);
+export async function emailJobCard(jobCard: PrintableDoc, recipientEmail: string, isReprint: boolean = false) {
+  return emailGenericDocument('job_card', jobCard.id as string | number, { ...jobCardConfig(jobCard), isCopy: isReprint }, recipientEmail);
 }
 
 // ----- Repair -----
 
-function repairConfig(repair: any): GenericDocumentConfig {
+function repairConfig(repair: PrintableDoc): GenericDocumentConfig {
   return {
     title: 'REPAIR VOUCHER',
-    number: repair.repair_number || `REP-${repair.id}`,
-    date: repair.date_received || repair.created_at || '',
-    customerName: repair.customer_name || undefined,
+    number: String(repair.repair_number || `REP-${repair.id}`),
+    date: String(repair.date_received || repair.created_at || ''),
+    customerName: repair.customer_name ? String(repair.customer_name) : undefined,
     customerExtra: [
       repair.address_line1, repair.address_line2,
       repair.telephone ? `Tel: ${repair.telephone}` : '',
-    ].filter(Boolean),
+    ].filter(Boolean).map(String),
     detailRows: [
-      { label: 'Status', value: repair.status_display || repair.status || '' },
-      ...(repair.date_required ? [{ label: 'Date Required', value: repair.date_required }] : []),
+      { label: 'Status', value: String(repair.status_display || repair.status || '') },
+      ...(repair.date_required ? [{ label: 'Date Required', value: String(repair.date_required) }] : []),
     ],
     total: Number(repair.selling_price ?? repair.quoted_value ?? repair.repair_cost ?? 0),
-    notes: repair.repair_details || undefined,
+    notes: repair.repair_details ? String(repair.repair_details) : undefined,
   };
 }
 
-export async function printRepair(repair: any, isReprint: boolean = false): Promise<void> {
+export async function printRepair(repair: PrintableDoc, isReprint: boolean = false): Promise<void> {
   return printGenericDocument({ ...repairConfig(repair), isCopy: isReprint });
 }
 
-export async function emailRepair(repair: any, recipientEmail: string, isReprint: boolean = false) {
-  return emailGenericDocument('repair', repair.id, { ...repairConfig(repair), isCopy: isReprint }, recipientEmail);
+export async function emailRepair(repair: PrintableDoc, recipientEmail: string, isReprint: boolean = false) {
+  return emailGenericDocument('repair', repair.id as string | number, { ...repairConfig(repair), isCopy: isReprint }, recipientEmail);
 }
 
 // ----- Payout -----
 
-function payoutConfig(payout: any): GenericDocumentConfig {
+function payoutConfig(payout: PrintableDoc): GenericDocumentConfig {
   return {
     title: 'PAYOUT VOUCHER',
     number: `PO-${payout.id}`,
-    date: payout.payout_date || '',
-    customerName: payout.payee || undefined,
-    detailRows: payout.reference ? [{ label: 'Reference', value: payout.reference }] : [],
+    date: String(payout.payout_date || ''),
+    customerName: payout.payee ? String(payout.payee) : undefined,
+    detailRows: payout.reference ? [{ label: 'Reference', value: String(payout.reference) }] : [],
     total: Number(payout.amount || 0),
-    notes: payout.description || undefined,
+    notes: payout.description ? String(payout.description) : undefined,
   };
 }
 
-export async function printPayout(payout: any, isReprint: boolean = false): Promise<void> {
+export async function printPayout(payout: PrintableDoc, isReprint: boolean = false): Promise<void> {
   return printGenericDocument({ ...payoutConfig(payout), isCopy: isReprint });
 }
 
-export async function emailPayout(payout: any, recipientEmail: string, isReprint: boolean = false) {
-  return emailGenericDocument('payout', payout.id, { ...payoutConfig(payout), isCopy: isReprint }, recipientEmail);
+export async function emailPayout(payout: PrintableDoc, recipientEmail: string, isReprint: boolean = false) {
+  return emailGenericDocument('payout', payout.id as string | number, { ...payoutConfig(payout), isCopy: isReprint }, recipientEmail);
 }

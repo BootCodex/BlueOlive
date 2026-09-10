@@ -1,5 +1,16 @@
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { ENDPOINTS } from './api-config';
+import type { MaybeAxiosError } from '@/lib/types/errors';
+
+// Custom request-config flags this module reads/writes on top of axios's
+// own config (rate-limit retry bookkeeping, opt-out of retry-on-429).
+declare module 'axios' {
+  interface AxiosRequestConfig {
+    skipRateLimitRetry?: boolean;
+    _rateLimitRetry?: boolean;
+    _retry?: boolean;
+  }
+}
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE
   || (process.env.NODE_ENV === 'production' ? 'http://blueolive-backend:8000' : 'http://localhost:8000');
@@ -104,7 +115,7 @@ export async function fetchCSRFToken(): Promise<string> {
   
   try {
     // GET request to CSRF endpoint to get token in cookie
-    const response = await axios.get(`${API_BASE}${csrfEndpoint}`, {
+    const _response = await axios.get(`${API_BASE}${csrfEndpoint}`, {
       withCredentials: true,
     });
     
@@ -114,9 +125,9 @@ export async function fetchCSRFToken(): Promise<string> {
       csrfToken = cookieToken;
       return cookieToken;
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Check for rate limiting
-    if (error?.response?.status === 429) {
+    if ((error as MaybeAxiosError)?.response?.status === 429) {
       markEndpointRateLimited(csrfEndpoint, 30); // Wait 30 seconds before retrying CSRF
       console.warn('CSRF endpoint rate limited (429) - stale tokens detected');
       return '';
@@ -141,9 +152,13 @@ export const api: AxiosInstance = axios.create({
 
 // Track if we're currently refreshing token to avoid infinite loops
 let isRefreshing = false;
-let failedQueue: any[] = [];
+interface QueuedRequest {
+  resolve: (value?: unknown) => void;
+  reject: (reason?: unknown) => void;
+}
+let failedQueue: QueuedRequest[] = [];
 
-const processQueue = (error: any, token: string | null = null) => {
+const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue.forEach(prom => {
     if (error) {
       prom.reject(error);
@@ -164,7 +179,7 @@ const PUBLIC_ENDPOINTS = [
   '/api/v1/users/auth/token/refresh/',
 ];
 
-function isPublicEndpoint(url: string | undefined): boolean {
+function _isPublicEndpoint(url: string | undefined): boolean {
   if (!url) return false;
   return PUBLIC_ENDPOINTS.some(endpoint => url.includes(endpoint));
 }
@@ -307,17 +322,24 @@ api.interceptors.response.use(
  * React child"), so always unwrap through this instead of reading
  * err.response.data.error straight into JSX.
  */
-export function getApiErrorMessage(err: any, fallback: string): string {
-  const errorField = err?.response?.data?.error ?? err?.data?.error ?? err?.error;
+interface ApiErrorLike {
+  response?: { data?: { error?: unknown; detail?: string } };
+  data?: { error?: unknown };
+  error?: unknown;
+}
+
+export function getApiErrorMessage(err: unknown, fallback: string): string {
+  const e = err as ApiErrorLike;
+  const errorField = e?.response?.data?.error ?? e?.data?.error ?? e?.error;
 
   if (typeof errorField === 'string') {
     return errorField;
   }
-  if (errorField && typeof errorField === 'object' && typeof errorField.message === 'string') {
-    return errorField.message;
+  if (errorField && typeof errorField === 'object' && typeof (errorField as { message?: unknown }).message === 'string') {
+    return (errorField as { message: string }).message;
   }
 
-  const detail = err?.response?.data?.detail;
+  const detail = e?.response?.data?.detail;
   if (typeof detail === 'string') {
     return detail;
   }
@@ -329,7 +351,9 @@ export function getApiErrorMessage(err: any, fallback: string): string {
   return fallback;
 }
 
-export async function apiRequest(endpoint: string, options: any = {}): Promise<AxiosResponse> {
+type ApiRequestOptions = AxiosRequestConfig & { body?: unknown };
+
+export async function apiRequest(endpoint: string, options: ApiRequestOptions = {}): Promise<AxiosResponse> {
   const { method = 'GET', headers = {}, body, skipRateLimitRetry, ...rest } = options;
   
   return api({
@@ -448,17 +472,17 @@ export async function refreshToken(): Promise<AxiosResponse> {
   }
 }
 
-export async function getCurrentUser(): Promise<any> {
+export async function getCurrentUser(): Promise<Record<string, unknown>> {
   const res = await apiRequest('/api/v1/users/auth/profile/');
   return res.data;
 }
 
-export async function getCurrentTenant(): Promise<any> {
+export async function getCurrentTenant(): Promise<Record<string, unknown>> {
   const res = await apiRequest('/api/v1/tenants/current/');
   return res.data;
 }
 
-export async function getUsers(): Promise<any[]> {
+export async function getUsers(): Promise<Record<string, unknown>[]> {
   const res = await apiRequest('/api/v1/users/');
   // Handle both array and paginated responses
   if (Array.isArray(res.data)) {
@@ -467,7 +491,7 @@ export async function getUsers(): Promise<any[]> {
   return res.data.results || [];
 }
 
-export async function getShops(): Promise<any[]> {
+export async function getShops(): Promise<Record<string, unknown>[]> {
   const res = await apiRequest('/api/v1/shops/');
   // Handle both array and paginated responses
   if (Array.isArray(res.data)) {
@@ -476,7 +500,7 @@ export async function getShops(): Promise<any[]> {
   return res.data.results || [];
 }
 
-export async function createUser(userData: any): Promise<any> {
+export async function createUser(userData: Record<string, unknown>): Promise<Record<string, unknown>> {
   const res = await apiRequest('/api/v1/users/', {
     method: 'POST',
     data: userData,
@@ -484,7 +508,7 @@ export async function createUser(userData: any): Promise<any> {
   return res.data;
 }
 
-export async function updateUser(id: number, userData: any): Promise<any> {
+export async function updateUser(id: number, userData: Record<string, unknown>): Promise<Record<string, unknown>> {
   const res = await apiRequest(`/api/v1/users/${id}/`, {
     method: 'PATCH',
     data: userData,
@@ -498,7 +522,7 @@ export async function deleteUser(id: number): Promise<void> {
   });
 }
 
-export async function createShop(shopData: any): Promise<any> {
+export async function createShop(shopData: Record<string, unknown>): Promise<Record<string, unknown>> {
   const res = await apiRequest('/api/v1/shops/', {
     method: 'POST',
     data: shopData,
@@ -506,7 +530,7 @@ export async function createShop(shopData: any): Promise<any> {
   return res.data;
 }
 
-export async function updateShop(id: number, shopData: any): Promise<any> {
+export async function updateShop(id: number, shopData: Record<string, unknown>): Promise<Record<string, unknown>> {
   const res = await apiRequest(`/api/v1/shops/${id}/`, {
     method: 'PUT',
     data: shopData,
@@ -520,18 +544,18 @@ export async function deleteShop(id: number): Promise<void> {
   });
 }
 
-export async function getTenants(): Promise<any[]> {
+export async function getTenants(): Promise<Record<string, unknown>[]> {
   const res = await apiRequest('/api/v1/tenants/');
   return res.data;
 }
 
-export async function getTenantShops(tenantSlug?: string): Promise<any[]> {
+export async function getTenantShops(tenantSlug?: string): Promise<Record<string, unknown>[]> {
   const url = tenantSlug ? `/api/v1/tenants/tenant_shops/?tenant=${tenantSlug}` : '/api/v1/tenants/tenant_shops/';
   const res = await apiRequest(url);
   return res.data;
 }
 
-export async function createTenant(tenantData: any): Promise<AxiosResponse> {
+export async function createTenant(tenantData: Record<string, unknown>): Promise<AxiosResponse> {
   return apiRequest('/api/v1/tenants/', {
     method: 'POST',
     data: tenantData,
@@ -542,12 +566,12 @@ export async function createTenant(tenantData: any): Promise<AxiosResponse> {
 // Subscription/SaaS Plans API
 // ========================================
 
-export async function getSubscriptionPlans(): Promise<any[]> {
+export async function getSubscriptionPlans(): Promise<Record<string, unknown>[]> {
   const res = await api.get('/api/v1/subscription/plans/');
   return res.data;
 }
 
-export async function getActiveSubscriptionPlans(): Promise<any> {
+export async function getActiveSubscriptionPlans(): Promise<Record<string, unknown>[]> {
   const res = await api.get('/api/v1/subscription/plans/?is_active=true');
   // Handle both array and paginated response
   if (Array.isArray(res.data)) {
@@ -560,7 +584,7 @@ export async function getActiveSubscriptionPlans(): Promise<any> {
 // Supplier/Creditors API
 // ========================================
 
-export async function getSuppliers(): Promise<any[]> {
+export async function getSuppliers(): Promise<Record<string, unknown>[]> {
   const res = await apiRequest('/api/v1/creditors/creditors/');
   if (Array.isArray(res.data)) {
     return res.data;
@@ -568,12 +592,12 @@ export async function getSuppliers(): Promise<any[]> {
   return res.data.results || [];
 }
 
-export async function getSupplier(id: number): Promise<any> {
+export async function getSupplier(id: number): Promise<Record<string, unknown>> {
   const res = await apiRequest(`/api/v1/creditors/creditors/${id}/`);
   return res.data;
 }
 
-export async function createSupplier(supplierData: any): Promise<any> {
+export async function createSupplier(supplierData: Record<string, unknown>): Promise<Record<string, unknown>> {
   const res = await apiRequest('/api/v1/creditors/creditors/', {
     method: 'POST',
     data: supplierData,
@@ -581,7 +605,7 @@ export async function createSupplier(supplierData: any): Promise<any> {
   return res.data;
 }
 
-export async function updateSupplier(id: number, supplierData: any): Promise<any> {
+export async function updateSupplier(id: number, supplierData: Record<string, unknown>): Promise<Record<string, unknown>> {
   const res = await apiRequest(`/api/v1/creditors/creditors/${id}/`, {
     method: 'PATCH',
     data: supplierData,

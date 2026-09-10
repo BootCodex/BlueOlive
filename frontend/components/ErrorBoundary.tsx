@@ -5,7 +5,7 @@
 
 'use client';
 
-import React, { ErrorInfo, ReactNode, useState } from 'react';
+import React, { ErrorInfo, ReactNode } from 'react';
 
 interface Props {
   children: ReactNode;

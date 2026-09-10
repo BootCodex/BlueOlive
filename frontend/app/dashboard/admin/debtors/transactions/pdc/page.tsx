@@ -4,13 +4,10 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import debtorsApi from '@/lib/debtorsApi';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import PostDatedChequeForm from '@/components/debtors/forms/PostDatedChequeForm';
 import type { PostDatedCheque } from '@/lib/types/debtors';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle } from 'lucide-react';
-
 export default function PDCPage() {
   const [debtorId, setDebtorId] = useState<number | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);

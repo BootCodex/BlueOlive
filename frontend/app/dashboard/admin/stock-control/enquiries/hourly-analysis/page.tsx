@@ -63,7 +63,7 @@ export default function HourlyAnalysisPage() {
             <Loader className="w-6 h-6 animate-spin text-blue-600" />
           </div>
         ) : !rows || rows.length === 0 ? (
-          <p className="text-gray-500 text-center py-12">No sales in this period (transaction time wasn't recorded)</p>
+          <p className="text-gray-500 text-center py-12">No sales in this period (transaction time wasn&apos;t recorded)</p>
         ) : (
           <div className="space-y-2">
             {Array.from({ length: 24 }, (_, hour) => hour).map((hour) => {

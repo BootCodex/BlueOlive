@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Download, Printer } from 'lucide-react';
+import { ArrowLeft, Printer } from 'lucide-react';
 import { API_BASE_URL } from '@/lib/api-config';
 
 interface Account {
@@ -66,7 +66,7 @@ export default function AccountDetailsReport({ onBack }: { onBack: () => void })
     }
   };
 
-  const formatCurrency = (value: number | undefined) => {
+  const _formatCurrency = (value: number | undefined) => {
     if (!value) return '-';
     return new Intl.NumberFormat('en-ZA', {
       style: 'currency',

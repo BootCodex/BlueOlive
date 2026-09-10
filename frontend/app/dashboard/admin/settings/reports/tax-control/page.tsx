@@ -124,9 +124,9 @@ export default function TaxControlReportPage() {
           </Card>
 
           <Card className="p-6">
-            <h2 className="text-lg font-bold mb-2">Reconcile Against Each Module's Own Report</h2>
+            <h2 className="text-lg font-bold mb-2">Reconcile Against Each Module&apos;s Own Report</h2>
             <p className="text-sm text-gray-600 mb-4">
-              Compare these totals against each module's own Transaction Report before submitting VAT-201.
+              Compare these totals against each module&apos;s own Transaction Report before submitting VAT-201.
             </p>
             <dl className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
               <div>

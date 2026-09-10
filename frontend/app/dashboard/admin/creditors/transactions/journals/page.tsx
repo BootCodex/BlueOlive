@@ -1,13 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { creditorsApi } from '@/lib/creditorsApi';
 import type { CreditorJournal } from '@/lib/types/creditors';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Loader, Plus, Edit } from 'lucide-react';
 import Link from 'next/link';
 

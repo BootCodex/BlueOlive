@@ -10,12 +10,13 @@ import React, {
 import Link from 'next/link';
 import { debtorsApi } from '@/lib/debtorsApi';
 import type { DebtorAccount } from '@/lib/types/debtors';
-import { Edit2, Trash2, Plus, Search, AlertCircle, Eye, X } from 'lucide-react';
+import { Edit2, Trash2, Plus, Search, Eye, X } from 'lucide-react';
 import DebtorAccountForm from '@/components/debtors/forms/DebtorAccountForm';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import type { MaybeAxiosError } from '@/lib/types/errors';
 
 interface DebtorsListProps {
   onRefresh?: number;
@@ -101,7 +102,7 @@ const DebtorRow = memo(function DebtorRow({
 function DebtorsListComponent({ onRefresh }: DebtorsListProps) {
   const [debtors, setDebtors] = useState<DebtorAccount[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [_error, setError] = useState<string | null>(null);
   const [selectedDebtor, setSelectedDebtor] = useState<DebtorAccount | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -154,8 +155,8 @@ function DebtorsListComponent({ onRefresh }: DebtorsListProps) {
         setDebtors(data?.results ?? []);
         setTotal(data?.count ?? 0);
       }
-    } catch (err: any) {
-      setError(err?.message ?? 'Failed to load debtors');
+    } catch (err: unknown) {
+      setError((err as MaybeAxiosError)?.message ?? 'Failed to load debtors');
       setDebtors([]);
       setTotal(0);
     } finally {

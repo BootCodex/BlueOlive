@@ -6,7 +6,6 @@ import debtorsApi from '@/lib/debtorsApi';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import DebtorDetailCard from '@/components/debtors/enquiries/DebtorDetailCard';
 import AgeAnalysisDisplay from '@/components/debtors/enquiries/AgeAnalysisDisplay';
 import { Search, AlertCircle } from 'lucide-react';

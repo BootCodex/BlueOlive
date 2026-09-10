@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { debtorsApi } from '@/lib/debtorsApi';
 import { apiRequest, getApiErrorMessage } from '@/lib/api';
+import type { MaybeAxiosError } from '@/lib/types/errors';
 
 interface DebtorOption {
   id: number;
@@ -60,7 +61,7 @@ export default function CancelRemovePDCForm() {
             }))
           : [];
         setDebtors(options);
-      } catch (err) {
+      } catch {
         setError('Failed to load debtors.');
       } finally {
         setLoadingDebtors(false);
@@ -106,9 +107,9 @@ export default function CancelRemovePDCForm() {
       }
       setPdcRecords(pdcs);
       setError(pdcs.length === 0 ? 'No post-dated cheques found for this debtor.' : '');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to load PDC records:', err);
-      if (err?.response?.status === 404) {
+      if ((err as MaybeAxiosError)?.response?.status === 404) {
         setError('No post-dated cheques found or this operation is not supported.');
       } else {
         setError('Failed to load post-dated cheques.');
@@ -169,7 +170,7 @@ export default function CancelRemovePDCForm() {
       if (selectedDebtorId) {
         loadPDCRecords(selectedDebtorId);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Failed to cancel PDC'));
     } finally {
       setLoading(false);

@@ -7,7 +7,6 @@ import { jobCardsApi } from '@/lib/jobCardsApi';
 import { DebtorPicker } from '@/components/pos/DebtorPicker';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
@@ -16,13 +15,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ArrowLeft, AlertCircle, CheckCircle, Edit, CreditCard, Banknote, Building } from 'lucide-react';
+import { ArrowLeft, AlertCircle, Edit } from 'lucide-react';
 import Link from 'next/link';
+import type { MaybeAxiosError } from '@/lib/types/errors';
 
 export default function JobCardDetailPage() {
   const router = useRouter();
   const params = useParams();
-  const { user } = useAuth();
+  const { user: _user } = useAuth();
   const [jobCard, setJobCard] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +32,7 @@ export default function JobCardDetailPage() {
   const [selectedDebtor, setSelectedDebtor] = useState<any>(null);
   const [convertedInvoice, setConvertedInvoice] = useState<any>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
-  const [processingPayment, setProcessingPayment] = useState(false);
+  const [processingPayment, _setProcessingPayment] = useState(false);
 
   const jobId = params.id as string;
 
@@ -88,9 +88,9 @@ export default function JobCardDetailPage() {
       
       // Show payment dialog
       setShowPaymentDialog(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error converting to invoice:', err);
-      const errorData = err.response?.data;
+      const errorData = (err as MaybeAxiosError).response?.data;
       const errorMessage = errorData?.error || errorData?.detail || 'Failed to convert to invoice';
       const errorDetails = errorData?.details || errorData?.message || '';
       setError(errorDetails ? `${errorMessage}: ${errorDetails}` : errorMessage);

@@ -10,17 +10,19 @@ import OneTouchLookupKeyMaintenance from '@/components/stock-control/maintenance
 import ContractPricingMaintenance from '@/components/stock-control/maintenance/ContractPricingMaintenance';
 import ShrinkWrapMaintenance from '@/components/stock-control/maintenance/ShrinkWrapMaintenance';
 import PackBundleMaintenance from '@/components/stock-control/maintenance/PackBundleMaintenance';
+import LabelPrinting from '@/components/stock-control/maintenance/LabelPrinting';
 
-type MaintenanceSection = 
-  | 'menu' 
-  | 'stock-items' 
-  | 'special-deals' 
-  | 'prices' 
-  | 'departments' 
-  | 'lookup-keys' 
-  | 'contract-pricing' 
-  | 'shrink-wraps' 
-  | 'packs-bundles';
+type MaintenanceSection =
+  | 'menu'
+  | 'stock-items'
+  | 'special-deals'
+  | 'prices'
+  | 'departments'
+  | 'lookup-keys'
+  | 'contract-pricing'
+  | 'shrink-wraps'
+  | 'packs-bundles'
+  | 'labels';
 
 const maintenanceOptions = [
   {
@@ -101,6 +103,16 @@ const maintenanceOptions = [
       'Ingredient Maintenance',
       'View Pack Compositions'
     ]
+  },
+  {
+    id: 'labels',
+    title: 'Print Shelf / Barcode Labels',
+    description: 'Print barcode and price labels for shelf tags or new stock',
+    subItems: [
+      'Search and select stock items',
+      'A4 sheet or thermal roll layout',
+      'CODE128 barcode with current selling price'
+    ]
   }
 ];
 
@@ -161,6 +173,7 @@ export default function StockControlMaintenancePage() {
         {activeSection === 'contract-pricing' && <ContractPricingMaintenance onBack={handleBack} />}
         {activeSection === 'shrink-wraps' && <ShrinkWrapMaintenance onBack={handleBack} />}
         {activeSection === 'packs-bundles' && <PackBundleMaintenance onBack={handleBack} />}
+        {activeSection === 'labels' && <LabelPrinting onBack={handleBack} />}
       </div>
     </div>
   );

@@ -34,7 +34,7 @@ export default function StockReturnForm() {
     queryFn: () => creditorsApi.accounts.list({ page_size: 500 }),
   });
 
-  const { data: returnData, isLoading } = useQuery({
+  const { data: _returnData, isLoading } = useQuery({
     queryKey: ['stock-return', returnId],
     queryFn: () => creditorsApi.creditNotes.get(returnId),
     enabled: !isNew,

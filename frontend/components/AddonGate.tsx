@@ -39,7 +39,7 @@ export default function AddonGate({ addon, children }: { addon: string; children
             <h1 className="text-3xl font-bold text-gray-900 mb-2 text-center">Not Available</h1>
 
             <p className="text-gray-600 mb-6 text-center">
-              This feature isn't enabled for your account. Contact your administrator if you'd like to add it.
+              This feature isn&apos;t enabled for your account. Contact your administrator if you&apos;d like to add it.
             </p>
 
             <Link

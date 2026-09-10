@@ -2,7 +2,6 @@
 
 import { useQuery, useMutation } from '@tanstack/react-query';
 import debtorsApi from '@/lib/debtorsApi';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { OpenItem } from '@/lib/types/debtors';

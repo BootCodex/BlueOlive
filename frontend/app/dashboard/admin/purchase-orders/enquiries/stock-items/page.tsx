@@ -20,7 +20,7 @@ export default function OutstandingStockItemsPage() {
           Outstanding Stock Items
         </h1>
         <p className="text-sm text-gray-500">
-          View stock items currently on order, and which purchase orders they're on
+          View stock items currently on order, and which purchase orders they&apos;re on
         </p>
       </div>
 

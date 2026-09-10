@@ -134,7 +134,7 @@ export default function DebtorImportPage() {
       if (res.data.length === 0) {
         setError('No active tenants found. Create a tenant and shop first.');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Failed to load tenants'));
     } finally {
       setLoading(false);
@@ -173,7 +173,7 @@ export default function DebtorImportPage() {
       setAnalysis(res.data);
       setMappings(res.data.suggested_mappings);
       setStep('map');
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Failed to analyze file'));
     } finally {
       setLoading(false);
@@ -215,7 +215,7 @@ export default function DebtorImportPage() {
       });
       setImportResult(res.data);
       setStep('done');
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Import failed'));
       setStep('map');
     } finally {

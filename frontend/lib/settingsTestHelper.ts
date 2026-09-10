@@ -9,6 +9,7 @@
 */
 
 import { api } from './api';
+import type { MaybeAxiosError } from '@/lib/types/errors';
 
 export const settingsTestHelper = {
   /**
@@ -24,8 +25,8 @@ export const settingsTestHelper = {
       }
       console.error('No shops found. Please create a shop first.');
       return null;
-    } catch (error: any) {
-      console.error('Failed to get shops:', error.response?.data || error.message);
+    } catch (error: unknown) {
+      console.error('Failed to get shops:', (error as MaybeAxiosError).response?.data || (error as MaybeAxiosError).message);
       return null;
     }
   },
@@ -41,8 +42,8 @@ export const settingsTestHelper = {
       const getRes = await api.get('/api/settings/departments/');
       console.log('Response:', getRes.data);
       return getRes.data;
-    } catch (error: any) {
-      console.error('Error:', error.response?.data || error.message);
+    } catch (error: unknown) {
+      console.error('Error:', (error as MaybeAxiosError).response?.data || (error as MaybeAxiosError).message);
       return null;
     }
   },
@@ -58,8 +59,8 @@ export const settingsTestHelper = {
       const res = await api.post('/api/settings/departments/', data);
       console.log('Response:', res.data);
       return res.data;
-    } catch (error: any) {
-      console.error('Error:', error.response?.data || error.message);
+    } catch (error: unknown) {
+      console.error('Error:', (error as MaybeAxiosError).response?.data || (error as MaybeAxiosError).message);
       return null;
     }
   },
@@ -74,8 +75,8 @@ export const settingsTestHelper = {
       const getRes = await api.get('/api/settings/income-categories/');
       console.log('Response:', getRes.data);
       return getRes.data;
-    } catch (error: any) {
-      console.error('Error:', error.response?.data || error.message);
+    } catch (error: unknown) {
+      console.error('Error:', (error as MaybeAxiosError).response?.data || (error as MaybeAxiosError).message);
       return null;
     }
   },
@@ -91,8 +92,8 @@ export const settingsTestHelper = {
       const res = await api.post('/api/settings/income-categories/', data);
       console.log('Response:', res.data);
       return res.data;
-    } catch (error: any) {
-      console.error('Error:', error.response?.data || error.message);
+    } catch (error: unknown) {
+      console.error('Error:', (error as MaybeAxiosError).response?.data || (error as MaybeAxiosError).message);
       return null;
     }
   },
@@ -107,8 +108,8 @@ export const settingsTestHelper = {
       const getRes = await api.get('/api/settings/expense-categories/');
       console.log('Response:', getRes.data);
       return getRes.data;
-    } catch (error: any) {
-      console.error('Error:', error.response?.data || error.message);
+    } catch (error: unknown) {
+      console.error('Error:', (error as MaybeAxiosError).response?.data || (error as MaybeAxiosError).message);
       return null;
     }
   },
@@ -124,8 +125,8 @@ export const settingsTestHelper = {
       const res = await api.post('/api/settings/expense-categories/', data);
       console.log('Response:', res.data);
       return res.data;
-    } catch (error: any) {
-      console.error('Error:', error.response?.data || error.message);
+    } catch (error: unknown) {
+      console.error('Error:', (error as MaybeAxiosError).response?.data || (error as MaybeAxiosError).message);
       return null;
     }
   },
@@ -140,8 +141,8 @@ export const settingsTestHelper = {
       const getRes = await api.get('/api/settings/tax-codes/');
       console.log('Response:', getRes.data);
       return getRes.data;
-    } catch (error: any) {
-      console.error('Error:', error.response?.data || error.message);
+    } catch (error: unknown) {
+      console.error('Error:', (error as MaybeAxiosError).response?.data || (error as MaybeAxiosError).message);
       return null;
     }
   },
@@ -157,8 +158,8 @@ export const settingsTestHelper = {
       const res = await api.post('/api/settings/tax-codes/', data);
       console.log('Response:', res.data);
       return res.data;
-    } catch (error: any) {
-      console.error('Error:', error.response?.data || error.message);
+    } catch (error: unknown) {
+      console.error('Error:', (error as MaybeAxiosError).response?.data || (error as MaybeAxiosError).message);
       return null;
     }
   },
@@ -173,8 +174,8 @@ export const settingsTestHelper = {
       const getRes = await api.get('/api/settings/payment-methods/');
       console.log('Response:', getRes.data);
       return getRes.data;
-    } catch (error: any) {
-      console.error('Error:', error.response?.data || error.message);
+    } catch (error: unknown) {
+      console.error('Error:', (error as MaybeAxiosError).response?.data || (error as MaybeAxiosError).message);
       return null;
     }
   },
@@ -190,8 +191,8 @@ export const settingsTestHelper = {
       const res = await api.post('/api/settings/payment-methods/', data);
       console.log('Response:', res.data);
       return res.data;
-    } catch (error: any) {
-      console.error('Error:', error.response?.data || error.message);
+    } catch (error: unknown) {
+      console.error('Error:', (error as MaybeAxiosError).response?.data || (error as MaybeAxiosError).message);
       return null;
     }
   },
@@ -206,8 +207,8 @@ export const settingsTestHelper = {
       const getRes = await api.get('/api/settings/credit-terms/');
       console.log('Response:', getRes.data);
       return getRes.data;
-    } catch (error: any) {
-      console.error('Error:', error.response?.data || error.message);
+    } catch (error: unknown) {
+      console.error('Error:', (error as MaybeAxiosError).response?.data || (error as MaybeAxiosError).message);
       return null;
     }
   },
@@ -223,8 +224,8 @@ export const settingsTestHelper = {
       const res = await api.post('/api/settings/credit-terms/', data);
       console.log('Response:', res.data);
       return res.data;
-    } catch (error: any) {
-      console.error('Error:', error.response?.data || error.message);
+    } catch (error: unknown) {
+      console.error('Error:', (error as MaybeAxiosError).response?.data || (error as MaybeAxiosError).message);
       return null;
     }
   },
@@ -239,8 +240,8 @@ export const settingsTestHelper = {
       const getRes = await api.get('/api/settings/system-config/');
       console.log('Response:', getRes.data);
       return getRes.data;
-    } catch (error: any) {
-      console.error('Error:', error.response?.data || error.message);
+    } catch (error: unknown) {
+      console.error('Error:', (error as MaybeAxiosError).response?.data || (error as MaybeAxiosError).message);
       return null;
     }
   },
@@ -259,8 +260,8 @@ export const settingsTestHelper = {
       });
       console.log('Response:', res.data);
       return res.data;
-    } catch (error: any) {
-      console.error('Error:', error.response?.data || error.message);
+    } catch (error: unknown) {
+      console.error('Error:', (error as MaybeAxiosError).response?.data || (error as MaybeAxiosError).message);
       return null;
     }
   },
@@ -275,8 +276,8 @@ export const settingsTestHelper = {
       const res = await api.delete(`/api/settings/departments/${id}/`);
       console.log('Response:', res.data);
       return res.data;
-    } catch (error: any) {
-      console.error('Error:', error.response?.data || error.message);
+    } catch (error: unknown) {
+      console.error('Error:', (error as MaybeAxiosError).response?.data || (error as MaybeAxiosError).message);
       return null;
     }
   },
@@ -314,21 +315,21 @@ export const settingsTestHelper = {
 
 // Type for the test helper
 interface SettingsTestHelper {
-  testDepartments(): Promise<any>;
-  testAddDepartment(number: number, name: string): Promise<any>;
-  testIncomeCategories(): Promise<any>;
-  testAddIncomeCategory(number: number, name: string): Promise<any>;
-  testExpenseCategories(): Promise<any>;
-  testAddExpenseCategory(number: number, name: string, category_type?: string): Promise<any>;
-  testTaxCodes(): Promise<any>;
-  testAddTaxCode(code: number, description: string, rate: number): Promise<any>;
-  testPaymentMethods(): Promise<any>;
-  testAddPaymentMethod(code: string, name: string, is_electronic?: boolean): Promise<any>;
-  testCreditTerms(): Promise<any>;
-  testAddCreditTerms(days: number, description: string): Promise<any>;
-  testSystemConfig(): Promise<any>;
-  testUpdateDepartment(id: number, number: number, name: string): Promise<any>;
-  testDeleteDepartment(id: number): Promise<any>;
+  testDepartments(): Promise<Record<string, unknown>>;
+  testAddDepartment(number: number, name: string): Promise<Record<string, unknown>>;
+  testIncomeCategories(): Promise<Record<string, unknown>>;
+  testAddIncomeCategory(number: number, name: string): Promise<Record<string, unknown>>;
+  testExpenseCategories(): Promise<Record<string, unknown>>;
+  testAddExpenseCategory(number: number, name: string, category_type?: string): Promise<Record<string, unknown>>;
+  testTaxCodes(): Promise<Record<string, unknown>>;
+  testAddTaxCode(code: number, description: string, rate: number): Promise<Record<string, unknown>>;
+  testPaymentMethods(): Promise<Record<string, unknown>>;
+  testAddPaymentMethod(code: string, name: string, is_electronic?: boolean): Promise<Record<string, unknown>>;
+  testCreditTerms(): Promise<Record<string, unknown>>;
+  testAddCreditTerms(days: number, description: string): Promise<Record<string, unknown>>;
+  testSystemConfig(): Promise<Record<string, unknown>>;
+  testUpdateDepartment(id: number, number: number, name: string): Promise<Record<string, unknown>>;
+  testDeleteDepartment(id: number): Promise<Record<string, unknown>>;
   runAllTests(): Promise<void>;
 }
 
@@ -338,5 +339,5 @@ declare global {
 }
 
 if (typeof window !== 'undefined') {
-  (window as any).settingsTestHelper = settingsTestHelper;
+  window.settingsTestHelper = settingsTestHelper;
 }

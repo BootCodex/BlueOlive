@@ -177,3 +177,43 @@ jobs:
       - name: Audit dependencies (high/critical)
         working-directory: frontend
         run: npm audit --audit-level=high || true
+
+  admin:
+    name: Admin
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: admin/package-lock.json
+
+      - name: Install dependencies
+        working-directory: admin
+        run: npm ci
+
+      # Lint is non-blocking for the same reason as the frontend job above:
+      # eslint.config.mjs uses the ESLint 9 flat-config API but eslint@8.57
+      # is installed, so `eslint` errors out (ERR_PACKAGE_PATH_NOT_EXPORTED)
+      # before it can check anything. Type-check and build are both clean
+      # today, so they're blocking.
+      - name: Lint
+        working-directory: admin
+        run: npm run lint || true
+
+      - name: Type check
+        working-directory: admin
+        run: npm run type-check
+
+      - name: Build
+        working-directory: admin
+        run: npm run build
+
+      - name: Audit dependencies (high/critical)
+        working-directory: admin
+        run: npm audit --audit-level=high || true

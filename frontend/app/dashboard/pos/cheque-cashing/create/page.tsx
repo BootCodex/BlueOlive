@@ -12,7 +12,7 @@ import { ArrowLeft, AlertCircle, CheckCircle } from 'lucide-react';
 
 export default function CreateChequeCashingPage() {
   const router = useRouter();
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: _authLoading } = useAuth();
   const posAPI = usePOSAPI(user?.tenant?.slug);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -83,7 +83,7 @@ export default function CreateChequeCashingPage() {
 
       setSuccess('Cheque cashing recorded successfully');
       setTimeout(() => router.push('/dashboard/pos/cheque-cashing'), 2000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Failed to create cheque cashing record'));
     } finally {
       setLoading(false);
@@ -168,7 +168,7 @@ export default function CreateChequeCashingPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Drawer's Name *
+                    Drawer&apos;s Name *
                   </label>
                   <Input
                     type="text"

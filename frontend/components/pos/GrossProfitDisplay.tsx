@@ -117,7 +117,7 @@ export function LineItemGP({ sellingPrice, costPrice, quantity, discountPercent 
   const afterDiscount = lineTotal - discount;
   const costTotal = Number(costPrice) * Number(quantity);
   const gp = afterDiscount - costTotal;
-  const gpPercent = afterDiscount > 0 ? (gp / afterDiscount) * 100 : 0;
+  const _gpPercent = afterDiscount > 0 ? (gp / afterDiscount) * 100 : 0;
 
   return (
     <GrossProfitDisplay

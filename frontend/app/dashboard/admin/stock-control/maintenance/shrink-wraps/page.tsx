@@ -188,7 +188,7 @@ export default function ShrinkWrapsPage() {
           </div>
         ) : filteredItems.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            No shrink wrap relationships found. Click "Add Shrink Wrap" to create one.
+            No shrink wrap relationships found. Click &quot;Add Shrink Wrap&quot; to create one.
           </div>
         ) : (
           <Table>

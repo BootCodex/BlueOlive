@@ -21,7 +21,7 @@ import { DebtorPicker } from '@/components/pos';
 export default function EditJobCardPage() {
   const router = useRouter();
   const params = useParams();
-  const { user } = useAuth();
+  const { user: _user } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);

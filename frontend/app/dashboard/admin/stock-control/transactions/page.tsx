@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import StockTransactions from '@/components/stock-control/transactions/StockTransactions';
 
 export default function StockControlTransactionsPage() {

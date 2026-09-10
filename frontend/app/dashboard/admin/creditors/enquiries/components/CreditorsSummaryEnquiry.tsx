@@ -12,8 +12,6 @@ import {
 } from '@/components/ui/select';
 import { ArrowLeft, Download } from 'lucide-react';
 import { creditorsApi } from '@/lib/creditorsApi';
-import { AgedBalanceSummary } from '@/lib/types/creditors';
-
 interface SupplierData {
   id: number;
   supplier_number: string;

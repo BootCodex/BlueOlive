@@ -2,8 +2,7 @@
 
 import React from 'react';
 import { 
-  Package, 
-  TrendingUp, 
+  Package,  
   Search, 
   BarChart3, 
   Settings,

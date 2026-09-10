@@ -55,7 +55,7 @@ export default function CashControlPage() {
         posAPI.getCashControlDailySummary({ date: controlDate, cashier: user?.id }),
         posAPI.getCashControlHourlyAnalysis({ date: controlDate, cashier: user?.id }),
       ]);
-      setSummary(summaryData);
+      setSummary(summaryData as unknown as CashControlSummary);
       setHourly(hourlyData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load cash control');

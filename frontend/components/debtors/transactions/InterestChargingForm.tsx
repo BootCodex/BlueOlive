@@ -112,7 +112,7 @@ export default function InterestChargingForm() {
       setRate('1.0');
       setStartPeriod(2);
       setChargeCreditBalances(false);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Failed to charge interest'));
     } finally {
       setLoading(false);
@@ -134,7 +134,7 @@ export default function InterestChargingForm() {
       )}
 
       <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-xs text-yellow-800">
-        Manual §2.2 "Interest Charging": this should only be done at month end after a backup.
+        Manual §2.2 &quot;Interest Charging&quot;: this should only be done at month end after a backup.
       </div>
 
       {/* Debtor Selection */}
@@ -233,7 +233,7 @@ export default function InterestChargingForm() {
             Estimated Interest: R{previewInterest().toFixed(2)}
           </p>
           <p className="text-xs text-gray-600 mt-1">
-            Final amount is computed server-side from the debtor's current aged balances at posting time.
+            Final amount is computed server-side from the debtor&apos;s current aged balances at posting time.
           </p>
         </div>
       )}

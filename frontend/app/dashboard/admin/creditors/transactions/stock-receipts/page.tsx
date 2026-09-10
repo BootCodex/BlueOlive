@@ -1,18 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { creditorsApi } from '@/lib/creditorsApi';
 import type { CreditorAccount } from '@/lib/types/creditors';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader, Plus, Edit, Trash2, Printer } from 'lucide-react';
+import { Loader, Plus, Edit, Printer } from 'lucide-react';
 import Link from 'next/link';
 
 export default function StockReceiptsPage() {
-  const queryClient = useQueryClient();
-  const [selectedSupplier, setSelectedSupplier] = useState<CreditorAccount | null>(null);
+  const _queryClient = useQueryClient();
+  const [_selectedSupplier, setSelectedSupplier] = useState<CreditorAccount | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
 

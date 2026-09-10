@@ -16,6 +16,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { DebtorPicker } from '@/components/pos/DebtorPicker';
+import type { MaybeAxiosError } from '@/lib/types/errors';
 
 export default function CashSaleDetailPage() {
   const { user, isLoading: authLoading } = useAuth();
@@ -50,9 +51,9 @@ export default function CashSaleDetailPage() {
       } else {
         setConvertDialogOpen(false);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error converting cash sale to invoice:', err);
-      setConvertError(err.message || 'Failed to convert to account sale');
+      setConvertError((err as MaybeAxiosError).message || 'Failed to convert to account sale');
     } finally {
       setConverting(false);
     }

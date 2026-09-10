@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { getStockSummary, getStockItems } from '@/lib/stockApi';
+import { getStockSummary } from '@/lib/stockApi';
 import { stockControlApi } from '@/lib/stockControlApi';
 import { Card } from '@/components/ui/card';
 import { 
@@ -29,7 +29,7 @@ export default function StockControlReportsPage() {
     staleTime: 30 * 1000,
   });
 
-  const { data: monthlyStats } = useQuery({
+  const { data: _monthlyStats } = useQuery({
     queryKey: ['monthly-stats-summary'],
     queryFn: () => stockControlApi.monthlyStats.list({ year: new Date().getFullYear() }),
     staleTime: 30 * 1000,

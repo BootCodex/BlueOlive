@@ -6,13 +6,25 @@ All endpoints require platform superuser (IsPlatformSuperuser) permission.
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
+from .audit_views import AuditLogViewSet
 from .auth_views import (
     PlatformLoginView,
     PlatformLogoutView,
     PlatformProfileView,
     PlatformTokenRefreshView,
 )
+from .impersonation_views import support_login
 from .import_views import analyze_csv, import_csv, list_tenants_and_shops
+from .provisioning_views import (
+    provisioning_health,
+    retry_shop_provisioning,
+    retry_tenant_provisioning,
+)
+from .subscription_views import (
+    PlatformSubscriptionPaymentViewSet,
+    PlatformSubscriptionPlanViewSet,
+    PlatformSubscriptionViewSet,
+)
 from .tenant_views import ShopViewSet, TenantStatsViewSet, TenantViewSet
 from .user_views import (
     assign_user_shops,
@@ -29,6 +41,10 @@ router = DefaultRouter()
 router.register(r"tenants", TenantViewSet, basename="tenant")
 router.register(r"shops", ShopViewSet, basename="shop")
 router.register(r"tenant-stats", TenantStatsViewSet, basename="tenant-stats")
+router.register(r"subscription-plans", PlatformSubscriptionPlanViewSet, basename="subscription-plan")
+router.register(r"subscriptions", PlatformSubscriptionViewSet, basename="subscription")
+router.register(r"subscription-payments", PlatformSubscriptionPaymentViewSet, basename="subscription-payment")
+router.register(r"audit-logs", AuditLogViewSet, basename="audit-log")
 
 urlpatterns = [
     # Platform Owner Authentication (separate from tenant login)
@@ -52,4 +68,22 @@ urlpatterns = [
     path("users/toggle-status/", toggle_user_status, name="toggle-user-status"),
     path("users/reset-password/", reset_user_password, name="reset-user-password"),
     path("users/assign-shops/", assign_user_shops, name="assign-user-shops"),
+    # Provisioning health
+    path("provisioning/", provisioning_health, name="provisioning-health"),
+    path(
+        "provisioning/tenants/<int:tenant_id>/retry/",
+        retry_tenant_provisioning,
+        name="retry-tenant-provisioning",
+    ),
+    path(
+        "provisioning/shops/<int:shop_id>/retry/",
+        retry_shop_provisioning,
+        name="retry-shop-provisioning",
+    ),
+    # Support login (tenant impersonation)
+    path(
+        "tenants/<int:tenant_id>/support-login/",
+        support_login,
+        name="support-login",
+    ),
 ]

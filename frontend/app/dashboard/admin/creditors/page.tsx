@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { creditorsApi } from '@/lib/creditorsApi';
 import { Card } from '@/components/ui/card';
@@ -9,7 +8,7 @@ import { Loader, Plus, Receipt, RotateCcw, FileText, Zap } from 'lucide-react';
 import Link from 'next/link';
 
 export default function CreditorsOverviewPage() {
-  const { data: summary, isLoading: summaryLoading } = useQuery({
+  const { data: _summary, isLoading: summaryLoading } = useQuery({
     queryKey: ['creditors-summary'],
     queryFn: () => creditorsApi.summary.get(),
     staleTime: 5 * 60 * 1000,

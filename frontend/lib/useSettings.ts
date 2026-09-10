@@ -5,14 +5,14 @@ import { useState, useEffect, useCallback } from 'react';
 import { api } from './api';
 
 export interface SettingsData {
-  departments: any[];
-  salesAreas: any[];
-  incomeCategories: any[];
-  expenseCategories: any[];
-  taxCodes: any[];
-  paymentMethods: any[];
-  creditTerms: any[];
-  systemConfig: any;
+  departments: Record<string, unknown>[];
+  salesAreas: Record<string, unknown>[];
+  incomeCategories: Record<string, unknown>[];
+  expenseCategories: Record<string, unknown>[];
+  taxCodes: Record<string, unknown>[];
+  paymentMethods: Record<string, unknown>[];
+  creditTerms: Record<string, unknown>[];
+  systemConfig: Record<string, unknown> | null;
 }
 
 const initialState: SettingsData = {

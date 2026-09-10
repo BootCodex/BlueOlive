@@ -12,8 +12,7 @@ import {
   Receipt, 
   Package, 
   AlertCircle,
-  TrendingUp,
-  MoreVertical,
+  TrendingUp,
   ChevronRight
 } from 'lucide-react';
 
@@ -185,7 +184,7 @@ export default function POSDashboard() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Today's Summary</CardTitle>
+                  <CardTitle>Today&apos;s Summary</CardTitle>
                   <CardDescription>Transaction overview</CardDescription>
                 </div>
                 <TrendingUp className="h-5 w-5 text-blue-600" />

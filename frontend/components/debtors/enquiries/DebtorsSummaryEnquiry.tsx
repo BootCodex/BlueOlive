@@ -130,7 +130,7 @@ export default function DebtorsSummaryEnquiry() {
       {/* No Data State */}
       {!summary && !loading && (
         <div className="text-center py-12">
-          <p className="text-gray-600">Click "Generate Report" to view debtors summary</p>
+          <p className="text-gray-600">Click &quot;Generate Report&quot; to view debtors summary</p>
         </div>
       )}
     </div>

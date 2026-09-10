@@ -6,10 +6,10 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
+import type { MaybeAxiosError } from '@/lib/types/errors';
 import {
   validateForm,
   FormValidationRules,
-  ValidationResult,
 } from '@/lib/validation';
 
 export interface UseFormOptions<T> {
@@ -30,7 +30,7 @@ export interface UseFormReturn<T> {
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   handleBlur: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   handleSubmit: (e: React.FormEvent) => Promise<void>;
-  setFieldValue: (name: string, value: any) => void;
+  setFieldValue: (name: string, value: unknown) => void;
   setFieldError: (name: string, error: string) => void;
   resetForm: () => void;
   setFormError: (error: string | null) => void;
@@ -40,7 +40,7 @@ export interface UseFormReturn<T> {
 /**
  * useForm hook for managing form state, validation, and submission
  */
-export function useForm<T extends Record<string, any>>({
+export function useForm<T extends Record<string, unknown>>({
   initialValues,
   onSubmit,
   validationRules = {},
@@ -51,14 +51,30 @@ export function useForm<T extends Record<string, any>>({
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const initialValuesRef = useRef(initialValues);
+  // A stable, one-time snapshot of the form's starting values, read during
+  // render to compute isDirty - state (not a ref) so that read is safe
+  // during render; it's captured once via the lazy initializer and never
+  // updated, matching the ref's original "never changes" semantics.
+  const [initialSnapshot] = useState(initialValues);
   const isDirtyRef = useRef(false);
 
   const isDirty = Object.keys(values).some(
-    (key) => values[key as keyof T] !== initialValuesRef.current[key as keyof T]
+    (key) => values[key as keyof T] !== initialSnapshot[key as keyof T]
   );
 
   const isValid = Object.keys(errors).length === 0 && isDirty;
+
+  const resetForm = useCallback(() => {
+    setValues(initialSnapshot);
+    setErrors({});
+    setTouched({});
+    setFormError(null);
+    isDirtyRef.current = false;
+    // initialSnapshot is captured once via useState's lazy initializer and
+    // never changes for the lifetime of this hook instance, so it's safe
+    // to omit here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -157,18 +173,18 @@ export function useForm<T extends Record<string, any>>({
         await onSubmit(values);
         // Reset form on successful submission
         resetForm();
-      } catch (error: any) {
-        const errorMessage = error?.message || 'An error occurred while submitting the form';
+      } catch (error: unknown) {
+        const errorMessage = (error as MaybeAxiosError)?.message || 'An error occurred while submitting the form';
         setFormError(errorMessage);
-        onError?.(error);
+        onError?.(error instanceof Error ? error : new Error(errorMessage));
       } finally {
         setIsSubmitting(false);
       }
     },
-    [values, validationRules, onSubmit, onError]
+    [values, validationRules, onSubmit, onError, resetForm]
   );
 
-  const setFieldValue = useCallback((name: string, value: any) => {
+  const setFieldValue = useCallback((name: string, value: unknown) => {
     setValues((prev) => ({
       ...prev,
       [name]: value,
@@ -189,14 +205,6 @@ export function useForm<T extends Record<string, any>>({
       delete newErrors[name];
       return newErrors;
     });
-  }, []);
-
-  const resetForm = useCallback(() => {
-    setValues(initialValuesRef.current);
-    setErrors({});
-    setTouched({});
-    setFormError(null);
-    isDirtyRef.current = false;
   }, []);
 
   return {
@@ -223,7 +231,7 @@ export function useForm<T extends Record<string, any>>({
  * Returns props to spread on form field elements
  */
 export function getFieldProps(
-  form: Partial<UseFormReturn<any>>,
+  form: Partial<UseFormReturn<Record<string, unknown>>>,
   fieldName: string
 ) {
   return {

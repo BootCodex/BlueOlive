@@ -7,8 +7,6 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Loader, Phone, Mail, MapPin, Building2, CreditCard, Calendar } from 'lucide-react';
-import type { DebtorAccount } from '@/lib/types/debtors';
-
 interface ViewAccountPageProps {
   params: {
     id: string;

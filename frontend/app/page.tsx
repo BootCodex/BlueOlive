@@ -10,7 +10,7 @@ import { getActiveSubscriptionPlans } from '@/lib/api';
 export default function LandingPage() {
   const { user, isLoading } = useAuthContext();
   const router = useRouter();
-  const [plans, setPlans] = useState<any[]>([]);
+  const [plans, setPlans] = useState<Record<string, unknown>[]>([]);
   const [plansLoading, setPlansLoading] = useState(true);
 
   // Redirect if already logged in

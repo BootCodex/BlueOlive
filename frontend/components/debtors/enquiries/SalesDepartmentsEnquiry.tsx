@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { apiRequest } from '@/lib/api';
 
 interface DepartmentData {
@@ -16,7 +16,7 @@ interface DepartmentData {
   gross_profit_percent_ytd: number;
 }
 
-interface DepartmentListData {
+interface _DepartmentListData {
   results: DepartmentData[];
 }
 
@@ -238,7 +238,7 @@ export default function SalesDepartmentsEnquiry() {
                 ) : (
                   <tr className="border-b border-gray-200 hover:bg-gray-50">
                     <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
-                      Click "View All" to see all departments with sales activity
+                      Click &quot;View All&quot; to see all departments with sales activity
                     </td>
                   </tr>
                 )}

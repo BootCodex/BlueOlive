@@ -17,7 +17,7 @@ export default function SalesAnalysis({ debtorId }: SalesAnalysisProps) {
   const [monthlySales, setMonthlySales] = useState<MonthlySales[]>([]);
   const [ytdTotal, setYtdTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [_error, setError] = useState('');
 
   useEffect(() => {
     loadSalesAnalysis();

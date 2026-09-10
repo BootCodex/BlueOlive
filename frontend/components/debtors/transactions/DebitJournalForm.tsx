@@ -107,7 +107,7 @@ export default function DebitJournalForm() {
         additional_reference: '',
         age_period: '0',
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Failed to post debit journal'));
     } finally {
       setLoading(false);

@@ -5,12 +5,8 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  Phone,
-  Mail,
   MapPin,
   CreditCard,
-  User,
-  Building2,
   Calendar,
 } from 'lucide-react';
 import type { DebtorAccount } from '@/lib/types/debtors';
@@ -61,7 +57,7 @@ function formatDateTime(dateString: string | null | undefined): string {
   }
 }
 
-function getAccountType(acctype: string | null | undefined): string {
+function _getAccountType(acctype: string | null | undefined): string {
   if (!acctype) return ACCOUNT_TYPES[''];
   return ACCOUNT_TYPES[acctype as keyof typeof ACCOUNT_TYPES] ?? ACCOUNT_TYPES[''];
 }
@@ -77,7 +73,7 @@ interface DataFieldProps {
   className?: string;
 }
 
-const DataField = memo(function DataField({
+const _DataField = memo(function DataField({
   label,
   value,
   fallback = 'Not provided',
@@ -102,7 +98,7 @@ interface DataFieldWithIconProps extends DataFieldProps {
   icon: React.ReactNode;
 }
 
-const DataFieldWithIcon = memo(function DataFieldWithIcon({
+const _DataFieldWithIcon = memo(function DataFieldWithIcon({
   icon,
   label,
   value,

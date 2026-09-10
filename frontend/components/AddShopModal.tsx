@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createShop } from '@/lib/api';
 import { X } from 'lucide-react';
+import type { MaybeAxiosError } from '@/lib/types/errors';
 
 interface AddShopModalProps {
   isOpen: boolean;
@@ -18,7 +19,7 @@ export default function AddShopModal({ isOpen, onClose, onSuccess }: AddShopModa
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [isSetupInProgress, setIsSetupInProgress] = useState(false);
-  const [createdShop, setCreatedShop] = useState<any>(null);
+  const [_createdShop, setCreatedShop] = useState<any>(null);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,7 +34,7 @@ export default function AddShopModal({ isOpen, onClose, onSuccess }: AddShopModa
         name,
         description,
         is_head_office: isHeadOffice,
-      });
+      }) as { id: number; name: string };
 
       // Shop has been created but schema setup is still running in the background
       setCreatedShop(shop);
@@ -48,9 +49,9 @@ export default function AddShopModal({ isOpen, onClose, onSuccess }: AddShopModa
         onSuccess();
       }, 500);
       
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Only show error if it's not a timeout
-      if (err.code === 'ECONNABORTED' || err.message.includes('timeout')) {
+      if ((err as MaybeAxiosError).code === 'ECONNABORTED' || (err as MaybeAxiosError).message?.includes('timeout')) {
         // Timeout - shop might still be creating in the backend
         setIsSetupInProgress(true);
         setError('Shop creation is taking a bit longer. Redirecting you to the admin dashboard...');
@@ -61,7 +62,7 @@ export default function AddShopModal({ isOpen, onClose, onSuccess }: AddShopModa
           onSuccess();
         }, 2000);
       } else {
-        setError(err.response?.data?.detail || err.message || 'Failed to create shop');
+        setError((err as MaybeAxiosError).response?.data?.detail || (err as MaybeAxiosError).message || 'Failed to create shop');
       }
     } finally {
       setLoading(false);

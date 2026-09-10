@@ -1,9 +1,9 @@
 "use client";
-import { Bell, User, LogOut, Home, Shield, Menu, X } from "lucide-react";
+import { User, LogOut, Home, Shield, Menu } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { isAuthenticated, logout } from "@/lib/api";
+import { logout } from "@/lib/api";
 import { useAuthContext } from "@/lib/AuthContext";
 import ShopSelector from "@/components/ShopSelector";
 import NotificationBell from "@/components/NotificationBell";

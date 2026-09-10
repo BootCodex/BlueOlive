@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label';
 import { AlertCircle, Loader2 } from 'lucide-react';
 
 export default function GasCheckoutPage() {
-  const { user } = useAuth();
+  const { user: _user } = useAuth();
   const router = useRouter();
 
   const [debtor, setDebtor] = useState<{ account_number: string; name: string } | null>(null);
@@ -59,7 +59,7 @@ export default function GasCheckoutPage() {
         reference: reference || undefined,
       });
       router.push(`/dashboard/gas/${rental.id}`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Checkout failed — please check stock availability and try again.'));
     } finally {
       setLoading(false);

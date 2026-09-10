@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Key, Plus, Trash2, Copy, Check, X, Loader } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/lib/api";
+import type { MaybeAxiosError } from '@/lib/types/errors';
 
 interface APIKey {
   id: number;
@@ -46,8 +47,8 @@ export default function APIKeysPage() {
     try {
       const response = await api.get('/api/v1/api-keys/');
       setApiKeys(response.data.results || response.data);
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to load API keys');
+    } catch (err: unknown) {
+      setError((err as MaybeAxiosError).response?.data?.detail || 'Failed to load API keys');
     } finally {
       setLoading(false);
     }
@@ -81,8 +82,8 @@ export default function APIKeysPage() {
       
       // Reload the list (without the actual key)
       loadAPIKeys();
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to create API key');
+    } catch (err: unknown) {
+      setError((err as MaybeAxiosError).response?.data?.detail || 'Failed to create API key');
     } finally {
       setSaving(false);
     }
@@ -95,8 +96,8 @@ export default function APIKeysPage() {
       await api.delete(`/api/v1/api-keys/${id}/`);
       setSuccessMessage('API key deleted successfully!');
       loadAPIKeys();
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to delete API key');
+    } catch (err: unknown) {
+      setError((err as MaybeAxiosError).response?.data?.detail || 'Failed to delete API key');
     }
   };
 
@@ -186,7 +187,7 @@ export default function APIKeysPage() {
           </CardHeader>
           <CardContent className="pt-4">
             <p className="text-sm text-gray-600 mb-2">
-              Copy this key now. You won't be able to see it again!
+              Copy this key now. You won&apos;t be able to see it again!
             </p>
             <div className="flex items-center gap-2 p-3 bg-gray-100 rounded font-mono text-sm">
               <span className="flex-1 break-all">{newKey.key}</span>
@@ -202,7 +203,7 @@ export default function APIKeysPage() {
               onClick={() => setNewKey(null)}
               className="mt-3 text-sm text-gray-600 hover:text-gray-800"
             >
-              I've copied the key
+              I&apos;ve copied the key
             </button>
           </CardContent>
         </Card>
@@ -216,7 +217,7 @@ export default function APIKeysPage() {
       ) : filteredKeys.length === 0 ? (
         <Card>
           <CardContent className="py-8 text-center text-gray-500">
-            No API keys found. Click "Create API Key" to add one.
+            No API keys found. Click &quot;Create API Key&quot; to add one.
           </CardContent>
         </Card>
       ) : (

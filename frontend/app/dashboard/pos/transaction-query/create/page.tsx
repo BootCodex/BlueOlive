@@ -24,7 +24,7 @@ const TRANSACTION_TYPES: Array<{ value: string; label: string }> = [
 
 export default function CreateTransactionQueryPage() {
   const router = useRouter();
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: _authLoading } = useAuth();
   const posAPI = usePOSAPI(user?.tenant?.slug);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -71,7 +71,7 @@ export default function CreateTransactionQueryPage() {
 
       setSuccess('Query logged successfully');
       setTimeout(() => router.push('/dashboard/pos/transaction-query'), 2000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Failed to log query'));
     } finally {
       setLoading(false);

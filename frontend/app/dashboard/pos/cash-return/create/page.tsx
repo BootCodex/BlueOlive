@@ -128,7 +128,7 @@ export default function CreateCashReturnPage() {
 
       setSuccess(true);
       setTimeout(() => router.push('/dashboard/pos/cash-return'), 2000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Failed to create cash return'));
     } finally {
       setLoading(false);

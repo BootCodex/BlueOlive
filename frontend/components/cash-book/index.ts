@@ -5,12 +5,14 @@ import CategoryBadge from './CategoryBadge';
 import BalanceCard from './BalanceCard';
 import ReconciliationStatus from './ReconciliationStatus';
 
-export default {
+const CashBookComponents = {
   TransactionTypeBadge,
   CategoryBadge,
   BalanceCard,
   ReconciliationStatus,
 };
+
+export default CashBookComponents;
 
 export {
   TransactionTypeBadge,

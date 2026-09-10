@@ -50,7 +50,7 @@ export default function StockReturns({ onBack }: StockReturnsProps) {
   const queryClient = useQueryClient();
 
   // Fetch stock items
-  const { data: stockData, isLoading: stockLoading } = useQuery({
+  const { data: stockData, isLoading: _stockLoading } = useQuery({
     queryKey: ['stock-items'],
     queryFn: async () => {
       const response = await api.get('/api/stock-control/stock-items/');
@@ -160,7 +160,7 @@ export default function StockReturns({ onBack }: StockReturnsProps) {
       return;
     }
 
-    const { subtotal, vat, total } = calculateLineTotal();
+    const { subtotal: _subtotal, vat, total } = calculateLineTotal();
     const item = stockItems.find((s) => s.stock_code === selectedStockCode);
 
     const newLine: ReturnLine = {
@@ -200,7 +200,7 @@ export default function StockReturns({ onBack }: StockReturnsProps) {
     }
 
     const updatedLines = [...lines];
-    const { subtotal, vat, total } = calculateLineTotal();
+    const { subtotal: _subtotal, vat, total } = calculateLineTotal();
     
     updatedLines[index] = {
       ...updatedLines[index],

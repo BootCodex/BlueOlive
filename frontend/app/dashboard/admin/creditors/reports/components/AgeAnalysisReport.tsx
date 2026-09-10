@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Download, Printer } from 'lucide-react';
+import { ArrowLeft, Printer } from 'lucide-react';
 import { API_BASE_URL } from '@/lib/api-config';
 
 interface Creditor {

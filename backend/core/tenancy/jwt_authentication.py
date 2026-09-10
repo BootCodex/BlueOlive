@@ -87,12 +87,14 @@ class TenantJWTAuthentication(JWTAuthentication):
             "/users/auth/token/refresh/",
             "/users/auth/logout/",
             "/users/auth/unified-login/",
+            "/users/auth/support-login/exchange/",
             "/auth/signup/",
             "/auth/login/",
             "/auth/csrf/",
             "/auth/token/refresh/",
             "/auth/logout/",
             "/auth/unified-login/",
+            "/auth/support-login/exchange/",
             # Shop creation endpoint - JWT authentication is sufficient
             "/tenants/shops/",
             "/tenants/shops",
@@ -197,12 +199,14 @@ class TenantJWTAuthentication(JWTAuthentication):
             "/users/auth/token/refresh/",
             "/users/auth/logout/",
             "/users/auth/unified-login/",
+            "/users/auth/support-login/exchange/",
             "/auth/signup/",
             "/auth/login/",
             "/auth/csrf/",
             "/auth/token/refresh/",
             "/auth/logout/",
             "/auth/unified-login/",
+            "/auth/support-login/exchange/",
         ]
         request_path = request.path
         for path in public_auth_paths:

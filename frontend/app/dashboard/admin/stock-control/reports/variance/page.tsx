@@ -23,7 +23,7 @@ export default function VarianceReportPage() {
   });
 
   // Get completed takes
-  const completedTakes = stockTakes?.results?.filter((t: any) => t.status === 'COMPLETED') || [];
+  const completedTakes = stockTakes?.results?.filter((t) => t.status === 'COMPLETED') || [];
   const latestCompleted = completedTakes[0];
 
   // Fetch variance report for selected stock take
@@ -53,12 +53,12 @@ export default function VarianceReportPage() {
   const getSummary = () => {
     if (!varianceItems || !Array.isArray(varianceItems)) return null;
     
-    const positive = varianceItems.filter((item: any) => item.variance_quantity > 0);
-    const negative = varianceItems.filter((item: any) => item.variance_quantity < 0);
-    const zero = varianceItems.filter((item: any) => item.variance_quantity === 0);
+    const positive = varianceItems.filter((item) => (item.variance_quantity ?? 0) > 0);
+    const negative = varianceItems.filter((item) => (item.variance_quantity ?? 0) < 0);
+    const zero = varianceItems.filter((item) => (item.variance_quantity ?? 0) === 0);
     
-    const positiveValue = positive.reduce((sum: number, item: any) => sum + Number(item.variance_value || 0), 0);
-    const negativeValue = Math.abs(negative.reduce((sum: number, item: any) => sum + Number(item.variance_value || 0), 0));
+    const positiveValue = positive.reduce((sum: number, item) => sum + Number(item.variance_value || 0), 0);
+    const negativeValue = Math.abs(negative.reduce((sum: number, item) => sum + Number(item.variance_value || 0), 0));
     
     return {
       total: varianceItems.length,
@@ -76,9 +76,9 @@ export default function VarianceReportPage() {
     if (!varianceItems || !Array.isArray(varianceItems)) return;
     
     const headers = ['Stock Code', 'Description', 'System Qty', 'Counted Qty', 'Variance', 'Unit Cost', 'Variance Value'];
-    const rows = varianceItems.map((item: any) => [
+    const rows = varianceItems.map((item) => [
       item.stock_item_detail?.stock_code,
-      item.stock_item_detail?.description || item.description || '',
+      item.stock_item_detail?.description || '',
       item.quantity_on_hand,
       item.quantity_counted,
       item.variance_quantity,
@@ -134,7 +134,7 @@ export default function VarianceReportPage() {
                   <SelectItem value="latest">
                     Latest ({latestCompleted ? new Date(latestCompleted.stock_take_date).toLocaleDateString('en-ZA') : 'N/A'})
                   </SelectItem>
-                  {completedTakes.map((take: any) => (
+                  {completedTakes.map((take) => (
                     <SelectItem key={take.id} value={take.id.toString()}>
                       #{take.id} - {take.stock_take_date ? new Date(take.stock_take_date).toLocaleDateString('en-ZA') : 'N/A'}
                     </SelectItem>
@@ -221,18 +221,18 @@ export default function VarianceReportPage() {
                 </tr>
               </thead>
               <tbody>
-                {varianceItems.map((item: any, idx: number) => (
+                {varianceItems.map((item, idx: number) => (
                   <tr key={idx} className="border-b hover:bg-gray-50">
                     <td className="py-3 px-3 font-mono">{item.stock_item_detail?.stock_code}</td>
                     <td className="py-3 px-3 max-w-xs truncate">
-                      {item.stock_item_detail?.description || item.description || '-'}
+                      {item.stock_item_detail?.description || '-'}
                     </td>
                     <td className="py-3 px-3 text-right">{item.quantity_on_hand?.toFixed(2)}</td>
                     <td className="py-3 px-3 text-right">{item.quantity_counted?.toFixed(2)}</td>
                     <td className={`py-3 px-3 text-right font-medium ${
-                      item.variance_quantity > 0 ? 'text-green-600' : item.variance_quantity < 0 ? 'text-red-600' : 'text-gray-600'
+                      (item.variance_quantity ?? 0) > 0 ? 'text-green-600' : (item.variance_quantity ?? 0) < 0 ? 'text-red-600' : 'text-gray-600'
                     }`}>
-                      {item.variance_quantity > 0 ? '+' : ''}{item.variance_quantity?.toFixed(2)}
+                      {(item.variance_quantity ?? 0) > 0 ? '+' : ''}{item.variance_quantity?.toFixed(2)}
                     </td>
                     <td className="py-3 px-3 text-right">R {item.cost_price_at_count?.toFixed(2)}</td>
                     <td className={`py-3 px-3 text-right font-medium ${
@@ -241,11 +241,11 @@ export default function VarianceReportPage() {
                       R {Number(item.variance_value || 0).toFixed(2)}
                     </td>
                     <td className="py-3 px-3 text-center">
-                      {item.variance_quantity > 0 ? (
+                      {(item.variance_quantity ?? 0) > 0 ? (
                         <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-green-100 text-green-800">
                           Surplus
                         </span>
-                      ) : item.variance_quantity < 0 ? (
+                      ) : (item.variance_quantity ?? 0) < 0 ? (
                         <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-red-100 text-red-800">
                           Shortage
                         </span>

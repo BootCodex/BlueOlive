@@ -57,7 +57,7 @@ export default function CreditUtilizationPage() {
     };
   });
 
-  const COLORS = ['#22c55e', '#84cc16', '#f59e0b', '#ef4444', '#991b1b'];
+  const _COLORS = ['#22c55e', '#84cc16', '#f59e0b', '#ef4444', '#991b1b'];
 
   return (
     <div className="space-y-6">

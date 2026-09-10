@@ -105,7 +105,7 @@ export default function ReturnsStockForm({ onComplete }: ReturnsStockFormProps) 
         creditor: parseInt(formData.supplier),
         rfc_number: formData.document_number || `RFC-${Date.now()}`,
         return_date: formData.document_date,
-        line_items: lineItems.map((item, index) => ({
+        line_items: lineItems.map((item, _index) => ({
           stock_item: 0, // Would need to look up stock item ID from stock_code
           quantity_returned: parseFloat(item.quantity.toString()),
           line_value: parseFloat(item.quantity.toString()) * parseFloat(item.unit_cost.toString()),

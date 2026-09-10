@@ -7,10 +7,9 @@ import { getStockItem, getStockItemPricing, getStockItemTransactions, getStockIt
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Loader, Search, Package, DollarSign, TrendingUp, 
-  ArrowLeft, AlertTriangle, Calendar, ArrowDown, ArrowUp
+  ArrowLeft, AlertTriangle, Calendar
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -438,7 +437,7 @@ function ItemEnquiryContent() {
         <Card className="p-6 border-red-200 bg-red-50">
           <div className="flex items-center text-red-600">
             <AlertTriangle className="w-5 h-5 mr-2" />
-            <p>Stock item "{stockCode}" not found. Please check the code and try again.</p>
+            <p>Stock item &quot;{stockCode}&quot; not found. Please check the code and try again.</p>
           </div>
         </Card>
       )}

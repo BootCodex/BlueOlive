@@ -6,7 +6,7 @@ import debtorsApi from '@/lib/debtorsApi';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Search, Loader, ChevronDown, ChevronUp } from 'lucide-react';
-import type { DebtorAccount, OpenItem, AgeAnalysis } from '@/lib/types/debtors';
+import type { DebtorAccount, OpenItem } from '@/lib/types/debtors';
 
 export default function IndividualAccountEnquiry() {
   const [searchTerm, setSearchTerm] = useState('');

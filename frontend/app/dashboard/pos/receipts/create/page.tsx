@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@/lib/useAuth';
 import { usePOSAPI, TenderData, ReceiptCreateData } from '@/lib/posApi';
 import { useRouter } from 'next/navigation';
@@ -13,12 +13,8 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
-  FormSectionHeader,
   AccountInfoCard,
-  TotalsSummary,
-  FormActions,
   TenderRow,
   ErrorAlert,
   SuccessAlert,
@@ -53,9 +49,9 @@ export default function CreateReceipt() {
   ]);
 
   const [debtorInfo, setDebtorInfo] = useState<any>(null);
-  const [debtorLoading, setDebtorLoading] = useState(false);
-  const [debtorError, setDebtorError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [_debtorLoading, _setDebtorLoading] = useState(false);
+  const [_debtorError, setDebtorError] = useState<string | null>(null);
+  const [_loading, _setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);

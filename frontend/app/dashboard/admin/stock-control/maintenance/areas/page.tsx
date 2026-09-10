@@ -169,7 +169,7 @@ export default function AreasPage() {
           </div>
         ) : filteredAreas.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
-            No sales areas found. Click "Add Sales Area" to create one.
+            No sales areas found. Click &quot;Add Sales Area&quot; to create one.
           </div>
         ) : (
           <Table>
