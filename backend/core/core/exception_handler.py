@@ -45,9 +45,7 @@ from rest_framework.exceptions import (
     NotFound,
 )
 from rest_framework.exceptions import PermissionDenied as DRFPermissionDenied
-from rest_framework.exceptions import (
-    Throttled,
-)
+from rest_framework.exceptions import Throttled
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.response import Response
 from rest_framework.views import exception_handler

@@ -29,8 +29,13 @@ jobs:
             ${{ runner.os }}-pip-lint-
 
       - name: Install dependencies
+        # Pinned: unpinned installs pick up whatever's newest on PyPI at
+        # each run, so a tool's own release (e.g. isort's 8->9 line-
+        # collapsing behavior change) can flip check results with no
+        # change to this repo at all. These match versions verified
+        # locally against the current codebase.
         run: |
-          pip install flake8 black isort bandit safety
+          pip install flake8==7.3.0 black==26.5.1 isort==9.0.1 bandit==1.9.4 safety==3.8.1
 
       - name: Run Black (check only)
         run: |
