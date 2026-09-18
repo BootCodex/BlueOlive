@@ -123,7 +123,9 @@ class TenderReconciliationSerializer(serializers.ModelSerializer):
 
     def get_sale_date(self, obj):
         parent = self._parent(obj)
-        return getattr(parent, "sale_date", None) or getattr(parent, "invoice_date", None)
+        return getattr(parent, "sale_date", None) or getattr(
+            parent, "invoice_date", None
+        )
 
     def get_station_number(self, obj):
         parent = self._parent(obj)
